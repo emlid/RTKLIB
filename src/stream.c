@@ -59,6 +59,7 @@
 #include <netdb.h>
 #endif
 
+#include "spi.h"
 static const char rcsid[]="$Id$";
 
 /* constants -----------------------------------------------------------------*/
@@ -1840,6 +1841,7 @@ extern int stropen(stream_t *stream, int type, int mode, const char *path)
         case STR_NTRIPCLI: stream->port=openntrip (path,1,   stream->msg); break;
         case STR_FTP     : stream->port=openftp   (path,0,   stream->msg); break;
         case STR_HTTP    : stream->port=openftp   (path,1,   stream->msg); break;
+        case STR_SPI     : stream->port=openspi   (path, 0,  stream->msg); break;
         default: stream->state=0; return 1;
     }
     stream->state=!stream->port?-1:1;
