@@ -14,7 +14,7 @@ all        : rtkrcv
 rtkrcv     : rtkrcv.o rtkcmn.o rtksvr.o rtkpos.o geoid.o solution.o lambda.o
 rtkrcv     : sbas.o stream.o rcvraw.o rtcm.o preceph.o options.o pntpos.o ppp.o ppp_ar.o
 rtkrcv     : novatel.o ublox.o ss2.o crescent.o skytraq.o gw10.o javad.o nvs.o binex.o
-rtkrcv     : rt17.o ephemeris.o rinex.o ionex.o rtcm2.o rtcm3.o rtcm3e.o qzslex.o
+rtkrcv     : rt17.o ephemeris.o rinex.o ionex.o rtcm2.o rtcm3.o rtcm3e.o qzslex.o spi.o
 
 rtkrcv.o   : ../rtkrcv.c
 	$(CC) -c $(CFLAGS) ../rtkrcv.c
@@ -82,6 +82,9 @@ ionex.o    : $(SRC)/ionex.c
 	$(CC) -c $(CFLAGS) $(SRC)/ionex.c
 qzslex.o   : $(SRC)/qzslex.c
 	$(CC) -c $(CFLAGS) $(SRC)/qzslex.c
+
+spi.o   : $(SRC)/spi.c
+	$(CC) -c $(CFLAGS) $(SRC)/spi.c
 
 rtkrcv.o   : $(SRC)/rtklib.h
 rtkcmn.o   : $(SRC)/rtklib.h

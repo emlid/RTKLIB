@@ -148,6 +148,7 @@ static int decodepath(const char *path, int *type, char *strpath, int *fmt)
     else if (!strncmp(path,"ntrips",6)) *type=STR_NTRIPSVR;
     else if (!strncmp(path,"ntrip", 5)) *type=STR_NTRIPCLI;
     else if (!strncmp(path,"file",  4)) *type=STR_FILE;
+    else if (!strncmp(path,"spi",  3)) *type=STR_SPI;
     else {
         fprintf(stderr,"stream path error: %s\n",buff);
         return 0;
