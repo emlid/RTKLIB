@@ -910,7 +910,7 @@ static int sync_ubx(unsigned char *buff, unsigned char data)
     return buff[0]==UBXSYNC1&&buff[1]==UBXSYNC2;
 }
 /* input ublox raw message from stream -----------------------------------------
-* fetch next ublox raw data and input a mesasge from stream
+* fetch next ublox raw data and input a message from stream
 * args   : raw_t *raw   IO     receiver raw data control struct
 *          unsigned char data I stream data (1 byte)
 * return : status (-1: error message, 0: no message, 1: input observation data,
