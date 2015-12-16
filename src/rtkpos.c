@@ -31,6 +31,9 @@
 *                           add output of gal-gps and bds-gps time offset
 *           2014/05/28 1.14 fix bug on memory exception with many sys and freq
 *           2014/08/26 1.15 add functino to swap sol-stat file with keywords
+*           2014/10/21 1.16 fix bug on beidou amb-res with pos2-bdsarmode=0
+*           2014/11/08 1.17 fix bug on ar-degradation by unhealthy satellites
+*           2015/03/23 1.18 residuals referenced to reference satellite
 *-----------------------------------------------------------------------------*/
 #include <stdarg.h>
 #include "rtklib.h"
@@ -1022,7 +1025,7 @@ static int ddres(rtk_t *rtk, const nav_t *nav, double dt, const double *x,
 {
     prcopt_t *opt=&rtk->opt;
     double bl,dr[3],posu[3],posr[3],didxi=0.0,didxj=0.0,*im;
-    double *tropr,*tropu,*dtdxr,*dtdxu,*Ri,*Rj,s,lami,lamj,fi,fj,df,*Hi=NULL;
+    double *tropr,*tropu,*dtdxr,*dtdxu,*Ri,*Rj,lami,lamj,fi,fj,df,*Hi=NULL;
     int i,j,k,m,f,ff,nv=0,nb[NFREQ*4*2+2]={0},b=0,sysi,sysj,nf=NF(opt);
     
     trace(3,"ddres   : dt=%.1f nx=%d ns=%d\n",dt,rtk->nx,ns);
@@ -1161,6 +1164,7 @@ static int ddres(rtk_t *rtk, const nav_t *nav, double dt, const double *x,
             vflg[nv++]=(sat[i]<<16)|(sat[j]<<8)|((f<nf?0:1)<<4)|(f%nf);
             nb[b]++;
         }
+#if 0 /* residuals referenced to reference satellite (2.4.2 p11) */
         /* restore single-differenced residuals assuming sum equal zero */
         if (f<nf) {
             for (j=0,s=0.0;j<MAXSAT;j++) s+=rtk->ssat[j].resc[f];
@@ -1177,6 +1181,7 @@ static int ddres(rtk_t *rtk, const nav_t *nav, double dt, const double *x,
                     rtk->ssat[j].resp[f-nf]-=s;
             }
         }
+#endif
         b++;
     }
     /* end of system loop */
@@ -1246,11 +1251,13 @@ static int ddmat(rtk_t *rtk, double *D)
     for (m=0;m<4;m++) { /* m=0:gps/qzs/sbs,1:glo,2:gal,3:bds */
         
         if (m==1&&rtk->opt.glomodear==0) continue;
+        if (m==3&&rtk->opt.bdsmodear==0) continue;
         
         for (f=0,k=na;f<nf;f++,k+=MAXSAT) {
             
             for (i=k;i<k+MAXSAT;i++) {
-                if (rtk->x[i]==0.0||!test_sys(rtk->ssat[i-k].sys,m)) {
+                if (rtk->x[i]==0.0||!test_sys(rtk->ssat[i-k].sys,m)||
+                    !rtk->ssat[i-k].vsat[f]) {
                     continue;
                 }
                 if (rtk->ssat[i-k].lock[f]>0&&!(rtk->ssat[i-k].slip[f]&2)&&
@@ -1261,10 +1268,12 @@ static int ddmat(rtk_t *rtk, double *D)
                 else rtk->ssat[i-k].fix[f]=1;
             }
             for (j=k;j<k+MAXSAT;j++) {
-                if (i==j||rtk->x[j]==0.0||!test_sys(rtk->ssat[j-k].sys,m)) {
+                if (i==j||rtk->x[j]==0.0||!test_sys(rtk->ssat[j-k].sys,m)||
+                    !rtk->ssat[j-k].vsat[f]) {
                     continue;
                 }
                 if (rtk->ssat[j-k].lock[f]>0&&!(rtk->ssat[j-k].slip[f]&2)&&
+                    rtk->ssat[i-k].vsat[f]&&
                     rtk->ssat[j-k].azel[1]>=rtk->opt.elmaskar) {
                     D[i+(na+nb)*nx]= 1.0;
                     D[j+(na+nb)*nx]=-1.0;
