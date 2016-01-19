@@ -1667,7 +1667,7 @@ extern int outsols(unsigned char *buff, const sol_t *sol, const double *rb,
         if (opt->nmeaintv[0]<0.0) return 0;
         if (!screent(sol->time,ts,ts,opt->nmeaintv[0])) return 0;
     }
-    if (sol->stat<=SOLQ_NONE||(opt->posf==SOLF_ENU&&norm(rb,3)<=0.0)) {
+    if ((opt->posf != SOLF_ERB) && (sol->stat<=SOLQ_NONE||(opt->posf==SOLF_ENU&&norm(rb,3)<=0.0))) {
         return 0;
     }
     timeu=opt->timeu<0?0:(opt->timeu>20?20:opt->timeu);
