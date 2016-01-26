@@ -853,6 +853,16 @@ typedef struct {        /* solution type */
     unsigned char ns;   /* number of valid satellites */
     float age;          /* age of differential (s) */
     float ratio;        /* AR ratio factor for valiation */
+    double dop[4];      /* dilution of precision */
+    int nSV;            /* number of SV */
+    int idSV[MAXSAT];   /* IDs of SVs */
+    int typeSV[MAXSAT]; /* type of SVs */
+    float carPh[MAXSAT];/* carrier-phase */
+    float psRan[MAXSAT];/* pseudorange */
+    float freqD[MAXSAT];/* Doppler frequency */
+    int snr[MAXSAT];    /* sonar */
+    double azim[MAXSAT];/* azimuths */
+    double elev[MAXSAT];/* elevations */
 } sol_t;
 
 typedef struct {        /* solution buffer type */
