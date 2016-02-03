@@ -1492,8 +1492,8 @@ static int relpos(rtk_t *rtk, const obsd_t *obs, int nu, int nr,
 {
     prcopt_t *opt=&rtk->opt;
     gtime_t time=obs[0].time;
-    double *rs,*dts,*var,*y,*e,*azel,*v,*H,*R,*xp,*Pp,*xa,*bias,dt;
-    int i,j,f,n=nu+nr,ns,ny,nv,sat[MAXSAT],iu[MAXSAT],ir[MAXSAT],niter;
+    double *rs,*dts,*var,*y,*e,*azel,*v,*H,*R,*xp,*Pp,*xa,*bias,dt,azeld[2*MAXSAT];
+    int i,j,f,n=nu+nr,ns,ny,nv,sat[MAXSAT],iu[MAXSAT],ir[MAXSAT],niter,prn;
     int info,vflg[MAXOBS*NFREQ*2+1],svh[MAXOBS*2];
     int stat=rtk->opt.mode<=PMODE_DGPS?SOLQ_DGPS:SOLQ_FLOAT;
     int nf=opt->ionoopt==IONOOPT_IFLC?1:opt->nf;
@@ -1505,6 +1505,34 @@ static int relpos(rtk_t *rtk, const obsd_t *obs, int nu, int nr,
     rs=mat(6,n); dts=mat(2,n); var=mat(1,n); y=mat(nf*2,n); e=mat(3,n);
     azel=zeros(2,n);
     
+    /* Filling additional fields of structure sol_t */
+    for (i=j=0;i<MAXSAT;i++) {
+        if (rtk->ssat[i].azel[1] <= 0) continue;
+        rtk->sol.azim[j] = rtk->ssat[i].azel[0] * R2D;
+        if (rtk->sol.azim[j] < 0.0) rtk->sol.azim[j] += 360.0;
+        rtk->sol.elev[j] = rtk->ssat[i].azel[1] * R2D;
+        rtk->sol.carPh[j] = obs[j].L[0];
+        rtk->sol.psRan[j] = obs[j].P[0];
+        rtk->sol.freqD[j] = obs[j].D[0];
+        rtk->sol.snr[j] = obs[j].SNR[0];
+        azeld[j*2] = rtk->ssat[i].azel[0];
+        azeld[1+j*2] = rtk->ssat[i].azel[1];
+        /*-- Type of sattelite and its id --*/
+        switch (satsys(i+1,&prn)) {
+            case SYS_GPS: rtk->sol.typeSV[j] = 0; rtk->sol.idSV[j] = prn-MINPRNGPS+1; break;
+            case SYS_GLO: rtk->sol.typeSV[j] = 1; rtk->sol.idSV[j] = prn-MINPRNGLO+1; break;
+            case SYS_GAL: rtk->sol.typeSV[j] = 2; rtk->sol.idSV[j] = prn-MINPRNGAL+1; break;
+            case SYS_QZS: rtk->sol.typeSV[j] = 3; rtk->sol.idSV[j] = prn-MINPRNQZS+1; break;
+            case SYS_CMP: rtk->sol.typeSV[j] = 4; rtk->sol.idSV[j] = prn-MINPRNCMP+1; break;
+            case SYS_LEO: rtk->sol.typeSV[j] = 5; rtk->sol.idSV[j] = prn-MINPRNLEO+1; break;
+            case SYS_SBS: rtk->sol.typeSV[j] = 6; rtk->sol.idSV[j] = prn; break;
+          }
+    /*--------------------------------*/
+    j++;
+    }
+    dops(j,azeld,0.0,rtk->sol.dop);
+    rtk->sol.nSV = j;
+
     for (i=0;i<MAXSAT;i++) {
         rtk->ssat[i].sys=satsys(i+1,NULL);
         for (j=0;j<NFREQ;j++) rtk->ssat[i].vsat[j]=rtk->ssat[i].snr[j]=0;
@@ -1646,6 +1674,7 @@ static int relpos(rtk_t *rtk, const obsd_t *obs, int nu, int nr,
         rtk->sol.qr[5]=(float)rtk->P[2];
         rtk->nfix=0;
     }
+
     for (i=0;i<n;i++) for (j=0;j<nf;j++) {
         if (obs[i].L[j]==0.0) continue;
         rtk->ssat[obs[i].sat-1].pt[obs[i].rcv-1][j]=obs[i].time;
