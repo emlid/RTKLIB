@@ -1824,11 +1824,13 @@ extern int outrnxobsh(FILE *fp, const rnxopt_t *opt, const nav_t *nav)
     const char *glo_codes[]={"C1C","C1P","C2C","C2P"};
     double ep[6],pos[3]={0},del[3]={0};
     int i,j,k,n,prn[MAXPRNGLO];
-    char date[32],*sys,*tsys="GPS";
+    char date[32],prog[20],*sys,*tsys="GPS";
     
     trace(3,"outrnxobsh:\n");
     
     timestr_rnx(date);
+    strcpy(prog,opt->prog);
+    strcat(prog," Emlid");
     
     if (opt->rnxver<=2.99) { /* ver.2 */
         sys=opt->navsys==SYS_GPS?"G (GPS)":"M (MIXED)";
@@ -1844,7 +1846,7 @@ extern int outrnxobsh(FILE *fp, const rnxopt_t *opt, const nav_t *nav)
     }
     fprintf(fp,"%9.2f%-11s%-20s%-20s%-20s\n",opt->rnxver,"","OBSERVATION DATA",
             sys,"RINEX VERSION / TYPE");
-    fprintf(fp,"%-20.20s%-20.20s%-20.20s%-20s\n",opt->prog,opt->runby,date,
+    fprintf(fp,"%-20.20s%-20.20s%-20.20s%-20s\n",prog,opt->runby,date,
             "PGM / RUN BY / DATE");
     
     for (i=0;i<MAXCOMMENT;i++) {
@@ -1987,6 +1989,27 @@ static int obsindex(double ver, int sys, const unsigned char *code,
     }
     return -1;
 }
+/* output rinex event time ---------------------------------------------------*/
+static void outrinexevent(FILE *fp, const rnxopt_t *opt, const obsd_t *obs,
+                          const double epdiff)
+{
+    int n;
+    double epe[6];
+
+    time2epoch(obs[0].eventime,epe);
+    n = obs->timevalid ? 0 : 1;
+
+    if (opt->rnxver<=2.99) { /* ver.2 */
+        if (epdiff < 0) fprintf(fp,"\n");
+        fprintf(fp," %02d %2.0f %2.0f %2.0f %2.0f%11.7f  %d%3d",
+                (int)epe[0]%100,epe[1],epe[2],epe[3],epe[4],epe[5],5,n);
+        if (epdiff >= 0) fprintf(fp,"\n");
+    } else { /* ver.3 */
+        fprintf(fp,"> %04.0f %2.0f %2.0f %2.0f %2.0f%11.7f  %d%3d\n",
+                epe[0],epe[1],epe[2],epe[3],epe[4],epe[5],5,n);
+    }
+    if (n) fprintf(fp,"%-60.60s%-20s\n"," Time mark is not valid","COMMENT");
+}
 /* output rinex obs body -------------------------------------------------------
 * output rinex obs body
 * args   : FILE   *fp       I   output file pointer
@@ -2000,7 +2023,7 @@ extern int outrnxobsb(FILE *fp, const rnxopt_t *opt, const obsd_t *obs, int n,
                       int flag)
 {
     const char *mask;
-    double ep[6];
+    double epdiff,ep[6];
     char sats[MAXOBS][4]={""};
     int i,j,k,m,ns,sys,ind[MAXOBS],s[MAXOBS]={0};
     
@@ -2023,9 +2046,17 @@ extern int outrnxobsb(FILE *fp, const rnxopt_t *opt, const obsd_t *obs, int n,
         if (!opt->nobs[opt->rnxver<=2.99?0:s[ns]]) continue;
         ind[ns++]=i;
     }
+
+    /* if epoch of event less than epoch of observation, then first output
+    time mark, else first output observation record */
+    epdiff = timediff(obs[0].time,obs[0].eventime);
+    if (flag == 5 && epdiff >= 0) {
+        outrinexevent(fp, opt, obs, epdiff);
+    }
+
     if (opt->rnxver<=2.99) { /* ver.2 */
         fprintf(fp," %02d %2.0f %2.0f %2.0f %2.0f%11.7f  %d%3d",
-                (int)ep[0]%100,ep[1],ep[2],ep[3],ep[4],ep[5],flag,ns);
+                (int)ep[0]%100,ep[1],ep[2],ep[3],ep[4],ep[5],0,ns);
         for (i=0;i<ns;i++) {
             if (i>0&&i%12==0) fprintf(fp,"\n%32s","");
             fprintf(fp,"%-3s",sats[i]);
@@ -2033,7 +2064,7 @@ extern int outrnxobsb(FILE *fp, const rnxopt_t *opt, const obsd_t *obs, int n,
     }
     else { /* ver.3 */
         fprintf(fp,"> %04.0f %2.0f %2.0f %2.0f %2.0f%11.7f  %d%3d%21s\n",
-                ep[0],ep[1],ep[2],ep[3],ep[4],ep[5],flag,ns,"");
+                ep[0],ep[1],ep[2],ep[3],ep[4],ep[5],0,ns,"");
     }
     for (i=0;i<ns;i++) {
         sys=satsys(obs[ind[i]].sat,NULL);
@@ -2069,6 +2100,11 @@ extern int outrnxobsb(FILE *fp, const rnxopt_t *opt, const obsd_t *obs, int n,
         }
         if (opt->rnxver>2.99&&fprintf(fp,"\n")==EOF) return 0;
     }
+
+    if (flag == 5 && epdiff < 0) {
+        outrinexevent(fp, opt, obs, epdiff);
+    }
+
     if (opt->rnxver>2.99) return 1;
     
     return fprintf(fp,"\n")!=EOF;
