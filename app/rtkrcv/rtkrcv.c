@@ -558,9 +558,9 @@ static void prstatus(vt_t *vt)
     };
     const char *freq[]={"-","L1","L1+L2","L1+L2+L5","","",""};
     rtcm_t rtcm[3];
-    int i,j,n,thread,cycle,state,rtkstat,nsat0,nsat1,prcout;
+    int i,j,n,thread,cycle,state,rtkstat,nsat0,nsat1,prcout,rcvcount,tmcount,timevalid;
     int cputime,nb[3]={0},nmsg[3][10]={{0}};
-    char tstr[64],s[1024],*p;
+    char tstr[64],tmstr[64],s[1024],*p;
     double runtime,rt[3]={0},dop[4]={0},rr[3],bl1=0.0,bl2=0.0;
     double azel[MAXSAT*2],pos[3],vel[3],*del;
     
@@ -574,6 +574,9 @@ static void prstatus(vt_t *vt)
     rtkstat=svr.rtk.sol.stat;
     nsat0=svr.obs[0][0].n;
     nsat1=svr.obs[1][0].n;
+    rcvcount = svr.raw[0].obs.rcvcount;
+    tmcount = svr.raw[0].obs.tmcount;
+    timevalid = svr.raw[0].obs.data[0].timevalid;
     cputime=svr.cputime;
     prcout=svr.prcout;
     for (i=0;i<3;i++) nb[i]=svr.nb[i];
@@ -586,6 +589,7 @@ static void prstatus(vt_t *vt)
         rt[1]=floor(runtime/60.0); rt[2]=runtime-rt[1]*60.0;
     }
     for (i=0;i<3;i++) rtcm[i]=svr.rtcm[i];
+    time2str(svr.raw[0].obs.data[0].eventime,tmstr,9);
     rtksvrunlock(&svr);
     
     for (i=n=0;i<MAXSAT;i++) {
@@ -598,7 +602,7 @@ static void prstatus(vt_t *vt)
     dops(n,azel,0.0,dop);
     
     vt_printf(vt,"\n%s%-28s: %s%s\n",ESC_BOLD,"Parameter","Value",ESC_RESET);
-    vt_printf(vt,"%-28s: %s\n","rtklib version",VER_RTKLIB);
+    vt_printf(vt,"%-28s: %s %s\n","rtklib version",VER_RTKLIB,"by Emlid");
     vt_printf(vt,"%-28s: %d\n","rtk server thread",thread);
     vt_printf(vt,"%-28s: %s\n","rtk server state",svrstate[state]);
     vt_printf(vt,"%-28s: %d\n","processing cycle (ms)",cycle);
@@ -683,6 +687,9 @@ static void prstatus(vt_t *vt)
     vt_printf(vt,"%-28s: %.3f\n","baseline length float (m)",bl1);
     vt_printf(vt,"%-28s: %.3f\n","baseline length fixed (m)",bl2);
     vt_printf(vt,"%-28s: %d\n","monitor port",moniport);
+    vt_printf(vt,"%-28s: %s\n","last time mark",tmcount ? tmstr : "-");
+    vt_printf(vt,"%-28s: %d\n","receiver time mark count",rcvcount);
+    vt_printf(vt,"%-28s: %d\n","rtklib time mark count",tmcount);
 }
 /* print satellite -----------------------------------------------------------*/
 static void prsatellite(vt_t *vt, int nf)
