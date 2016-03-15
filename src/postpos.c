@@ -291,16 +291,43 @@ static int inputobs(obsd_t *obs, int solq, const prcopt_t *popt)
     }
     return n;
 }
+/* fill structure sol_t for time mark ----------------------------------------*/
+static sol_t fillsoltm(const sol_t solold, const sol_t solnew, const gtime_t tm)
+{
+    gtime_t t1={0},t2={0};
+    sol_t sol=solold;
+    int i=0;
+
+    if (solold.stat == 0 || solnew.stat == 0) {
+        sol.stat = 0;
+    } else {
+        sol.stat = (solold.stat > solnew.stat) ? solold.stat : solnew.stat;
+    }
+    sol.ns = (solold.ns < solnew.ns) ? solold.ns : solnew.ns;
+    sol.ratio = (solold.ratio < solnew.ratio) ? solold.ratio : solnew.ratio;
+
+    /* interpolation postion and speed of time mark */
+    t1 = solold.time;
+    t2 = solnew.time;
+    sol.time = tm;
+    
+    for (i=0;i<6;i++)
+    {
+        sol.rr[i] = solold.rr[i] + timediff(tm,t1) / timediff(t2,t1) * (solnew.rr[i] - solold.rr[i]);
+    }
+
+    return sol;
+}
 /* process positioning -------------------------------------------------------*/
-static void procpos(FILE *fp, const prcopt_t *popt, const solopt_t *sopt,
+static void procpos(FILE *fp, FILE *fptm, const prcopt_t *popt, const solopt_t *sopt,
                     int mode)
 {
     gtime_t time={0};
-    sol_t sol={{0}};
+    sol_t sol={{0}},oldsol={{0}},newsol={{0}};
     rtk_t rtk;
     obsd_t obs[MAXOBS*2]; /* for rover and base */
     double rb[3]={0};
-    int i,nobs,n,solstatic,pri[]={0,1,2,3,4,5,1,6};
+    int i,nobs,n,solstatic,num=0,pri[]={0,1,2,3,4,5,1,6};
     
     trace(3,"procpos : mode=%d\n",mode);
     
@@ -332,6 +359,16 @@ static void procpos(FILE *fp, const prcopt_t *popt, const solopt_t *sopt,
                     time=rtk.sol.time;
                 }
             }
+            /* check time mark */
+            if (rtk.sol.eventime.time != 0)
+            {
+                newsol = fillsoltm(oldsol,rtk.sol,rtk.sol.eventime);
+                num++;
+                if (!solstatic && mode == 0) {
+                    outsol(fptm,&newsol,rb,sopt);
+                }
+            }
+            oldsol = rtk.sol;
         }
         else if (!revs) { /* combined-forward */
             if (isolf>=nepoch) return;
@@ -377,12 +414,12 @@ static int valcomb(const sol_t *solf, const sol_t *solb)
     return 1;
 }
 /* combine forward/backward solutions and output results ---------------------*/
-static void combres(FILE *fp, const prcopt_t *popt, const solopt_t *sopt)
+static void combres(FILE *fp, FILE *fptm, const prcopt_t *popt, const solopt_t *sopt)
 {
     gtime_t time={0};
-    sol_t sols={{0}},sol={{0}};
+    sol_t sols={{0}},sol={{0}},oldsol={{0}},newsol={{0}};
     double tt,Qf[9],Qb[9],Qs[9],rbs[3]={0},rb[3]={0},rr_f[3],rr_b[3],rr_s[3];
-    int i,j,k,solstatic,pri[]={0,1,2,3,4,5,1,6};
+    int i,j,k,solstatic,num=0,pri[]={0,1,2,3,4,5,1,6};
     
     trace(3,"combres : isolf=%d isolb=%d\n",isolf,isolb);
     
@@ -456,6 +493,15 @@ static void combres(FILE *fp, const prcopt_t *popt, const solopt_t *sopt)
                 time=sols.time;
             }
         }
+        if (sols.eventime.time != 0)
+        {
+            newsol = fillsoltm(oldsol,sols,sols.eventime);
+            num++;
+            if (!solstatic) {
+                outsol(fptm,&newsol,rb,sopt);
+            }
+        }
+        oldsol = sols;
     }
     if (solstatic&&time.time!=0.0) {
         sol.time=time;
@@ -873,14 +919,32 @@ static FILE *openfile(const char *outfile)
     
     return !*outfile?stdout:fopen(outfile,"a");
 }
+/* Name time marks file ------------------------------------------------------*/
+static void namefiletm(char *outfiletm, const char *outfile)
+{
+    int i;
+
+    for (i=strlen(outfile);i>0;i--) {
+        if (outfile[i] == '.') {
+            break;
+        }
+    }
+    /* if no file extension, then name time marks file as name of outfile + _events.pos */
+    if (i == 0) {
+        i = strlen(outfile);
+    }
+    strncpy(outfiletm, outfile, i);
+    strcat(outfiletm, "_events.pos");
+}
 /* execute processing session ------------------------------------------------*/
 static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
                    const solopt_t *sopt, const filopt_t *fopt, int flag,
                    char **infile, const int *index, int n, char *outfile)
 {
-    FILE *fp;
+    FILE *fp,*fptm;
     prcopt_t popt_=*popt;
-    char tracefile[1024],statfile[1024];
+    solopt_t tmsopt = *sopt;
+    char tracefile[1024],statfile[1024],outfiletm[64]={0};
     
     trace(3,"execses : n=%d outfile=%s\n",n,outfile);
     
@@ -934,19 +998,27 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
         freeobsnav(&obss,&navs);
         return 0;
     }
+    /* name time events file */
+    namefiletm(outfiletm,outfile);
+    /* write header to file with time marks */
+    strcat(tmsopt.prog, " by Emlid");
+    outhead(outfiletm,infile,n,&popt_,&tmsopt);
+    
     iobsu=iobsr=isbs=ilex=revs=aborts=0;
     
     if (popt_.mode==PMODE_SINGLE||popt_.soltype==0) {
-        if ((fp=openfile(outfile))) {
-            procpos(fp,&popt_,sopt,0); /* forward */
+        if ((fp=openfile(outfile)) && (fptm=openfile(outfiletm))) {
+            procpos(fp,fptm,&popt_,sopt,0); /* forward */
             fclose(fp);
+            fclose(fptm);
         }
     }
     else if (popt_.soltype==1) {
-        if ((fp=openfile(outfile))) {
+        if ((fp=openfile(outfile)) && (fptm=openfile(outfiletm))) {
             revs=1; iobsu=iobsr=obss.n-1; isbs=sbss.n-1; ilex=lexs.n-1;
-            procpos(fp,&popt_,sopt,0); /* backward */
+            procpos(fp,fptm,&popt_,sopt,0); /* backward */
             fclose(fp);
+            fclose(fptm);
         }
     }
     else { /* combined */
@@ -957,14 +1029,15 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
         
         if (solf&&solb) {
             isolf=isolb=0;
-            procpos(NULL,&popt_,sopt,1); /* forward */
+            procpos(NULL,NULL,&popt_,sopt,1); /* forward */
             revs=1; iobsu=iobsr=obss.n-1; isbs=sbss.n-1; ilex=lexs.n-1;
-            procpos(NULL,&popt_,sopt,1); /* backward */
+            procpos(NULL,NULL,&popt_,sopt,1); /* backward */
             
             /* combine forward/backward solutions */
-            if (!aborts&&(fp=openfile(outfile))) {
-                combres(fp,&popt_,sopt);
+            if (!aborts && (fp=openfile(outfile)) && (fptm=openfile(outfiletm))) {
+                combres(fp,fptm,&popt_,sopt);
                 fclose(fp);
+                fclose(fptm);
             }
         }
         else showmsg("error : memory allocation");
