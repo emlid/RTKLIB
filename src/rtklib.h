@@ -846,6 +846,7 @@ typedef struct {        /* station parameter type */
 
 typedef struct {        /* solution type */
     gtime_t time;       /* time (GPST) */
+    gtime_t eventime;   /* time of event (GPST) */
     double rr[6];       /* position/velocity (m|m/s) */
                         /* {x,y,z,vx,vy,vz} or {e,n,u,ve,vn,vu} */
     float  qr[6];       /* position variance/covariance (m^2) */
