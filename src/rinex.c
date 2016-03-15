@@ -638,10 +638,15 @@ static int decode_obsepoch(FILE *fp, char *buff, double ver, gtime_t *time,
     trace(4,"decode_obsepoch: ver=%.2f\n",ver);
     
     if (ver<=2.99) { /* ver.2 */
-        if ((n=(int)str2num(buff,29,3))<=0) return 0;
         
         /* epoch flag: 3:new site,4:header info,5:external event */
         *flag=(int)str2num(buff,28,1);
+        
+        if (*flag == 5) {
+            str2time(buff,0,26,time);
+        }
+        
+        if ((n=(int)str2num(buff,29,3))<=0) return 0;
         
         if (3<=*flag&&*flag<=5) return n;
         
@@ -661,9 +666,13 @@ static int decode_obsepoch(FILE *fp, char *buff, double ver, gtime_t *time,
         }
     }
     else { /* ver.3 */
-        if ((n=(int)str2num(buff,32,3))<=0) return 0;
-        
         *flag=(int)str2num(buff,31,1);
+        
+        if (*flag == 5) {
+            str2time(buff,1,28,time);
+        }
+        
+        if ((n=(int)str2num(buff,32,3))<=0) return 0;
         
         if (3<=*flag&&*flag<=5) return n;
         
@@ -939,9 +948,13 @@ static int readrnxobsb(FILE *fp, const char *opt, double ver,
         
         /* decode obs epoch */
         if (i==0) {
-            if ((nsat=decode_obsepoch(fp,buff,ver,&time,flag,sats))<=0) {
+            if ((nsat=decode_obsepoch(fp,buff,ver,&time,flag,sats))<=0 && (*flag != 5)) {
                 continue;
             }
+        }
+        if (*flag == 5) {
+            data[0].eventime = time;
+            return 0;
         }
         else if (*flag<=2||*flag==6) {
             
@@ -960,6 +973,7 @@ static int readrnxobs(FILE *fp, gtime_t ts, gtime_t te, double tint,
                       const char *opt, int rcv, double ver, int tsys,
                       char tobs[][MAXOBSTYPE][4], obs_t *obs)
 {
+    gtime_t eventime={0};
     obsd_t *data;
     unsigned char slips[MAXSAT][NFREQ]={{0}};
     int i,n,flag=0,stat=0;
@@ -972,6 +986,16 @@ static int readrnxobs(FILE *fp, gtime_t ts, gtime_t te, double tint,
     
     /* read rinex obs data body */
     while ((n=readrnxobsb(fp,opt,ver,tobs,&flag,data))>=0&&stat>=0) {
+        
+        if (flag == 5) {
+            eventime = data[0].eventime;
+            n = readrnxobsb(fp,opt,ver,tobs,&flag,data);
+        }
+        
+        for (i=0;i<n;i++) data[i].eventime = eventime;
+        /* set to sero eventime for the next iteration */
+        eventime.time = 0;
+        eventime.sec = 0;
         
         for (i=0;i<n;i++) {
             
