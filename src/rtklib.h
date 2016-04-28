@@ -472,6 +472,8 @@ typedef struct {        /* time struct */
 
 typedef struct {        /* observation data record */
     gtime_t time;       /* receiver sampling time (GPST) */
+    gtime_t eventime;   /* time of event (GPST) */
+    int timevalid;      /* time is valid (Valid GNSS fix) for time mark */
     unsigned char sat,rcv; /* satellite/receiver number */
     unsigned char SNR [NFREQ+NEXOBS]; /* signal strength (0.25 dBHz) */
     unsigned char LLI [NFREQ+NEXOBS]; /* loss of lock indicator */
@@ -483,6 +485,9 @@ typedef struct {        /* observation data record */
 
 typedef struct {        /* observation data */
     int n,nmax;         /* number of obervation data/allocated */
+    int flag;           /* epoch flag (0:ok,1:power failure,>1:event flag) */
+    int rcvcount;       /* count of rcv event */
+    int tmcount;        /* time mark count */
     obsd_t *data;       /* observation data records */
 } obs_t;
 
