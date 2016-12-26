@@ -1288,6 +1288,8 @@ typedef struct {        /* stream converter type */
     int msgs[32];       /* output message types */
     double tint[32];    /* output message intervals (s) */
     unsigned int tick[32]; /* cycle tick of output message */
+    gtime_t time_last_msg[32]; /* center of time interval containing
+                                  last message recieved for each message type */
     int ephsat[32];     /* satellites of output ephemeris */
     int stasel;         /* station info selection (0:remote,1:local) */
     rtcm_t rtcm;        /* rtcm input data buffer */

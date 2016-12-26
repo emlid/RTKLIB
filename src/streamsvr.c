@@ -46,11 +46,51 @@ static int is_stamsg(int msg)
 {
     return msg==1005||msg==1006||msg==1007||msg==1008||msg==1033;
 }
-/* test time interval --------------------------------------------------------*/
-static int is_tint(gtime_t time, double tint)
+/* gtime to seconds ----------------------------------------------------------*/
+static double gtime2sec(gtime_t time)
 {
-    if (tint<=0.0) return 1;
-    return fmod(time2gpst(time,NULL)+DTTOL,tint)<=2.0*DTTOL;
+    return (double) time.time + time.sec;
+}
+/* test time interval --------------------------------------------------------*/
+static int is_tint(gtime_t time, gtime_t time_last_msg, double tint)
+{
+    double time_sec          = gtime2sec(time);
+    double time_last_msg_sec = gtime2sec(time_last_msg);
+    
+    if ( tint <= 0.0 ) return 1;
+    return ( time_sec >= (time_last_msg_sec + 0.5 * tint) ); 
+}
+/* update time of last message recieved for obs messages --------------------*/
+static void update_time_last_msg(gtime_t time, strconv_t *conv)
+{
+    
+    double  time_sec = gtime2sec(time);
+    gtime_t time_last_msg;
+    double  time_last_msg_sec;
+    double  tint;    
+    
+    int i;
+
+    for ( i = 0; i < conv->nmsg; i++ ) {
+        
+        if ( is_obsmsg(conv->msgs[i]) ) {
+
+            tint              = conv->tint[i];
+            time_last_msg     = conv->time_last_msg[i]; 
+            time_last_msg_sec = gtime2sec(time_last_msg); 
+             
+            if ( is_tint(time, time_last_msg, tint) ) {
+
+                if (time_sec - time_last_msg_sec > 1.5 * tint)
+                    time_last_msg_sec = tint * ( (long) (time_sec / tint + 0.5) );                                
+                else
+                    time_last_msg_sec += tint;
+
+                conv->time_last_msg[i].time = (time_t) time_last_msg_sec;
+                conv->time_last_msg[i].sec  = time_last_msg_sec - (double) conv->time_last_msg[i].time; 
+            }
+        }
+    }
 }
 /* new stream converter --------------------------------------------------------
 * generate new stream converter
@@ -79,6 +119,8 @@ extern strconv_t *strconvnew(int itype, int otype, const char *msgs, int staid,
        if (sscanf(p,"%d(%lf)",&msg,&tint)<1) continue;
        conv->msgs[conv->nmsg]=msg;
        conv->tint[conv->nmsg]=tint;
+       conv->time_last_msg[conv->nmsg].time = 0;
+       conv->time_last_msg[conv->nmsg].sec = 0;
        conv->tick[conv->nmsg]=tickget();
        conv->ephsat[conv->nmsg++]=0;
        if (conv->nmsg>=32) break;
@@ -200,12 +242,12 @@ static void write_obs(gtime_t time, stream_t *str, strconv_t *conv)
     int i,j=0;
     
     for (i=0;i<conv->nmsg;i++) {
-        if (!is_obsmsg(conv->msgs[i])||!is_tint(time,conv->tint[i])) continue;
+        if (!is_obsmsg(conv->msgs[i])||!is_tint(time, conv->time_last_msg[i], conv->tint[i])) continue;
         
         j=i; /* index of last message */
     }
     for (i=0;i<conv->nmsg;i++) {
-        if (!is_obsmsg(conv->msgs[i])||!is_tint(time,conv->tint[i])) continue;
+        if (!is_obsmsg(conv->msgs[i])||!is_tint(time, conv->time_last_msg[i], conv->tint[i])) continue;
         
         /* generate messages */
         if (conv->otype==STRFMT_RTCM2) {
@@ -219,6 +261,9 @@ static void write_obs(gtime_t time, stream_t *str, strconv_t *conv)
         /* write messages to stream */
         strwrite(str,conv->out.buff,conv->out.nbyte);
     }
+    
+    update_time_last_msg(time, conv);
+
 }
 /* write nav data messages ---------------------------------------------------*/
 static void write_nav(gtime_t time, stream_t *str, strconv_t *conv)
@@ -549,7 +594,7 @@ extern int strsvrstart(strsvr_t *svr, int *opts, int *strs, char **paths,
     char file1[MAXSTRPATH],file2[MAXSTRPATH],*p;
     
     tracet(3,"strsvrstart:\n");
-trace(2,"strsvrstart: cmds_periodic=%s\n",cmds_periodic[0]);
+    trace(2,"strsvrstart: cmds_periodic=%s\n",cmds_periodic[0]);
     
     if (svr->state) return 0;
     
