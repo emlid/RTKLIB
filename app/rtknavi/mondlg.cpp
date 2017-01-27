@@ -374,7 +374,7 @@ void __fastcall TMonitorDialog::ShowRtk(void)
 	int cputime,nb[3]={0},nmsg[3][10]={{0}},ne;
 	char tstr[64],*ant,id[32],s1[64]="-",s2[64]="-",s3[64]="-";
 	char file[1024]="";
-	const char *ionoopt[]={"OFF","Broadcast","SBAS","Dual-Frequency","Estimate STEC","IONEX TEC","QZSS LEX",""};
+	const char *ionoopt[]={"OFF","Broadcast","SBAS","Dual-Frequency","Estimate STEC","IONEX TEC","QZSS LEX","SBAS or Broadcast,""};
 	const char *tropopt[]={"OFF","Saastamoinen","SBAS","Estimate ZTD","Estimate ZTD+Grad",""};
 	const char *ephopt []={"Broadcast","Precise","Broadcast+SBAS","Broadcat+SSR APC","Broadcast+SSR CoM","QZSS LEX",""};
 	

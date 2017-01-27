@@ -56,7 +56,7 @@ extern "C" {
 
 /* constants -----------------------------------------------------------------*/
 
-#define VER_RTKLIB  "2.4.3 Emlid"             /* library version */
+#define VER_RTKLIB  "2.4.3 Emlid"       /* library version */
 
 #define PATCH_LEVEL "b26"               /* patch level */
 
@@ -367,15 +367,16 @@ extern "C" {
 #define TIMES_UTC   1                   /* time system: utc */
 #define TIMES_JST   2                   /* time system: jst */
 
-#define IONOOPT_OFF 0                   /* ionosphere option: correction off */
-#define IONOOPT_BRDC 1                  /* ionosphere option: broadcast model */
-#define IONOOPT_SBAS 2                  /* ionosphere option: SBAS model */
-#define IONOOPT_IFLC 3                  /* ionosphere option: L1/L2 or L1/L5 iono-free LC */
-#define IONOOPT_EST 4                   /* ionosphere option: estimation */
-#define IONOOPT_TEC 5                   /* ionosphere option: IONEX TEC model */
-#define IONOOPT_QZS 6                   /* ionosphere option: QZSS broadcast model */
-#define IONOOPT_LEX 7                   /* ionosphere option: QZSS LEX ionospehre */
-#define IONOOPT_STEC 8                  /* ionosphere option: SLANT TEC model */
+#define IONOOPT_OFF      0              /* ionosphere option: correction off */
+#define IONOOPT_BRDC     1              /* ionosphere option: broadcast model */
+#define IONOOPT_SBAS     2              /* ionosphere option: SBAS model */
+#define IONOOPT_IFLC     3              /* ionosphere option: L1/L2 or L1/L5 iono-free LC */
+#define IONOOPT_EST      4              /* ionosphere option: estimation */
+#define IONOOPT_TEC      5              /* ionosphere option: IONEX TEC model */
+#define IONOOPT_QZS      6              /* ionosphere option: QZSS broadcast model */
+#define IONOOPT_LEX      7              /* ionosphere option: QZSS LEX ionospehre */
+#define IONOOPT_STEC     8              /* ionosphere option: SLANT TEC model */
+#define IONOOPT_SBAS_OR_BRDC 9          /* ionosphere option: using sbas if available or brdc if not */
 
 #define TROPOPT_OFF 0                   /* troposphere option: correction off */
 #define TROPOPT_SAAS 1                  /* troposphere option: Saastamoinen model */
@@ -1181,7 +1182,7 @@ typedef struct {        /* satellite status type */
     double azel[2];     /* azimuth/elevation angles {az,el} (rad) */
     double resp[NFREQ]; /* residuals of pseudorange (m) */
     double resc[NFREQ]; /* residuals of carrier-phase (m) */
-	double icbias[NFREQ];  /* glonass IC bias (cycles) */
+    double icbias[NFREQ];      /* glonass IC bias (cycles) */
     unsigned char vsat[NFREQ]; /* valid satellite flag */
     unsigned char snr [NFREQ]; /* signal strength (0.25 dBHz) */
     unsigned char fix [NFREQ]; /* ambiguity fix flag (1:fix,2:float,3:hold) */

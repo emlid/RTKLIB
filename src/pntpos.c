@@ -143,6 +143,19 @@ extern int ionocorr(gtime_t time, const nav_t *nav, int sat, const double *pos,
     if (ionoopt==IONOOPT_SBAS) {
         return sbsioncorr(time,nav,pos,azel,ion,var);
     }
+    /* sbas-or-brdc ionospheric model option */
+    if (ionoopt == IONOOPT_SBAS_OR_BRDC) {
+        
+        if ( !sbsioncorr(time, nav, pos, azel, ion, var) ) {
+            
+            *ion = ionmodel(time, nav->ion_gps, pos, azel);
+            *var = SQR(*ion * ERR_BRDCI);
+            
+        }
+        
+        return 1;
+        
+    }
     /* ionex tec model */
     if (ionoopt==IONOOPT_TEC) {
         return iontec(time,nav,pos,azel,1,ion,var);
