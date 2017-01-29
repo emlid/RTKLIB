@@ -376,7 +376,7 @@ extern "C" {
 #define IONOOPT_QZS      6              /* ionosphere option: QZSS broadcast model */
 #define IONOOPT_LEX      7              /* ionosphere option: QZSS LEX ionospehre */
 #define IONOOPT_STEC     8              /* ionosphere option: SLANT TEC model */
-#define IONOOPT_SBAS_OR_BRDC 9          /* ionosphere option: using sbas if available or brdc if not */
+#define IONOOPT_SBAS_OR_BRDC 9          /* ionosphere option: using SBAS if available or broadcast if not */
 
 #define TROPOPT_OFF 0                   /* troposphere option: correction off */
 #define TROPOPT_SAAS 1                  /* troposphere option: Saastamoinen model */

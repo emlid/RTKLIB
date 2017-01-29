@@ -875,7 +875,10 @@ static void udstate(rtk_t *rtk, const obsd_t *obs, const int *sat,
     udpos(rtk,tt);
     
     /* temporal update of ionospheric parameters */
-    if (rtk->opt.ionoopt>=IONOOPT_EST) {
+    if ( (rtk->opt.ionoopt == IONOOPT_EST) || (rtk->opt.ionoopt == IONOOPT_TEC) || 
+         (rtk->opt.ionoopt == IONOOPT_QZS) || (rtk->opt.ionoopt == IONOOPT_LEX) ||
+         (rtk->opt.ionoopt == IONOOPT_STEC) ) 
+    {
         bl=baseline(rtk->x,rtk->rb,dr);
         udion(rtk,tt,bl,sat,ns);
     }
@@ -1181,7 +1184,10 @@ static int ddres(rtk_t *rtk, const nav_t *nav, double dt, const double *x,
            - only used if kalman filter contains states for ION and TROP delays
            ususally insignificant for short baselines (<10km)*/
     for (i=0;i<ns;i++) {
-        if (opt->ionoopt>=IONOOPT_EST) {
+        if ( (rtk->opt.ionoopt == IONOOPT_EST) || (rtk->opt.ionoopt == IONOOPT_TEC) || 
+             (rtk->opt.ionoopt == IONOOPT_QZS) || (rtk->opt.ionoopt == IONOOPT_LEX) ||
+             (rtk->opt.ionoopt == IONOOPT_STEC) )  
+        {
             im[i]=(ionmapf(posu,azel+iu[i]*2)+ionmapf(posr,azel+ir[i]*2))/2.0;
         }
         if (opt->tropopt>=TROPOPT_EST) {
@@ -1198,7 +1204,7 @@ static int ddres(rtk_t *rtk, const nav_t *nav, double dt, const double *x,
             /* find reference satellite with highest elevation, set to i */
             for (i=-1,j=0;j<ns;j++) {
                 sysi=rtk->ssat[sat[j]-1].sys;
-                    if (!test_sys(sysi,m) || sysi==SYS_SBS) continue;
+                if (!test_sys(sysi,m) || sysi==SYS_SBS) continue;
                 if (!validobs(iu[j],ir[j],f,nf,y)) continue;
                 if (i<0||azel[1+iu[j]*2]>=azel[1+iu[i]*2]) i=j;
             }

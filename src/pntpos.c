@@ -149,12 +149,10 @@ extern int ionocorr(gtime_t time, const nav_t *nav, int sat, const double *pos,
         if ( !sbsioncorr(time, nav, pos, azel, ion, var) ) {
             
             *ion = ionmodel(time, nav->ion_gps, pos, azel);
-            *var = SQR(*ion * ERR_BRDCI);
-            
+            *var = SQR(*ion * ERR_BRDCI);            
         }
         
-        return 1;
-        
+        return 1;        
     }
     /* ionex tec model */
     if (ionoopt==IONOOPT_TEC) {
