@@ -366,7 +366,7 @@ void MonitorDialog::ShowRtk(void)
 	char file[1024]="";
     QString ionoopt[]={tr("OFF"),tr("Broadcast"),tr("SBAS"),tr("Dual-Frequency"),tr("Estimate STEC"),tr("IONEX TEC"),tr("QZSS LEX"),tr("SBAS or Broadcast"),""};
     QString tropopt[]={tr("OFF"),tr("Saastamoinen"),tr("SBAS"),tr("Estimate ZTD"),tr("Estimate ZTD+Grad"),""};
-    QString ephopt []={tr("Broadcast"),tr("Precise"),tr("Broadcast+SBAS"),tr("Broadcat+SSR APC"),tr("Broadcast+SSR CoM"),tr("QZSS LEX"),""};
+    QString ephopt []={tr("Broadcast"),tr("Precise"),tr("Broadcast+SBAS"),tr("Broadcat+SSR APC"),tr("Broadcast+SSR CoM"),tr("QZSS LEX"),tr("Broadcast+SBAS or Broadcast"),""};
 	
 	rtksvrlock(&rtksvr); // lock
 	

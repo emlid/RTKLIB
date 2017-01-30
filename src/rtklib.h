@@ -376,7 +376,7 @@ extern "C" {
 #define IONOOPT_QZS      6              /* ionosphere option: QZSS broadcast model */
 #define IONOOPT_LEX      7              /* ionosphere option: QZSS LEX ionospehre */
 #define IONOOPT_STEC     8              /* ionosphere option: SLANT TEC model */
-#define IONOOPT_SBAS_OR_BRDC 9          /* ionosphere option: using SBAS if available or broadcast if not */
+#define IONOOPT_SBAS_OR_BRDC 9          /* ionosphere option: SBAS model if available or broadcast if not */
 
 #define TROPOPT_OFF 0                   /* troposphere option: correction off */
 #define TROPOPT_SAAS 1                  /* troposphere option: Saastamoinen model */
@@ -385,12 +385,13 @@ extern "C" {
 #define TROPOPT_ESTG 4                  /* troposphere option: ZTD+grad estimation */
 #define TROPOPT_ZTD 5                   /* troposphere option: ZTD correction */
 
-#define EPHOPT_BRDC 0                   /* ephemeris option: broadcast ephemeris */
-#define EPHOPT_PREC 1                   /* ephemeris option: precise ephemeris */
-#define EPHOPT_SBAS 2                   /* ephemeris option: broadcast + SBAS */
-#define EPHOPT_SSRAPC 3                 /* ephemeris option: broadcast + SSR_APC */
-#define EPHOPT_SSRCOM 4                 /* ephemeris option: broadcast + SSR_COM */
-#define EPHOPT_LEX  5                   /* ephemeris option: QZSS LEX ephemeris */
+#define EPHOPT_BRDC     0               /* ephemeris option: broadcast ephemeris */
+#define EPHOPT_PREC     1               /* ephemeris option: precise ephemeris */
+#define EPHOPT_SBAS     2               /* ephemeris option: broadcast + SBAS */
+#define EPHOPT_SSRAPC   3               /* ephemeris option: broadcast + SSR_APC */
+#define EPHOPT_SSRCOM   4               /* ephemeris option: broadcast + SSR_COM */
+#define EPHOPT_LEX      5               /* ephemeris option: QZSS LEX ephemeris */
+#define EPHOPT_SBAS_OR_BRDC 6           /* ephemeris option: broadcast + SBAS if available or broadcast if not */
 
 #define ARMODE_OFF  0                   /* AR mode: off */
 #define ARMODE_CONT 1                   /* AR mode: continuous */
