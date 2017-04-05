@@ -694,6 +694,9 @@ extern int satpos(gtime_t time, gtime_t teph, int sat, int ephopt,
             if (!peph2pos(time,sat,nav,1,rs,dts,var)) break; else return 1;
         case EPHOPT_LEX   :
             if (!lexeph2pos(time,sat,nav,rs,dts,var)) break; else return 1;
+        case EPHOPT_SBAS_OR_BRDC: 
+            if ( satpos_sbas(time, teph, sat, nav, rs, dts, var, svh) ) return 1;
+            else return ephpos(time, teph, sat, nav, -1, rs, dts, var, svh);
     }
     *svh=-1;
     return 0;
