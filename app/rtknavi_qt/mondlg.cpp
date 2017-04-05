@@ -364,7 +364,7 @@ void MonitorDialog::ShowRtk(void)
 	int cputime,nb[3]={0},nmsg[3][10]={{0}},ne;
     char tstr[64],id[32],s1[64]="-",s2[64]="-",s3[64]="-";
 	char file[1024]="";
-    QString ionoopt[]={tr("OFF"),tr("Broadcast"),tr("SBAS"),tr("Dual-Frequency"),tr("Estimate STEC"),tr("IONEX TEC"),tr("QZSS LEX"),""};
+    QString ionoopt[]={tr("OFF"),tr("Broadcast"),tr("SBAS"),tr("Dual-Frequency"),tr("Estimate STEC"),tr("IONEX TEC"),tr("QZSS LEX"),tr("SBAS or Broadcast"),""};
     QString tropopt[]={tr("OFF"),tr("Saastamoinen"),tr("SBAS"),tr("Estimate ZTD"),tr("Estimate ZTD+Grad"),""};
     QString ephopt []={tr("Broadcast"),tr("Precise"),tr("Broadcast+SBAS"),tr("Broadcat+SSR APC"),tr("Broadcast+SSR CoM"),tr("QZSS LEX"),""};
 	

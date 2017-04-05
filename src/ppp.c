@@ -812,6 +812,18 @@ static int model_iono(gtime_t time, const double *pos, const double *azel,
         *var=SQR(*dion*ERR_BRDCI);
         return 1;
     }
+    if (opt->ionoopt == IONOOPT_SBAS_OR_BRDC) {
+        
+        if ( !sbsioncorr(time, nav, pos, azel, dion, var) ) {
+            
+            *dion = ionmodel(time, nav->ion_gps, pos, azel);
+            *var = SQR(*dion * ERR_BRDCI);
+            
+        }
+        
+        return 1;
+        
+    }
     if (opt->ionoopt==IONOOPT_EST) {
         *dion=x[II(sat,opt)];
         *var=0.0;
