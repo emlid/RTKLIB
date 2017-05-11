@@ -17,7 +17,7 @@ public slots:
     void BtnOkClick();
     void BtnFileTimeClick();
 public:
-	gtime_t Time;
+    gtime_t Time;
     QString FileName;
     explicit StartDialog(QWidget *parent=0);
 };

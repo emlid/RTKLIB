@@ -26,7 +26,7 @@ private:
     void UpdateMap(void);
     void UpdatePlot(void);
     void UpdateEnable(void);
-	
+
 public:
     explicit MapAreaDialog(QWidget *parent=NULL);
 

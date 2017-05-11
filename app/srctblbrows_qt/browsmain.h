@@ -47,7 +47,7 @@ public slots:
 
 private:
     QString AddrList,AddrCaster,SrcTable,IniFile;
-	int FontScale;
+    int FontScale;
     GoogleMapView *googleMapView;
     StaListDialog *staListDialog;
     QTimer *Timer;

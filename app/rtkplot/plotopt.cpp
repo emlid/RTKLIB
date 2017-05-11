@@ -29,8 +29,8 @@ void __fastcall TPlotOptDialog::FormShow(TObject *Sender)
 {
     char s1[64],s2[64];
     AnsiString s;
-    int i,marks[]={1,2,3,4,5,10,15,20};
-    
+    int i,marks[]= {1,2,3,4,5,10,15,20};
+
     TimeLabel  ->ItemIndex=Plot->TimeLabel;
     LatLonFmt  ->ItemIndex=Plot->LatLonFmt;
     AutoScale  ->ItemIndex=Plot->AutoScale;
@@ -45,8 +45,10 @@ void __fastcall TPlotOptDialog::FormShow(TObject *Sender)
     ShowScale  ->ItemIndex=Plot->ShowScale;
     ShowCompass->ItemIndex=Plot->ShowCompass;
     PlotStyle  ->ItemIndex=Plot->PlotStyle;
-    for (i=0;i<8;i++) {
-        if (marks[i]==Plot->MarkSize) MarkSize->ItemIndex=i;
+    for(i=0; i<8; i++) {
+        if(marks[i]==Plot->MarkSize) {
+            MarkSize->ItemIndex=i;
+        }
     }
     MColor1 ->Color=Plot->MColor[0][1];
     MColor2 ->Color=Plot->MColor[0][2];
@@ -64,13 +66,13 @@ void __fastcall TPlotOptDialog::FormShow(TObject *Sender)
     Color2 ->Color=Plot->CColor[1];
     Color3 ->Color=Plot->CColor[2];
     Color4 ->Color=Plot->CColor[3];
-    
+
     FontOpt->Assign(Plot->Font);
     UpdateFont();
-    
+
     ElMask ->Text=s.sprintf("%g",Plot->ElMask);
     MaxDop ->Text=s.sprintf("%g",Plot->MaxDop);
-    MaxMP  ->Text=s.sprintf("%g",Plot->MaxMP );
+    MaxMP  ->Text=s.sprintf("%g",Plot->MaxMP);
     YRange ->Text=s.sprintf("%g",Plot->YRange);
     Origin ->ItemIndex=Plot->Origin;
     RcvPos ->ItemIndex=Plot->RcvPos;
@@ -85,7 +87,7 @@ void __fastcall TPlotOptDialog::FormShow(TObject *Sender)
     NavSys6->Checked=Plot->NavSys&SYS_CMP;
     NavSys7->Checked=Plot->NavSys&SYS_IRN;
     AnimCycle->Text=s.sprintf("%d",Plot->AnimCycle);
-    RefCycle ->Text=s.sprintf("%d",Plot->RefCycle );
+    RefCycle ->Text=s.sprintf("%d",Plot->RefCycle);
     HideLowSat->ItemIndex=Plot->HideLowSat;
     ElMaskP->ItemIndex=Plot->ElMaskP;
     ExSats->Text=Plot->ExSats;
@@ -94,14 +96,14 @@ void __fastcall TPlotOptDialog::FormShow(TObject *Sender)
     RnxOpts->Text=Plot->RnxOpts;
     TLEFile->Text=Plot->TLEFile;
     TLESatFile->Text=Plot->TLESatFile;
-    
+
     UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void __fastcall TPlotOptDialog::BtnOKClick(TObject *Sender)
 {
-    int marks[]={1,2,3,4,5,10,15,20};
-    
+    int marks[]= {1,2,3,4,5,10,15,20};
+
     Plot->TimeLabel  =TimeLabel  ->ItemIndex;
     Plot->LatLonFmt  =LatLonFmt  ->ItemIndex;
     Plot->AutoScale  =AutoScale  ->ItemIndex;
@@ -133,9 +135,9 @@ void __fastcall TPlotOptDialog::BtnOKClick(TObject *Sender)
     Plot->CColor[1]=Color2 ->Color;
     Plot->CColor[2]=Color3 ->Color;
     Plot->CColor[3]=Color4 ->Color;
-    
+
     Plot->Font->Assign(FontOpt);
-    
+
     Plot->ElMask=str2dbl(ElMask->Text);
     Plot->MaxDop=str2dbl(MaxDop->Text);
     Plot->MaxMP =str2dbl(MaxMP ->Text);
@@ -168,42 +170,54 @@ void __fastcall TPlotOptDialog::MColorClick(TObject *Sender)
 {
     TPanel *panel=(TPanel *)Sender;
     ColorDialog->Color=panel->Color;
-    if (!ColorDialog->Execute()) return;
+    if(!ColorDialog->Execute()) {
+        return;
+    }
     panel->Color=ColorDialog->Color;
 }
 //---------------------------------------------------------------------------
 void __fastcall TPlotOptDialog::BtnColor1Click(TObject *Sender)
 {
     ColorDialog->Color=Color1->Color;
-    if (!ColorDialog->Execute()) return;
+    if(!ColorDialog->Execute()) {
+        return;
+    }
     Color1->Color=ColorDialog->Color;
 }
 //---------------------------------------------------------------------------
 void __fastcall TPlotOptDialog::BtnColor2Click(TObject *Sender)
 {
     ColorDialog->Color=Color2->Color;
-    if (!ColorDialog->Execute()) return;
+    if(!ColorDialog->Execute()) {
+        return;
+    }
     Color2->Color=ColorDialog->Color;
 }
 //---------------------------------------------------------------------------
 void __fastcall TPlotOptDialog::BtnColor3Click(TObject *Sender)
 {
     ColorDialog->Color=Color3->Color;
-    if (!ColorDialog->Execute()) return;
+    if(!ColorDialog->Execute()) {
+        return;
+    }
     Color3->Color=ColorDialog->Color;
 }
 //---------------------------------------------------------------------------
 void __fastcall TPlotOptDialog::BtnColor4Click(TObject *Sender)
 {
     ColorDialog->Color=Color4->Color;
-    if (!ColorDialog->Execute()) return;
+    if(!ColorDialog->Execute()) {
+        return;
+    }
     Color4->Color=ColorDialog->Color;
 }
 //---------------------------------------------------------------------------
 void __fastcall TPlotOptDialog::BtnFontClick(TObject *Sender)
 {
     FontDialog->Font=FontOpt;
-    if (!FontDialog->Execute()) return;
+    if(!FontDialog->Execute()) {
+        return;
+    }
     FontOpt=FontDialog->Font;
     UpdateFont();
 }
@@ -211,21 +225,27 @@ void __fastcall TPlotOptDialog::BtnFontClick(TObject *Sender)
 void __fastcall TPlotOptDialog::BtnQcCmdClick(TObject *Sender)
 {
     OpenDialog->FileName=QcCmd->Text;
-    if (!OpenDialog->Execute()) return;
+    if(!OpenDialog->Execute()) {
+        return;
+    }
     QcCmd->Text=OpenDialog->FileName;
 }
 //---------------------------------------------------------------------------
 void __fastcall TPlotOptDialog::BtnTLEFileClick(TObject *Sender)
 {
     OpenDialog->FileName=TLEFile->Text;
-    if (!OpenDialog->Execute()) return;
+    if(!OpenDialog->Execute()) {
+        return;
+    }
     TLEFile->Text=OpenDialog->FileName;
 }
 //---------------------------------------------------------------------------
 void __fastcall TPlotOptDialog::BtnTLESatFileClick(TObject *Sender)
 {
     OpenDialog->FileName=TLESatFile->Text;
-    if (!OpenDialog->Execute()) return;
+    if(!OpenDialog->Execute()) {
+        return;
+    }
     TLESatFile->Text=OpenDialog->FileName;
 }
 //---------------------------------------------------------------------------
@@ -237,7 +257,9 @@ void __fastcall TPlotOptDialog::BtnRefPosClick(TObject *Sender)
     RefDialog->RovPos[2]=str2dbl(RefPos3->Text);
     RefDialog->Left=Left+Width/2-RefDialog->Width/2;
     RefDialog->Top=Top+Height/2-RefDialog->Height/2;
-    if (RefDialog->ShowModal()!=mrOk) return;
+    if(RefDialog->ShowModal()!=mrOk) {
+        return;
+    }
     RefPos1->Text=s.sprintf("%.9f",RefDialog->Pos[0]);
     RefPos2->Text=s.sprintf("%.9f",RefDialog->Pos[1]);
     RefPos3->Text=s.sprintf("%.4f",RefDialog->Pos[2]);
@@ -279,8 +301,10 @@ void __fastcall TPlotOptDialog::BtnTLEViewClick(TObject *Sender)
 {
     TTextViewer *viewer;
     AnsiString file=TLEFile->Text;
-    
-    if (file=="") return;
+
+    if(file=="") {
+        return;
+    }
     viewer=new TTextViewer(Application);
     viewer->Caption=file;
     viewer->Show();
@@ -291,8 +315,10 @@ void __fastcall TPlotOptDialog::BtnTLESatViewClick(TObject *Sender)
 {
     TTextViewer *viewer;
     AnsiString file=TLESatFile->Text;
-    
-    if (file=="") return;
+
+    if(file=="") {
+        return;
+    }
     viewer=new TTextViewer(Application);
     viewer->Caption=file;
     viewer->Show();

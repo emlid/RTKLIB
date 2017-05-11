@@ -11,8 +11,8 @@ StartDialog::StartDialog(QWidget *parent)
 {
     setupUi(this);
 
-	Time.time=0;
-	Time.sec=0.0;
+    Time.time=0;
+    Time.sec=0.0;
 
     connect(BtnOk,SIGNAL(clicked(bool)),this,SLOT(BtnOkClick()));
     connect(BtnCancel,SIGNAL(clicked(bool)),this,SLOT(reject()));
@@ -20,13 +20,16 @@ StartDialog::StartDialog(QWidget *parent)
 //---------------------------------------------------------------------------
 void StartDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-	if (Time.time==0) {
-		Time=utc2gpst(timeget());
-	}
+    if(Time.time==0) {
+        Time=utc2gpst(timeget());
+    }
 
-    QDateTime date=QDateTime::fromTime_t(Time.time); date=date.addSecs(Time.sec);
+    QDateTime date=QDateTime::fromTime_t(Time.time);
+    date=date.addSecs(Time.sec);
     TimeY1->setDate(date.date());
     TimeH1->setTime(date.time());
 }
@@ -34,7 +37,8 @@ void StartDialog::showEvent(QShowEvent *event)
 void StartDialog::BtnOkClick()
 {
     QDateTime date(TimeY1->date(),TimeH1->time());
-    Time.time=date.toTime_t();Time.sec=date.time().msec()/1000;
+    Time.time=date.toTime_t();
+    Time.sec=date.time().msec()/1000;
 
     accept();
 }

@@ -74,8 +74,8 @@ protected:
     void showEvent(QShowEvent*);
 
 private:
-	snrmask_t SnrMask;
-	int RovPosTypeP,RefPosTypeP;
+    snrmask_t SnrMask;
+    int RovPosTypeP,RefPosTypeP;
 
     void GetOpt(void);
     void SetOpt(void);
@@ -85,8 +85,8 @@ private:
     void UpdateEnable(void);
     void UpdateEnableExtErr(void);
 public:
-	exterr_t ExtErr;
-	
+    exterr_t ExtErr;
+
     explicit OptDialog(QWidget *parent);
 };
 //---------------------------------------------------------------------------

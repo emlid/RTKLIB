@@ -52,7 +52,9 @@ LogStrDialog::LogStrDialog(QWidget* parent)
 //---------------------------------------------------------------------------
 void LogStrDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     Stream1C ->setChecked(StreamC[0]);
     Stream2C ->setChecked(StreamC[1]);
@@ -63,10 +65,11 @@ void LogStrDialog::showEvent(QShowEvent *event)
     FilePath1->setText(GetFilePath(Paths[0][2]));
     FilePath2->setText(GetFilePath(Paths[1][2]));
     FilePath3->setText(GetFilePath(Paths[2][2]));
-    SwapIntv ->insertItem(0,SwapInterval);SwapIntv->setCurrentIndex(0);
+    SwapIntv ->insertItem(0,SwapInterval);
+    SwapIntv->setCurrentIndex(0);
     TimeTagC ->setChecked(LogTimeTag);
 
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::BtnOkClick()
@@ -103,32 +106,32 @@ void LogStrDialog::BtnFile3Click()
 //---------------------------------------------------------------------------
 void LogStrDialog::Stream1Change(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::Stream2Change(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::Stream3CClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::Stream1CClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::Stream2CClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::Stream3Change(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::BtnKeyClick()
@@ -138,32 +141,56 @@ void LogStrDialog::BtnKeyClick()
 //---------------------------------------------------------------------------
 void LogStrDialog::BtnStr1Click()
 {
-    switch (Stream1->currentIndex()) {
-		case 0: SerialOpt(0,0); break;
-		case 1: TcpOpt(0,1); break;
-		case 2: TcpOpt(0,0); break;
-		case 3: TcpOpt(0,2); break;
-	}
+    switch(Stream1->currentIndex()) {
+    case 0:
+        SerialOpt(0,0);
+        break;
+    case 1:
+        TcpOpt(0,1);
+        break;
+    case 2:
+        TcpOpt(0,0);
+        break;
+    case 3:
+        TcpOpt(0,2);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::BtnStr2Click()
 {
-    switch (Stream2->currentIndex()) {
-		case 0: SerialOpt(1,0); break;
-		case 1: TcpOpt(1,1); break;
-		case 2: TcpOpt(1,0); break;
-		case 3: TcpOpt(1,2); break;
-	}
+    switch(Stream2->currentIndex()) {
+    case 0:
+        SerialOpt(1,0);
+        break;
+    case 1:
+        TcpOpt(1,1);
+        break;
+    case 2:
+        TcpOpt(1,0);
+        break;
+    case 3:
+        TcpOpt(1,2);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::BtnStr3Click()
 {
-    switch (Stream3->currentIndex()) {
-		case 0: SerialOpt(2,0); break;
-		case 1: TcpOpt(2,1); break;
-		case 2: TcpOpt(2,0); break;
-		case 3: TcpOpt(2,2); break;
-	}
+    switch(Stream3->currentIndex()) {
+    case 0:
+        SerialOpt(2,0);
+        break;
+    case 1:
+        TcpOpt(2,1);
+        break;
+    case 2:
+        TcpOpt(2,0);
+        break;
+    case 3:
+        TcpOpt(2,2);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 QString LogStrDialog::GetFilePath(const QString &path)
@@ -180,13 +207,15 @@ QString LogStrDialog::SetFilePath(const QString &p)
     QString str;
     bool okay;
 
-    if (TimeTagC->isChecked()) path+="::T";
+    if(TimeTagC->isChecked()) {
+        path+="::T";
+    }
     str=SwapIntv->currentText();
     str.toDouble(&okay);
-    if (okay) {
-		path+="::S="+str;
-	}
-	return path;
+    if(okay) {
+        path+="::S="+str;
+    }
+    return path;
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::SerialOpt(int index, int opt)
@@ -195,7 +224,9 @@ void LogStrDialog::SerialOpt(int index, int opt)
     serialOptDialog->Opt=opt;
 
     serialOptDialog->exec();
-    if (serialOptDialog->result()!=QDialog::Accepted) return;
+    if(serialOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][0]=serialOptDialog->Path;
 }
@@ -204,18 +235,20 @@ void LogStrDialog::TcpOpt(int index, int opt)
 {
     tcpOptDialog->Path=Paths[index][1];
     tcpOptDialog->Opt=opt;
-	for (int i=0;i<10;i++) {
+    for(int i=0; i<10; i++) {
         tcpOptDialog->History[i]=History[i];
         tcpOptDialog->MntpHist[i]=MntpHist[i];
-	}
+    }
     tcpOptDialog->exec();
-    if (tcpOptDialog->result()!=QDialog::Accepted) return;
+    if(tcpOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][1]=tcpOptDialog->Path;
-	for (int i=0;i<10;i++) {
+    for(int i=0; i<10; i++) {
         History[i]=tcpOptDialog->History[i];
         MntpHist[i]=tcpOptDialog->MntpHist[i];
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void LogStrDialog::UpdateEnable(void)

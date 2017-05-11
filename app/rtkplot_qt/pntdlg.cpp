@@ -38,24 +38,32 @@ PntDialog::PntDialog(QWidget* parent)
 //---------------------------------------------------------------------------
 void PntDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-    int width[]={120,120,90};
-	
+    int width[]= {120,120,90};
+
     FontScale=this->physicalDpiX();
-    for (int i=0;i<3;i++) {
+    for(int i=0; i<3; i++) {
         PntList->setColumnWidth(i,width[i]*FontScale/96);
     }
 }
 //---------------------------------------------------------------------------
 void PntDialog::BtnAddClick()
 {
-	double rr[3],pos[3]={0};
+    double rr[3],pos[3]= {0};
 
-    if (PntList->rowCount()>=MAXWAYPNT) return;
-    if (!plot->GetCenterPos(rr)) return;
-	if (norm(rr,3)<=0.0) return;
-	ecef2pos(rr,pos);
+    if(PntList->rowCount()>=MAXWAYPNT) {
+        return;
+    }
+    if(!plot->GetCenterPos(rr)) {
+        return;
+    }
+    if(norm(rr,3)<=0.0) {
+        return;
+    }
+    ecef2pos(rr,pos);
 
     noUpdate=true;
     PntList->setRowCount(PntList->rowCount()+1);
@@ -70,15 +78,20 @@ void PntDialog::BtnAddClick()
 void PntDialog::BtnDelClick()
 {
     QTableWidgetItem *sel=PntList->selectedItems().first();;
-    if (!sel) return;
-	
+    if(!sel) {
+        return;
+    }
+
     noUpdate=true;
-    for (int i=PntList->column(sel);i<PntList->rowCount();i++) {
-        for (int j=0;j<PntList->columnCount();j++) {
-            if (i+1>=PntList->rowCount()) PntList->setItem(i,j, new QTableWidgetItem(""));
-            else PntList->setItem(i,j, new QTableWidgetItem(PntList->item(i+1,j)->text()));
-		}
-	}
+    for(int i=PntList->column(sel); i<PntList->rowCount(); i++) {
+        for(int j=0; j<PntList->columnCount(); j++) {
+            if(i+1>=PntList->rowCount()) {
+                PntList->setItem(i,j, new QTableWidgetItem(""));
+            } else {
+                PntList->setItem(i,j, new QTableWidgetItem(PntList->item(i+1,j)->text()));
+            }
+        }
+    }
     PntList->setRowCount(PntList->rowCount()-1);
     noUpdate=false;
 
@@ -100,13 +113,23 @@ void PntDialog::UpdatePoint()
 {
     int n=0;
 
-    if (noUpdate) return;
+    if(noUpdate) {
+        return;
+    }
 
-    for (int i=0;i<PntList->rowCount();i++) {
-        if (!PntList->item(i,0)) continue;
-        if (!PntList->item(i,1)) continue;
-        if (!PntList->item(i,2)) continue;
-        if (PntList->item(i,2)->text()=="") continue;
+    for(int i=0; i<PntList->rowCount(); i++) {
+        if(!PntList->item(i,0)) {
+            continue;
+        }
+        if(!PntList->item(i,1)) {
+            continue;
+        }
+        if(!PntList->item(i,2)) {
+            continue;
+        }
+        if(PntList->item(i,2)->text()=="") {
+            continue;
+        }
         plot->PntPos[n][0]=PntList->item(i,0)->text().toDouble();
         plot->PntPos[n][1]=PntList->item(i,1)->text().toDouble();
         plot->PntPos[n][2]=0.0;
@@ -121,7 +144,7 @@ void PntDialog::SetPoint(void)
 {
     noUpdate=true;
     PntList->setRowCount(plot->NWayPnt);
-    for (int i=0;i<plot->NWayPnt;i++) {
+    for(int i=0; i<plot->NWayPnt; i++) {
         PntList->setItem(i,0,new QTableWidgetItem(QString::number(plot->PntPos[i][0],'f',9)));
         PntList->setItem(i,1,new QTableWidgetItem(QString::number(plot->PntPos[i][1],'f',9)));
         PntList->setItem(i,2,new QTableWidgetItem(plot->PntName[i]));
@@ -133,9 +156,13 @@ void PntDialog::SetPoint(void)
 void PntDialog::PntListClick()
 {
     QList<QTableWidgetItem*> selections= PntList->selectedItems();
-    if (selections.isEmpty()) return;
+    if(selections.isEmpty()) {
+        return;
+    }
     QTableWidgetItem * item=selections.first();
-    if (!item) return;
+    if(!item) {
+        return;
+    }
     int sel=PntList->row(item);
     plot->SelWayPnt=sel<plot->NWayPnt?sel:-1;
     plot->UpdatePlot();
@@ -144,7 +171,9 @@ void PntDialog::PntListClick()
 void PntDialog::PntListDblClick(QTableWidgetItem *w)
 {
     int sel=PntList->row(w);
-    if (sel>=plot->NWayPnt) return;
+    if(sel>=plot->NWayPnt) {
+        return;
+    }
     plot->SetTrkCent(plot->PntPos[sel][0],plot->PntPos[sel][1]);
 }
 //---------------------------------------------------------------------------

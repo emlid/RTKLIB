@@ -24,8 +24,8 @@ public slots:
 private:
     void UpdatePoint(void);
 public:
-	double Pos[3];
-	int FontScale;
+    double Pos[3];
+    int FontScale;
 
     explicit PntDialog(QWidget* parent=NULL);
     void SetPoint(void);

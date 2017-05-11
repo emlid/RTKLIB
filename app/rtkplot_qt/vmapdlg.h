@@ -32,10 +32,10 @@ public slots:
     void BtnDownClick();
 
 protected:
-    void showEvent (QShowEvent *event);
+    void showEvent(QShowEvent *event);
 
 private:
-	gis_t Gis;
+    gis_t Gis;
     QColor Colors[12];
 
     void UpdateLayer(void);

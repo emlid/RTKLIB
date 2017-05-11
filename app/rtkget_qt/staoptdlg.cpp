@@ -22,10 +22,12 @@ StaListDialog::StaListDialog(QWidget* parent)
 //---------------------------------------------------------------------------
 void StaListDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
     StaList->clear();
-    
-    for (int i=0;i<mainForm->StaList->count();i++) {
+
+    for(int i=0; i<mainForm->StaList->count(); i++) {
         StaList->addItem(mainForm->StaList->item(i)->text());
     }
 }
@@ -33,8 +35,8 @@ void StaListDialog::showEvent(QShowEvent *event)
 void StaListDialog::BtnOkClick()
 {
     mainForm->StaList->clear();
-    
-    for (int i=0;i<StaList->count();i++) {
+
+    for(int i=0; i<StaList->count(); i++) {
         mainForm->StaList->addItem(StaList->item(i)->text());
     }
 }
@@ -44,18 +46,19 @@ void StaListDialog::BtnLoadClick()
     QString file;
     QFile fp;
     QByteArray buff;
-    
-    
+
+
     file=QDir::toNativeSeparators(QFileDialog::getOpenFileName(this,tr("Open...")));
 
     fp.setFileName(file);
-    if (!fp.open(QIODevice::ReadOnly)) return;
-        
+    if(!fp.open(QIODevice::ReadOnly)) {
+        return;
+    }
+
     StaList->clear();
     StaList->setVisible(false);
-    
-    while (!fp.atEnd())
-    {
+
+    while(!fp.atEnd()) {
         buff=fp.readLine();
         buff=buff.mid(buff.indexOf('#'));
         StaList->addItem(buff);
@@ -70,10 +73,11 @@ void StaListDialog::BtnSaveClick()
     QFile fp;
 
     fp.setFileName(file);
-    if (!fp.open(QIODevice::WriteOnly)) return;
+    if(!fp.open(QIODevice::WriteOnly)) {
+        return;
+    }
 
-    for (int i=0;i<StaList->count();i++)
-    {
+    for(int i=0; i<StaList->count(); i++) {
         fp.write((StaList->item(i)->text()+"\n").toLatin1());
     }
 }

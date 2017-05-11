@@ -61,29 +61,40 @@ void Console::AddMsg(unsigned char *msg, int n)
     char buff[MAXLEN+16],*p=buff;
     int mode=BtnAsc->isChecked();
 
-    if (n<=0) return;
+    if(n<=0) {
+        return;
+    }
 
-    if (BtnStop->isChecked()) return;
+    if(BtnStop->isChecked()) {
+        return;
+    }
 
     p+=sprintf(p,"%s",qPrintable(ConBuff.last()));
 
-    for (int i=0;i<n;i++) {
-            if (mode) {
-                    if (msg[i]=='\r') continue;
-                    p+=sprintf(p,"%c",msg[i]=='\n'||isprint(msg[i])?msg[i]:'.');
+    for(int i=0; i<n; i++) {
+        if(mode) {
+            if(msg[i]=='\r') {
+                continue;
             }
-            else {
-                    p+=sprintf(p,"%s%02X",(p-buff)%17==16?" ":"",msg[i]);
-                    if (p-buff>=67) p+=sprintf(p,"\n");
+            p+=sprintf(p,"%c",msg[i]=='\n'||isprint(msg[i])?msg[i]:'.');
+        } else {
+            p+=sprintf(p,"%s%02X",(p-buff)%17==16?" ":"",msg[i]);
+            if(p-buff>=67) {
+                p+=sprintf(p,"\n");
             }
-            if (p-buff>=MAXLEN) p+=sprintf(p,"\n");
+        }
+        if(p-buff>=MAXLEN) {
+            p+=sprintf(p,"\n");
+        }
 
-            if (*(p-1)=='\n') {
-                    ConBuff.last()=buff;
-                    ConBuff.append("");
-                    *(p=buff)=0;
-                    if (ConBuff.count()>=MAXLINE) ConBuff.removeFirst();
+        if(*(p-1)=='\n') {
+            ConBuff.last()=buff;
+            ConBuff.append("");
+            *(p=buff)=0;
+            if(ConBuff.count()>=MAXLINE) {
+                ConBuff.removeFirst();
             }
+        }
     }
     ConBuff.last()=buff;
 

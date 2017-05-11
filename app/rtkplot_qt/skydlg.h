@@ -29,7 +29,7 @@ public slots:
 private:
     void UpdateSky(void);
     void UpdateEnable(void);
-	
+
 public:
     explicit SkyImgDialog(QWidget *parent=NULL);
     void UpdateField(void);

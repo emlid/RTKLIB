@@ -10,15 +10,15 @@
 TStaListDialog *StaListDialog;
 //---------------------------------------------------------------------------
 __fastcall TStaListDialog::TStaListDialog(TComponent* Owner)
-	: TForm(Owner)
+    : TForm(Owner)
 {
 }
 //---------------------------------------------------------------------------
 void __fastcall TStaListDialog::FormShow(TObject *Sender)
 {
     StaList->Clear();
-    
-    for (int i=0;i<MainForm->StaList->Items->Count;i++) {
+
+    for(int i=0; i<MainForm->StaList->Items->Count; i++) {
         StaList->Lines->Add(MainForm->StaList->Items->Strings[i]);
     }
 }
@@ -26,8 +26,8 @@ void __fastcall TStaListDialog::FormShow(TObject *Sender)
 void __fastcall TStaListDialog::BtnOkClick(TObject *Sender)
 {
     MainForm->StaList->Clear();
-    
-    for (int i=0;i<StaList->Lines->Count;i++) {
+
+    for(int i=0; i<StaList->Lines->Count; i++) {
         MainForm->StaList->Items->Add(StaList->Lines->Strings[i]);
     }
 }
@@ -37,19 +37,25 @@ void __fastcall TStaListDialog::BtnLoadClick(TObject *Sender)
     AnsiString file;
     FILE *fp;
     char buff[1024],*p;
-    
-    if (!OpenDialog->Execute()) return;
-    
+
+    if(!OpenDialog->Execute()) {
+        return;
+    }
+
     file=OpenDialog->FileName;
-    
-    if (!(fp=fopen(file.c_str(),"r"))) return;
-    
+
+    if(!(fp=fopen(file.c_str(),"r"))) {
+        return;
+    }
+
     StaList->Clear();
     StaList->Visible=false;
-    
-    while (fgets(buff,sizeof(buff),fp)) {
-        if ((p=strchr(buff,'#'))) *p='\0';
-        for (p=strtok(buff," ,\r\n");p;p=strtok(NULL," ,\r\n")) {
+
+    while(fgets(buff,sizeof(buff),fp)) {
+        if((p=strchr(buff,'#'))) {
+            *p='\0';
+        }
+        for(p=strtok(buff," ,\r\n"); p; p=strtok(NULL," ,\r\n")) {
             StaList->Lines->Add(p);
         }
     }
@@ -59,8 +65,10 @@ void __fastcall TStaListDialog::BtnLoadClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TStaListDialog::BtnSaveClick(TObject *Sender)
 {
-	if (!SaveDialog->Execute()) return;
-	StaList->Lines->SaveToFile(SaveDialog->FileName);
+    if(!SaveDialog->Execute()) {
+        return;
+    }
+    StaList->Lines->SaveToFile(SaveDialog->FileName);
 }
 //---------------------------------------------------------------------------
 

@@ -19,22 +19,21 @@ __fastcall TVideoOptDlg::TVideoOptDlg(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TVideoOptDlg::FormShow(TObject *Sender)
 {
-    TCaptureDeviceList list = 
+    TCaptureDeviceList list =
         TCaptureDeviceManager::Current->GetDevicesByMediaType(TMediaType::Video);
-    
+
     SelDev->Clear();
-    
-    for (int i = 0; i < list->Count; i++) {
+
+    for(int i = 0; i < list->Count; i++) {
         SelDev->Items->Add(list->Items[i]->Name);
-        if (i == 0) {
+        if(i == 0) {
             SelDev->ItemIndex = 0;
-        }
-        else if (list->Items[i]->Name == MainForm->DevName) {
+        } else if(list->Items[i]->Name == MainForm->DevName) {
             SelDev->ItemIndex = i;
         }
     }
     UpdateProf();
-    
+
     UnicodeString str;
     SelProf      ->ItemIndex = MainForm->Profile;
     SelCapPos    ->ItemIndex = MainForm->CaptionPos;
@@ -52,10 +51,9 @@ void __fastcall TVideoOptDlg::FormShow(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TVideoOptDlg::BtnOkClick(TObject *Sender)
 {
-    if (SelDev->Selected) {
+    if(SelDev->Selected) {
         MainForm->DevName = SelDev->Selected->Text;
-    }
-    else {
+    } else {
         MainForm->DevName = L"";
     }
     MainForm->Profile      = SelProf    ->ItemIndex;
@@ -74,7 +72,9 @@ void __fastcall TVideoOptDlg::BtnOkClick(TObject *Sender)
 void __fastcall TVideoOptDlg::BtnFileClick(TObject *Sender)
 {
     SaveDialog->FileName = EditFile->Text;
-    if (!SaveDialog->Execute()) return;
+    if(!SaveDialog->Execute()) {
+        return;
+    }
     EditFile->Text = SaveDialog->FileName;
 }
 //---------------------------------------------------------------------------
@@ -95,27 +95,29 @@ void __fastcall TVideoOptDlg::SelCapPosChange(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TVideoOptDlg::UpdateProf(void)
 {
-    if (!SelDev->Selected) {
+    if(!SelDev->Selected) {
         return;
     }
     TVideoCaptureDevice *device = dynamic_cast<TVideoCaptureDevice*>
-        (TCaptureDeviceManager::Current->GetDevicesByName(SelDev->Selected->Text));
-    
-    if (!device) return;
-    
+                                  (TCaptureDeviceManager::Current->GetDevicesByName(SelDev->Selected->Text));
+
+    if(!device) {
+        return;
+    }
+
     DynamicArray<TVideoCaptureSetting> settings =
         device->GetAvailableCaptureSettings(NULL);
-    
+
     SelProf->Clear();
-    
-    for (int i = 0; i < settings.Length; i++) {
+
+    for(int i = 0; i < settings.Length; i++) {
         UnicodeString str;
         str.sprintf(L"%d x %d, %2.0f FPS (%.0f-%.0f FPS)", settings[i].Width,
                     settings[i].Height, settings[i].FrameRate,
                     settings[i].MinFrameRate, settings[i].MaxFrameRate);
         SelProf->Items->Add(str);
     }
-    if (settings.Length > 0) {
+    if(settings.Length > 0) {
         SelProf->ItemIndex = 0;
     }
 }

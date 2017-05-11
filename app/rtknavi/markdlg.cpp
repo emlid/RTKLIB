@@ -16,89 +16,84 @@ extern rtksvr_t rtksvr;
 
 //---------------------------------------------------------------------------
 __fastcall TMarkDialog::TMarkDialog(TComponent* Owner)
-	: TForm(Owner)
+    : TForm(Owner)
 {
-	AnsiString s;
-	NMark=1;
-	Label1->Caption=s.sprintf("%%r=%03d",NMark);
+    AnsiString s;
+    NMark=1;
+    Label1->Caption=s.sprintf("%%r=%03d",NMark);
 }
 //---------------------------------------------------------------------------
 void __fastcall TMarkDialog::BtnCancelClick(TObject *Sender)
 {
-	Close();
+    Close();
 }
 //---------------------------------------------------------------------------
 void __fastcall TMarkDialog::BtnOkClick(TObject *Sender)
 {
-	AnsiString s;
-	AnsiString marker=MarkerName->Text;
-	AnsiString comment=MarkerComment->Text;
-	char str1[32],str2[1024];
-	
-	if (RadioGo->Checked) {
-		if (PosMode==PMODE_STATIC) {
-			PosMode=PMODE_KINEMA;
-		}
-		else if (PosMode==PMODE_PPP_STATIC) {
-			PosMode=PMODE_PPP_KINEMA;
-		}
-	}
-	else if (RadioStop->Checked) {
-		if (PosMode==PMODE_KINEMA) {
-			PosMode=PMODE_STATIC;
-		}
-		else if (PosMode==PMODE_PPP_KINEMA) {
-			PosMode=PMODE_PPP_STATIC;
-		}
-	}
-	if (ChkMarkerName->Checked) {
-		sprintf(str1,"%03d",NMark);
-		reppath(marker.c_str(),str2,utc2gpst(timeget()),str1,"");
-		rtksvrmark(&rtksvr,str2,comment.c_str());
-		NMark++;
-		Label1->Caption=s.sprintf("%%r=%03d",NMark);
-	}
-	Marker=marker;
-	Comment=comment;
+    AnsiString s;
+    AnsiString marker=MarkerName->Text;
+    AnsiString comment=MarkerComment->Text;
+    char str1[32],str2[1024];
+
+    if(RadioGo->Checked) {
+        if(PosMode==PMODE_STATIC) {
+            PosMode=PMODE_KINEMA;
+        } else if(PosMode==PMODE_PPP_STATIC) {
+            PosMode=PMODE_PPP_KINEMA;
+        }
+    } else if(RadioStop->Checked) {
+        if(PosMode==PMODE_KINEMA) {
+            PosMode=PMODE_STATIC;
+        } else if(PosMode==PMODE_PPP_KINEMA) {
+            PosMode=PMODE_PPP_STATIC;
+        }
+    }
+    if(ChkMarkerName->Checked) {
+        sprintf(str1,"%03d",NMark);
+        reppath(marker.c_str(),str2,utc2gpst(timeget()),str1,"");
+        rtksvrmark(&rtksvr,str2,comment.c_str());
+        NMark++;
+        Label1->Caption=s.sprintf("%%r=%03d",NMark);
+    }
+    Marker=marker;
+    Comment=comment;
 }
 //---------------------------------------------------------------------------
 void __fastcall TMarkDialog::ChkMarkerNameClick(TObject *Sender)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void __fastcall TMarkDialog::FormShow(TObject *Sender)
 {
-	MarkerName->Text=Marker;
-	MarkerComment->Text=Comment;
-	
-	if (PosMode==PMODE_STATIC||PosMode==PMODE_PPP_STATIC) {
-		RadioStop->Checked=true;
-	}
-	else if (PosMode==PMODE_KINEMA||PosMode==PMODE_PPP_KINEMA) {
-		RadioGo->Checked=true;
-	}
-	else {
-		RadioStop->Checked=false;
-		RadioGo  ->Checked=false;
-	}
-	UpdateEnable();
+    MarkerName->Text=Marker;
+    MarkerComment->Text=Comment;
+
+    if(PosMode==PMODE_STATIC||PosMode==PMODE_PPP_STATIC) {
+        RadioStop->Checked=true;
+    } else if(PosMode==PMODE_KINEMA||PosMode==PMODE_PPP_KINEMA) {
+        RadioGo->Checked=true;
+    } else {
+        RadioStop->Checked=false;
+        RadioGo  ->Checked=false;
+    }
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void __fastcall TMarkDialog::UpdateEnable(void)
 {
-	bool ena=PosMode==PMODE_STATIC||PosMode==PMODE_PPP_STATIC||
-			 PosMode==PMODE_KINEMA||PosMode==PMODE_PPP_KINEMA;
-	RadioStop->Enabled=ena;
-	RadioGo  ->Enabled=ena;
-	LabelPosMode->Enabled=ena;
-	MarkerName->Enabled=ChkMarkerName->Checked;
+    bool ena=PosMode==PMODE_STATIC||PosMode==PMODE_PPP_STATIC||
+             PosMode==PMODE_KINEMA||PosMode==PMODE_PPP_KINEMA;
+    RadioStop->Enabled=ena;
+    RadioGo  ->Enabled=ena;
+    LabelPosMode->Enabled=ena;
+    MarkerName->Enabled=ChkMarkerName->Checked;
 }
 //---------------------------------------------------------------------------
 void __fastcall TMarkDialog::BtnRepDlgClick(TObject *Sender)
 {
-	KeyDialog->Caption="Keyword Replacement in Marker Name";
-	KeyDialog->ShowModal();
+    KeyDialog->Caption="Keyword Replacement in Marker Name";
+    KeyDialog->ShowModal();
 }
 //---------------------------------------------------------------------------
 

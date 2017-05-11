@@ -36,7 +36,7 @@ private:
     QSystemTrayIcon TrayIcon;
     QMenu *trayMenu;
     int Tray;
-	
+
     int ExecCmd(const QString &cmd);
 public:
     explicit MainForm(QWidget *parent=0);

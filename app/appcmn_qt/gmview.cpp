@@ -47,9 +47,9 @@ GoogleMapView::GoogleMapView(QWidget *parent)
 
     connect(WebBrowser,SIGNAL(loadFinished(bool)),this,SLOT(PageLoaded(bool)));
 #endif
-	State=0;
-	Lat=Lon=0.0;
-	Zoom=2;
+    State=0;
+    Lat=Lon=0.0;
+    Zoom=2;
     FixCent=1;
 
     QTimer::singleShot(0,this,SLOT(FormCreate()));
@@ -86,7 +86,9 @@ void GoogleMapView::BtnCloseClick()
 //---------------------------------------------------------------------------
 void GoogleMapView::PageLoaded(bool ok)
 {
-    if (!ok) return;
+    if(!ok) {
+        return;
+    }
 
 #ifdef QWEBENGINE
     QFile webchannel(":/html/qwebchannel.js");
@@ -99,19 +101,23 @@ void GoogleMapView::PageLoaded(bool ok)
 //---------------------------------------------------------------------------
 void GoogleMapView::Timer1Timer()
 {
-	if (!GetState()) return;
-	
+    if(!GetState()) {
+        return;
+    }
+
     State=1;
 
-	SetView(Lat,Lon,Zoom);
-	
-	AddMark(0.0,0.0,"SOL1","SOLUTION 1");
-	AddMark(0.0,0.0,"SOL2","SOLUTION 2");
+    SetView(Lat,Lon,Zoom);
 
-	HideMark(1);
-	HideMark(2);
+    AddMark(0.0,0.0,"SOL1","SOLUTION 1");
+    AddMark(0.0,0.0,"SOL2","SOLUTION 2");
 
-	for (int i=0;i<2;i++) MarkPos[i][0]=MarkPos[i][1]=0.0;
+    HideMark(1);
+    HideMark(2);
+
+    for(int i=0; i<2; i++) {
+        MarkPos[i][0]=MarkPos[i][1]=0.0;
+    }
 
     Timer1.stop();
 }
@@ -129,30 +135,41 @@ void GoogleMapView::BtnExpandClick()
 void GoogleMapView::BtnFixCentClick()
 {
     FixCent=BtnFixCent->isChecked();
-    if (FixCent) SetCent(Lat,Lon);
+    if(FixCent) {
+        SetCent(Lat,Lon);
+    }
 }
 //---------------------------------------------------------------------------
 void GoogleMapView::resizeEvent(QResizeEvent *)
 {
-    if (FixCent) SetCent(Lat,Lon);
+    if(FixCent) {
+        SetCent(Lat,Lon);
+    }
 }
 //---------------------------------------------------------------------------
 void GoogleMapView::SetView(double lat, double lon, int zoom)
 {
-	Lat=lat; Lon=lon; Zoom=zoom;
+    Lat=lat;
+    Lon=lon;
+    Zoom=zoom;
     ExecFunc(QString("SetView(%1,%2,%3)").arg(lat,0,'f',9).arg(lon,0,'f',9).arg(zoom));
 }
 //---------------------------------------------------------------------------
 void GoogleMapView::SetCent(double lat, double lon)
 {
-	Lat=lat; Lon=lon;
-    if (FixCent) ExecFunc(QString("SetCent(%1,%2)").arg(lat,0,'f',9).arg(lon,0,'f',9));
+    Lat=lat;
+    Lon=lon;
+    if(FixCent) {
+        ExecFunc(QString("SetCent(%1,%2)").arg(lat,0,'f',9).arg(lon,0,'f',9));
+    }
 }
 //---------------------------------------------------------------------------
 void GoogleMapView::SetZoom(int zoom)
 {
-    if (zoom<2||zoom>21) return;
-	Zoom=zoom;
+    if(zoom<2||zoom>21) {
+        return;
+    }
+    Zoom=zoom;
     ExecFunc(QString("SetZoom(%1)").arg(zoom));
 }
 //---------------------------------------------------------------------------
@@ -162,7 +179,7 @@ void GoogleMapView::ClearMark(void)
 }
 //---------------------------------------------------------------------------
 void GoogleMapView::AddMark(double lat, double lon,
-    const QString &title, const QString &msg)
+                            const QString &title, const QString &msg)
 {
     ExecFunc(QString("AddMark(%1,%2,\"%3\",\"%4\")").arg(lat,0,'f',9).arg(lon,0,'f',9).arg(title).arg(msg));
 }
@@ -172,9 +189,9 @@ void GoogleMapView::SetMark(int index, const double *pos)
     QString title;
     title=QString("SOL%1").arg(index);
     ExecFunc(QString("PosMark(%1,%2,\"%3\")").arg(pos[0]*R2D,0,'f',9).arg(pos[1]*R2D,0,'f',9).arg(title));
-	
-	MarkPos[index-1][0]=pos[0]*R2D;
-	MarkPos[index-1][1]=pos[1]*R2D;
+
+    MarkPos[index-1][0]=pos[0]*R2D;
+    MarkPos[index-1][1]=pos[1]*R2D;
 }
 //---------------------------------------------------------------------------
 void GoogleMapView::ShowMark(int index)
@@ -197,49 +214,67 @@ int GoogleMapView::GetState(void)
     QWebElement ele;
     int state=0;
 
-    if (!WebBrowser->page()) return 0;
-    if (!WebBrowser->page()->mainFrame()) return 0;
+    if(!WebBrowser->page()) {
+        return 0;
+    }
+    if(!WebBrowser->page()->mainFrame()) {
+        return 0;
+    }
 
     QWebFrame *frame=WebBrowser->page()->mainFrame();
 
     ele=frame->findFirstElement("#state");
 
-    if (ele.isNull()) return 0;
-    if (!ele.hasAttribute("value")) return 0;
+    if(ele.isNull()) {
+        return 0;
+    }
+    if(!ele.hasAttribute("value")) {
+        return 0;
+    }
 
     state=ele.attribute("value").toInt();
 
-	return state;
+    return state;
 #else
- #ifdef QWEBENGINE
-    if (!loaded) return 0;
+#ifdef QWEBENGINE
+    if(!loaded) {
+        return 0;
+    }
     return pageState->getText().toInt();
- #else
+#else
     return 0;
- #endif
+#endif
 #endif
 }
 //---------------------------------------------------------------------------
 void GoogleMapView::ExecFunc(const QString &func)
 {
 #ifdef QWEBKIT
-    if (!WebBrowser->page()) return;
-    if (!WebBrowser->page()->mainFrame()) return;
+    if(!WebBrowser->page()) {
+        return;
+    }
+    if(!WebBrowser->page()->mainFrame()) {
+        return;
+    }
 
     QWebFrame *frame=WebBrowser->page()->mainFrame();
 
     frame->evaluateJavaScript(func);
 #else
- #ifdef QWEBENGINE
-    if (!loaded) return;
+#ifdef QWEBENGINE
+    if(!loaded) {
+        return;
+    }
 
     QWebEnginePage *page=WebBrowser->page();
-    if (page==NULL) return;
+    if(page==NULL) {
+        return;
+    }
 
     page->runJavaScript(func);
- #else
+#else
     Q_UNUSED(func)
- #endif
+#endif
 #endif
 }
 //---------------------------------------------------------------------------

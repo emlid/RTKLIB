@@ -14,18 +14,20 @@ TimeDialog::TimeDialog(QWidget *parent)
 //---------------------------------------------------------------------------
 void TimeDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-	gtime_t utc;
-	double tow,doy;
-	int week;
+    gtime_t utc;
+    double tow,doy;
+    int week;
     QString msg;
     char s1[64],s2[64];
-	utc=gpst2utc(Time);
-	time2str(Time,s1,0);
-	time2str(utc,s2,0);
-	tow=time2gpst(Time,&week);
-	doy=time2doy(Time);
+    utc=gpst2utc(Time);
+    time2str(Time,s1,0);
+    time2str(utc,s2,0);
+    tow=time2gpst(Time,&week);
+    doy=time2doy(Time);
     msg+=QString(tr("%1 GPST\n")).arg(s1);
     msg+=QString(tr("%1 UTC\n\n")).arg(s2);
     msg+=QString(tr("GPS Week: %1\n")).arg(week);

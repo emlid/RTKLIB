@@ -37,14 +37,16 @@ __fastcall TMainForm::TMainForm(TComponent* Owner)
 {
     char file[1024]="rtklaunch.exe",buff[1024],*argv[32],*p;
     int i,argc=0,tray=0;
-    
+
     ::GetModuleFileName(NULL,file,sizeof(file));
-    if (!(p=strrchr(file,'.'))) p=file+strlen(file);
+    if(!(p=strrchr(file,'.'))) {
+        p=file+strlen(file);
+    }
     strcpy(p,".ini");
     IniFile=file;
     Option=0;
     Minimize=0;
-    
+
     TIniFile *ini=new TIniFile(IniFile);
     Left  =ini->ReadInteger("pos","left",    0);
     Top   =ini->ReadInteger("pos","top",     0);
@@ -53,27 +55,33 @@ __fastcall TMainForm::TMainForm(TComponent* Owner)
     Option=ini->ReadInteger("pos","option",  0);
     Minimize=ini->ReadInteger("pos","minimize",1);
     delete ini;
-    
+
     Caption="RTKLIB v." VER_RTKLIB " " PATCH_LEVEL;
     BtnRtklib->Hint="RTKLIB v." VER_RTKLIB " " PATCH_LEVEL;
     TrayIcon->Hint=Caption;
     Panel1->Constraints->MinWidth=BTN_SIZE+2;
     Panel1->Constraints->MaxWidth=BTN_SIZE*BTN_COUNT+2;
-    
+
     strcpy(buff,GetCommandLine());
-    for (p=strtok(buff," ");p&&argc<32;p=strtok(NULL," ")) {
+    for(p=strtok(buff," "); p&&argc<32; p=strtok(NULL," ")) {
         argv[argc++]=p;
     }
-    for (i=1;i<argc;i++) {
-        if      (!strcmp(argv[i],"-t")&&i+1<argc) Caption=argv[++i];
-        else if (!strcmp(argv[i],"-tray" )) tray    =1;
-        else if (!strcmp(argv[i],"-min"  )) Minimize=1;
-        else if (!strcmp(argv[i],"-mkl"  )) Option  =1;
-        else if (!strcmp(argv[i],"-win64")) Option  =2;
+    for(i=1; i<argc; i++) {
+        if(!strcmp(argv[i],"-t")&&i+1<argc) {
+            Caption=argv[++i];
+        } else if(!strcmp(argv[i],"-tray")) {
+            tray    =1;
+        } else if(!strcmp(argv[i],"-min")) {
+            Minimize=1;
+        } else if(!strcmp(argv[i],"-mkl")) {
+            Option  =1;
+        } else if(!strcmp(argv[i],"-win64")) {
+            Option  =2;
+        }
     }
     UpdatePanel();
-    
-    if (tray) {
+
+    if(tray) {
         Application->ShowMainForm=false;
         TrayIcon->Visible=true;
     }
@@ -94,78 +102,98 @@ void __fastcall TMainForm::FormClose(TObject *Sender, TCloseAction &Action)
 void __fastcall TMainForm::BtnPlotClick(TObject *Sender)
 {
     UnicodeString cmd1="rtkplot",cmd2="..\\..\\..\\bin\\rtkplot",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnConvClick(TObject *Sender)
 {
     UnicodeString cmd1="rtkconv",cmd2="..\\..\\..\\bin\\rtkconv",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnStrClick(TObject *Sender)
 {
     UnicodeString cmd1="strsvr",cmd2="..\\..\\..\\bin\\strsvr",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnPostClick(TObject *Sender)
 {
     UnicodeString cmd1="rtkpost",cmd2="..\\..\\..\\bin\\rtkpost",opts="";
-    
-    if (Option==1) {
-        cmd1=cmd1+"_mkl"; cmd2=cmd2+"_mkl";
+
+    if(Option==1) {
+        cmd1=cmd1+"_mkl";
+        cmd2=cmd2+"_mkl";
+    } else if(Option==2) {
+        cmd1=cmd1+"_win64";
+        cmd2=cmd2+"_win64";
     }
-    else if (Option==2) {
-        cmd1=cmd1+"_win64"; cmd2=cmd2+"_win64";
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
     }
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnNtripClick(TObject *Sender)
 {
     UnicodeString cmd1="srctblbrows",cmd2="..\\..\\..\\bin\\srctblbrows",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnNaviClick(TObject *Sender)
 {
     UnicodeString cmd1="rtknavi",cmd2="..\\..\\..\\bin\\rtknavi",opts="";
-    
-    if (Option==1) {
-        cmd1=cmd1+"_mkl"; cmd2=cmd2+"_mkl";
+
+    if(Option==1) {
+        cmd1=cmd1+"_mkl";
+        cmd2=cmd2+"_mkl";
+    } else if(Option==2) {
+        cmd1=cmd1+"_win64";
+        cmd2=cmd2+"_win64";
     }
-    else if (Option==2) {
-        cmd1=cmd1+"_win64"; cmd2=cmd2+"_win64";
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
     }
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnGetClick(TObject *Sender)
 {
     UnicodeString cmd1="rtkget",cmd2="..\\..\\..\\bin\\rtkget",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnVideoClick(TObject *Sender)
 {
     UnicodeString cmd1="rtkvideo",cmd2="..\\..\\..\\bin\\rtkvideo",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 int __fastcall TMainForm::ExecCmd(AnsiString cmd)
 {
     PROCESS_INFORMATION info;
-    STARTUPINFO si={0};
+    STARTUPINFO si= {0};
     si.cb=sizeof(si);
     char *p=cmd.c_str();
-    if (!CreateProcess(NULL,p,NULL,NULL,false,0,NULL,NULL,&si,&info)) return 0;
+    if(!CreateProcess(NULL,p,NULL,NULL,false,0,NULL,NULL,&si,&info)) {
+        return 0;
+    }
     CloseHandle(info.hProcess);
     CloseHandle(info.hThread);
     return 1;
@@ -238,24 +266,26 @@ void __fastcall TMainForm::MenuExitClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::Panel1Resize(TObject *Sender)
 {
-    TSpeedButton *btn[]={
+    TSpeedButton *btn[]= {
         BtnPlot,BtnConv,BtnStr,BtnPost,BtnNtrip,BtnNavi,BtnGet,BtnVideo
     };
     int i,j,k,n,m,h;
-    
-    if (Minimize) return;
+
+    if(Minimize) {
+        return;
+    }
     n=MAX(1,Panel1->ClientWidth/BTN_SIZE);
     m=(BTN_COUNT-1)/n+1;
     h=BTN_SIZE*m+2;
     Panel1->Constraints->MinHeight=h;
     Panel1->Constraints->MaxHeight=h;
-    
-    for (i=k=0;k<BTN_COUNT;i++) for (j=0;j<n&&k<BTN_COUNT;j++,k++) {
-        btn[k]->Top =BTN_SIZE*i+1;
-        btn[k]->Left=BTN_SIZE*j+1;
-        btn[k]->Height=BTN_SIZE;
-        btn[k]->Width =BTN_SIZE;
-    }
+
+    for(i=k=0; k<BTN_COUNT; i++) for(j=0; j<n&&k<BTN_COUNT; j++,k++) {
+            btn[k]->Top =BTN_SIZE*i+1;
+            btn[k]->Left=BTN_SIZE*j+1;
+            btn[k]->Height=BTN_SIZE;
+            btn[k]->Width =BTN_SIZE;
+        }
     BtnTray->Left=Panel1->ClientWidth -BtnTray->Width;
     BtnTray->Top =Panel1->ClientHeight-BtnTray->Height;
     BtnOption->Left=Panel1->ClientWidth -BtnOption->Width;
@@ -264,13 +294,12 @@ void __fastcall TMainForm::Panel1Resize(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::UpdatePanel(void)
 {
-    if (Minimize) {
+    if(Minimize) {
         BorderStyle=bsToolWindow;
         Panel1->Visible=false;
         Panel2->Visible=true;
         AutoSize=true;
-    }
-    else {
+    } else {
         BorderStyle=bsSizeToolWin;
         Panel1->Visible=true;
         Panel2->Visible=false;
@@ -280,14 +309,16 @@ void __fastcall TMainForm::UpdatePanel(void)
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnOptionClick(TObject *Sender)
 {
-	if (LaunchOptDialog->ShowModal()!=mrOk) return;
+    if(LaunchOptDialog->ShowModal()!=mrOk) {
+        return;
+    }
     UpdatePanel();
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnRtklibMouseDown(TObject *Sender, TMouseButton Button,
-		  TShiftState Shift, int X, int Y)
+        TShiftState Shift, int X, int Y)
 {
-	PopupMenu->Popup(Left+X,Top+Y);
+    PopupMenu->Popup(Left+X,Top+Y);
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::BtnExitClick(TObject *Sender)

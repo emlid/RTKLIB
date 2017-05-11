@@ -50,7 +50,9 @@ SvrOptDialog::SvrOptDialog(QWidget *parent)
 //---------------------------------------------------------------------------
 void SvrOptDialog::showEvent(QShowEvent* event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     DataTimeout->setText(QString::number(SvrOpt[0]));
     ConnectInterval->setText(QString::number(SvrOpt[1]));
@@ -59,19 +61,18 @@ void SvrOptDialog::showEvent(QShowEvent* event)
     SvrCycle->setText(QString::number(SvrOpt[4]));
     NmeaCycle->setText(QString::number(SvrOpt[5]));
     FileSwapMarginE->setText(QString::number(FileSwapMargin));
-	if (norm(AntPos,3)>0.0) {
+    if(norm(AntPos,3)>0.0) {
         double pos[3];
 
         ecef2pos(AntPos,pos);
         AntPos1->setText(QString::number(pos[0]*R2D,'f',8));
         AntPos2->setText(QString::number(pos[1]*R2D,'f',8));
         AntPos3->setText(QString::number(pos[2],'f',3));
-	}
-	else {
+    } else {
         AntPos1->setText("0.00000000");
         AntPos2->setText("0.00000000");
         AntPos3->setText("0.000");
-	}
+    }
     TraceLevelS->setCurrentIndex(TraceLevel);
     NmeaReqT->setChecked(NmeaReq);
     LocalDir->setText(LocalDirectory);
@@ -83,13 +84,13 @@ void SvrOptDialog::showEvent(QShowEvent* event)
     AntOff1->setText(QString::number(AntOff[0],'f',4));
     AntOff2->setText(QString::number(AntOff[1],'f',4));
     AntOff3->setText(QString::number(AntOff[2],'f',4));
-	
-	UpdateEnable();
+
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void SvrOptDialog::BtnOkClick()
 {
-	double pos[3];
+    double pos[3];
     SvrOpt[0]=DataTimeout->text().toInt();
     SvrOpt[1]=ConnectInterval->text().toInt();
     SvrOpt[2]=AvePeriodRate->text().toInt();
@@ -100,12 +101,13 @@ void SvrOptDialog::BtnOkClick()
     pos[0]=AntPos1->text().toDouble()*D2R;
     pos[1]=AntPos2->text().toDouble()*D2R;
     pos[2]=AntPos3->text().toDouble();
-	if (norm(pos,3)>0.0) {
-		pos2ecef(pos,AntPos);
-	}
-	else {
-		for (int i=0;i<3;i++) AntPos[i]=0.0;
-	}
+    if(norm(pos,3)>0.0) {
+        pos2ecef(pos,AntPos);
+    } else {
+        for(int i=0; i<3; i++) {
+            AntPos[i]=0.0;
+        }
+    }
     TraceLevel=TraceLevelS->currentIndex();
     NmeaReq=NmeaReqT->isChecked();
     LocalDirectory=LocalDir->text();
@@ -133,7 +135,9 @@ void SvrOptDialog::BtnPosClick()
 
     refDialog->exec();
 
-    if (refDialog->result()!=QDialog::Accepted) return;
+    if(refDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     AntPos1->setText(QString::number(refDialog->Pos[0],'f',8));
     AntPos2->setText(QString::number(refDialog->Pos[1],'f',8));
@@ -167,11 +171,11 @@ void SvrOptDialog::UpdateEnable(void)
 //---------------------------------------------------------------------------
 void SvrOptDialog::NmeaReqTClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void SvrOptDialog::StaInfoSelClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------

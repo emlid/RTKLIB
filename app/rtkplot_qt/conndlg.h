@@ -40,8 +40,8 @@ private:
     void UpdateEnable(void);
 
 public:
-	int Stream1,Stream2,Format1,Format2,CmdEna1[2],CmdEna2[2];
-	int TimeForm,DegForm,TimeOutTime,ReConnTime;
+    int Stream1,Stream2,Format1,Format2,CmdEna1[2],CmdEna2[2];
+    int TimeForm,DegForm,TimeOutTime,ReConnTime;
     QString Path,Paths1[4],Paths2[4];
     QString TcpHistory[MAXHIST],TcpMntpHist[MAXHIST];
     QString Cmds1[2],Cmds2[2],FieldSep;

@@ -14,35 +14,35 @@
 class TGoogleMapView : public TForm
 {
 __published:
-	TPanel *Panel1;
-	TPanel *Panel2;
-	TCppWebBrowser *WebBrowser;
-	TPanel *Panel5;
-	TButton *BtnClose;
-	TTimer *Timer1;
-	TSpeedButton *BtnFixCent;
-	TSpeedButton *BtnExpand;
-	TSpeedButton *BtnShrink;
-	void __fastcall BtnCloseClick(TObject *Sender);
-	void __fastcall FormCreate(TObject *Sender);
-	void __fastcall Timer1Timer(TObject *Sender);
-	void __fastcall BtnShrinkClick(TObject *Sender);
-	void __fastcall BtnExpandClick(TObject *Sender);
-	void __fastcall BtnFixCentClick(TObject *Sender);
-	void __fastcall FormResize(TObject *Sender);
+    TPanel *Panel1;
+    TPanel *Panel2;
+    TCppWebBrowser *WebBrowser;
+    TPanel *Panel5;
+    TButton *BtnClose;
+    TTimer *Timer1;
+    TSpeedButton *BtnFixCent;
+    TSpeedButton *BtnExpand;
+    TSpeedButton *BtnShrink;
+    void __fastcall BtnCloseClick(TObject *Sender);
+    void __fastcall FormCreate(TObject *Sender);
+    void __fastcall Timer1Timer(TObject *Sender);
+    void __fastcall BtnShrinkClick(TObject *Sender);
+    void __fastcall BtnExpandClick(TObject *Sender);
+    void __fastcall BtnFixCentClick(TObject *Sender);
+    void __fastcall FormResize(TObject *Sender);
 
 
 private:
-	int State;
-	double Lat,Lon,Zoom;
-	double MarkPos[2][2];
-	
+    int State;
+    double Lat,Lon,Zoom;
+    double MarkPos[2][2];
+
     void __fastcall ExecFunc(AnsiString func);
 
 public:
-	int FixCent;
-	
-	__fastcall TGoogleMapView(TComponent* Owner);
+    int FixCent;
+
+    __fastcall TGoogleMapView(TComponent* Owner);
     int  __fastcall GetState(void);
     void __fastcall SetView(double lat, double lon, int zoom);
     void __fastcall SetCent(double lat, double lon);

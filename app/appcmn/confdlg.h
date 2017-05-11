@@ -10,13 +10,13 @@
 class TConfDialog : public TForm
 {
 __published:
-	TButton *BtnOverwrite;
-	TButton *BtnCancel;
-	TLabel *Label1;
-	TLabel *Label2;
+    TButton *BtnOverwrite;
+    TButton *BtnCancel;
+    TLabel *Label1;
+    TLabel *Label2;
 private:
 public:
-	__fastcall TConfDialog(TComponent* Owner);
+    __fastcall TConfDialog(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TConfDialog *ConfDialog;

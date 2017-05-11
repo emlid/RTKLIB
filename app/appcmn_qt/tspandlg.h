@@ -28,9 +28,9 @@ private:
     void UpdateEnable(void);
 
 public:
-	int TimeEna[3],TimeVal[3];
-	gtime_t TimeStart,TimeEnd;
-	double TimeInt;
+    int TimeEna[3],TimeVal[3];
+    gtime_t TimeStart,TimeEnd;
+    double TimeInt;
 
     explicit SpanDialog(QWidget* parent);
 };

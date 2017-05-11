@@ -17,7 +17,7 @@ class TimeDialog;
 //---------------------------------------------------------------------------
 class MainForm : public QWidget, public Ui::MainForm
 {
-     Q_OBJECT
+    Q_OBJECT
 
 protected:
     void  closeEvent(QCloseEvent *);
@@ -78,20 +78,20 @@ private:
     void  ReadHist(QSettings &, QString key, QComboBox *);
     void  WriteHist(QSettings &, QString key, QComboBox *);
     void  AddHist(QComboBox *combo);
-	
+
 public:
     QString IniFile;
     QString UrlFile;
     QString LogFile;
     QString Stations;
     QString ProxyAddr;
-	int HoldErr;
-	int HoldList;
-	int NCol;
-	int DateFormat;
-	int TraceLevel;
-	int LogAppend;
-	int TimerCnt;
+    int HoldErr;
+    int HoldList;
+    int NCol;
+    int DateFormat;
+    int TraceLevel;
+    int LogAppend;
+    int TimerCnt;
     QTimer Timer;
 
     explicit MainForm(QWidget* parent);

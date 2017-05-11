@@ -24,11 +24,11 @@ OptDialog::OptDialog(QWidget *parent)
 
     int nglo=MAXPRNGLO,ngal=MAXPRNGAL,nqzs=MAXPRNQZS,ncmp=MAXPRNCMP;
     int nirn=MAXPRNIRN;
-    
+
 #if 0
     QString label,s;
     Freq->Items->Clear();
-    for (int i=0;i<NFREQ;i++) {
+    for(int i=0; i<NFREQ; i++) {
         label=label+(i>0?"+":"L")+s.sprintf("%d",freq[i]);
         Freq->Items->Add(label);
     }
@@ -94,25 +94,37 @@ OptDialog::OptDialog(QWidget *parent)
     connect(BtnExtOpt,SIGNAL(clicked(bool)),this,SLOT(BtnExtOptClick()));
     connect(BtnMask,SIGNAL(clicked(bool)),this,SLOT(BtnMaskClick()));
 
-    if (nglo<=0) NavSys2->setEnabled(false);
-    if (ngal<=0) NavSys3->setEnabled(false);
-    if (nqzs<=0) NavSys4->setEnabled(false);
-    if (ncmp<=0) NavSys6->setEnabled(false);
-    if (nirn<=0) NavSys7->setEnabled(false);
+    if(nglo<=0) {
+        NavSys2->setEnabled(false);
+    }
+    if(ngal<=0) {
+        NavSys3->setEnabled(false);
+    }
+    if(nqzs<=0) {
+        NavSys4->setEnabled(false);
+    }
+    if(ncmp<=0) {
+        NavSys6->setEnabled(false);
+    }
+    if(nirn<=0) {
+        NavSys7->setEnabled(false);
+    }
 
-    UpdateEnable();        
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     GetOpt();
 }
 //---------------------------------------------------------------------------
 void OptDialog::BtnOkClick()
 {
-	SetOpt();
+    SetOpt();
 
     accept();
 }
@@ -127,13 +139,17 @@ void OptDialog::BtnSaveClick()
     QString file;
     file=QDir::toNativeSeparators(QFileDialog::getSaveFileName(this,tr("Save Options"),QString(),tr("Options File (*.conf);;All (*.*)")));
     QFileInfo f(file);
-    if (f.suffix()=="") file=file+".conf";
-	SaveOpt(file);
+    if(f.suffix()=="") {
+        file=file+".conf";
+    }
+    SaveOpt(file);
 }
 //---------------------------------------------------------------------------
 void OptDialog::BtnStaPosViewClick()
 {
-    if (StaPosFile->text()=="") return;
+    if(StaPosFile->text()=="") {
+        return;
+    }
     TextViewer *viewer=new TextViewer(this);
     viewer->show();
     viewer->Read(StaPosFile->text());
@@ -146,8 +162,8 @@ void OptDialog::BtnStaPosFileClick()
 //---------------------------------------------------------------------------
 void OptDialog::RovPosTypeChange()
 {
-    QLineEdit *edit[]={RovPos1,RovPos2,RovPos3};
-	double pos[3];
+    QLineEdit *edit[]= {RovPos1,RovPos2,RovPos3};
+    double pos[3];
 
     GetPos(RovPosTypeP,edit,pos);
     SetPos(RovPosType->currentIndex(),edit,pos);
@@ -158,8 +174,8 @@ void OptDialog::RovPosTypeChange()
 //---------------------------------------------------------------------------
 void OptDialog::RefPosTypeChange()
 {
-    QLineEdit *edit[]={RefPos1,RefPos2,RefPos3};
-	double pos[3];
+    QLineEdit *edit[]= {RefPos1,RefPos2,RefPos3};
+    double pos[3];
 
     GetPos(RefPosTypeP,edit,pos);
     SetPos(RefPosType->currentIndex(),edit,pos);
@@ -170,11 +186,11 @@ void OptDialog::RefPosTypeChange()
 //---------------------------------------------------------------------------
 void OptDialog::BtnRovPosClick()
 {
-    QLineEdit *edit[]={RovPos1,RovPos2,RovPos3};
-	double p[3],pos[3];
+    QLineEdit *edit[]= {RovPos1,RovPos2,RovPos3};
+    double p[3],pos[3];
 
     GetPos(RovPosType->currentIndex(),edit,p);
-	ecef2pos(p,pos);
+    ecef2pos(p,pos);
 
     RefDialog *refDialog=new RefDialog(this);
     refDialog->RovPos[0]=pos[0]*R2D;
@@ -182,10 +198,12 @@ void OptDialog::BtnRovPosClick()
     refDialog->Pos[2]=pos[2];
     refDialog->StaPosFile=StaPosFile->text();
     refDialog->move(this->pos().x()+width()/2-refDialog->width()/2,
-                this->pos().y()+height()/2-refDialog->height()/2);
+                    this->pos().y()+height()/2-refDialog->height()/2);
 
     refDialog->exec();
-    if (refDialog->result()!=QDialog::Accepted) return;
+    if(refDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     pos[0]=refDialog->Pos[0]*D2R;
     pos[1]=refDialog->Pos[1]*D2R;
@@ -199,11 +217,11 @@ void OptDialog::BtnRovPosClick()
 //---------------------------------------------------------------------------
 void OptDialog::BtnRefPosClick()
 {
-    QLineEdit *edit[]={RefPos1,RefPos2,RefPos3};
-	double p[3],pos[3];
+    QLineEdit *edit[]= {RefPos1,RefPos2,RefPos3};
+    double p[3],pos[3];
 
     GetPos(RefPosType->currentIndex(),edit,p);
-	ecef2pos(p,pos);
+    ecef2pos(p,pos);
 
     RefDialog *refDialog=new RefDialog(this);
     refDialog->RovPos[0]=pos[0]*R2D;
@@ -211,10 +229,12 @@ void OptDialog::BtnRefPosClick()
     refDialog->RovPos[2]=pos[2];
     refDialog->StaPosFile=StaPosFile->text();
     refDialog->move(this->pos().x()+width()/2-refDialog->width()/2,
-                this->pos().y()+height()/2-refDialog->height()/2);
+                    this->pos().y()+height()/2-refDialog->height()/2);
 
     refDialog->exec();
-    if (refDialog->result()!=QDialog::Accepted) return;
+    if(refDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     pos[0]=refDialog->Pos[0]*D2R;
     pos[1]=refDialog->Pos[1]*D2R;
@@ -228,7 +248,9 @@ void OptDialog::BtnRefPosClick()
 //---------------------------------------------------------------------------
 void OptDialog::BtnSatPcvViewClick()
 {
-    if (SatPcvFile->text()=="") return;
+    if(SatPcvFile->text()=="") {
+        return;
+    }
 
     TextViewer *viewer=new TextViewer(this);
     viewer->show();
@@ -242,7 +264,9 @@ void OptDialog::BtnSatPcvFileClick()
 //---------------------------------------------------------------------------
 void OptDialog::BtnAntPcvViewClick()
 {
-    if (AntPcvFile->text()=="") return;
+    if(AntPcvFile->text()=="") {
+        return;
+    }
 
     TextViewer *viewer=new TextViewer(this);
     viewer->show();
@@ -268,11 +292,13 @@ void OptDialog::BtnDCBFileClick()
 void OptDialog::BtnDCBViewClick()
 {
     QString DCBFile_Text=DCBFile->text();
-    if (DCBFile->text()=="") return;
+    if(DCBFile->text()=="") {
+        return;
+    }
 
     TextViewer *viewer=new TextViewer(this);
     viewer->show();
-	viewer->Read(DCBFile_Text);
+    viewer->Read(DCBFile_Text);
 }
 //---------------------------------------------------------------------------
 void OptDialog::BtnEOPFileClick()
@@ -283,11 +309,13 @@ void OptDialog::BtnEOPFileClick()
 void OptDialog::BtnEOPViewClick()
 {
     QString EOPFile_Text=EOPFile->text();
-    if (EOPFile->text()=="") return;
+    if(EOPFile->text()=="") {
+        return;
+    }
 
     TextViewer *viewer=new TextViewer(this);
     viewer->show();
-	viewer->Read(EOPFile_Text);
+    viewer->Read(EOPFile_Text);
 }
 //---------------------------------------------------------------------------
 void OptDialog::BtnBLQFileClick()
@@ -298,11 +326,13 @@ void OptDialog::BtnBLQFileClick()
 void OptDialog::BtnBLQFileViewClick()
 {
     QString BLQFile_Text=BLQFile->text();
-    if (BLQFile->text()=="") return;
+    if(BLQFile->text()=="") {
+        return;
+    }
 
     TextViewer *viewer=new TextViewer(this);
     viewer->show();
-	viewer->Read(BLQFile_Text);
+    viewer->Read(BLQFile_Text);
 }
 //---------------------------------------------------------------------------
 void OptDialog::BtnIonoFileClick()
@@ -312,108 +342,108 @@ void OptDialog::BtnIonoFileClick()
 //---------------------------------------------------------------------------
 void OptDialog::FreqChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::IonoOptChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::TropOptChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::DynamicModelChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::SatEphemChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::SolFormatChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::PosModeChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::SatEphemClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::NavSys2Click()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::AmbResChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::RovAntPcvClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::NetRSCorrClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::SatClkCorrClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::RovPosClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::RefPosClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::SbasCorrClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::OutputHeightClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::BaselineConstClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::RovAntClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::RefAntClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::GetOpt(void)
 {
-    QLineEdit *editu[]={RovPos1,RovPos2,RovPos3};
-    QLineEdit *editr[]={RefPos1,RefPos2,RefPos3};
+    QLineEdit *editu[]= {RovPos1,RovPos2,RovPos3};
+    QLineEdit *editr[]= {RefPos1,RefPos2,RefPos3};
 
     PosMode		 ->setCurrentIndex(mainForm->PosMode);
     Freq		 ->setCurrentIndex(mainForm->Freq);
@@ -440,7 +470,7 @@ void OptDialog::GetOpt(void)
     PosOpt5	     ->setChecked(mainForm->PosOpt[4]);
     PosOpt6	     ->setChecked(mainForm->PosOpt[5]);
 //	MapFunc	     ->setCurrentIndex(mainForm->MapFunc);
-	
+
     AmbRes		 ->setCurrentIndex(mainForm->AmbRes);
     GloAmbRes	 ->setCurrentIndex(mainForm->GloAmbRes);
     BdsAmbRes	 ->setCurrentIndex(mainForm->BdsAmbRes);
@@ -461,7 +491,7 @@ void OptDialog::GetOpt(void)
     BaselineLen	 ->setText(QString::number(mainForm->BaseLine[0],'f',3));
     BaselineSig	 ->setText(QString::number(mainForm->BaseLine[1],'f',3));
     BaselineConst->setChecked(mainForm->BaseLineConst);
-	
+
     SolFormat	 ->setCurrentIndex(mainForm->SolFormat);
     TimeFormat	 ->setCurrentIndex(mainForm->TimeFormat);
     TimeDecimal	 ->setText(QString::number(mainForm->TimeDecimal));
@@ -475,7 +505,7 @@ void OptDialog::GetOpt(void)
     SolStatic    ->setCurrentIndex(mainForm->SolStatic);
     DebugTrace	 ->setCurrentIndex(mainForm->DebugTrace);
     DebugStatus	 ->setCurrentIndex(mainForm->DebugStatus);
-	
+
     MeasErrR1	 ->setText(QString::number(mainForm->MeasErrR1,'f',1));
     MeasErrR2	 ->setText(QString::number(mainForm->MeasErrR2,'f',1));
     MeasErr2	 ->setText(QString::number(mainForm->MeasErr2,'f',3));
@@ -488,7 +518,7 @@ void OptDialog::GetOpt(void)
     PrNoise3	 ->setText(QString::number(mainForm->PrNoise3,'E',2));
     PrNoise4	 ->setText(QString::number(mainForm->PrNoise4,'E',2));
     PrNoise5	 ->setText(QString::number(mainForm->PrNoise5,'E',2));
-	
+
     RovAntPcv	 ->setChecked(mainForm->RovAntPcv);
     RefAntPcv	 ->setChecked(mainForm->RefAntPcv);
     RovAntE		 ->setText(QString::number(mainForm->RovAntE,'f',4));
@@ -498,11 +528,11 @@ void OptDialog::GetOpt(void)
     RefAntN		 ->setText(QString::number(mainForm->RefAntN,'f',4));
     RefAntU		 ->setText(QString::number(mainForm->RefAntU,'f',4));
     AntPcvFile	 ->setText(mainForm->AntPcvFile);
-	
+
     RnxOpts1	 ->setText(mainForm->RnxOpts1);
     RnxOpts2	 ->setText(mainForm->RnxOpts2);
     PPPOpts		 ->setText(mainForm->PPPOpts);
-	
+
     IntpRefObs	 ->setCurrentIndex(mainForm->IntpRefObs);
     SbasSat		 ->setText(QString::number(mainForm->SbasSat));
     SatPcvFile   ->setText(mainForm->SatPcvFile);
@@ -518,24 +548,24 @@ void OptDialog::GetOpt(void)
     RefPosTypeP					=RefPosType->currentIndex();
     SetPos(RovPosType->currentIndex(),editu,mainForm->RovPos);
     SetPos(RefPosType->currentIndex(),editr,mainForm->RefPos);
-	ReadAntList();
-	
+    ReadAntList();
+
     RovAnt		 ->setCurrentText(mainForm->RovAnt);
     RefAnt		 ->setCurrentText(mainForm->RefAnt);
 
     RovList		 ->setPlainText(mainForm->RovList);
     BaseList	 ->setPlainText(mainForm->BaseList);
-	
+
     ExtErr						=mainForm->ExtErr;
-	
-	UpdateEnable();
+
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::SetOpt(void)
 {
-    QLineEdit *editu[]={RovPos1,RovPos2,RovPos3};
-    QLineEdit *editr[]={RefPos1,RefPos2,RefPos3};
-	
+    QLineEdit *editu[]= {RovPos1,RovPos2,RovPos3};
+    QLineEdit *editr[]= {RefPos1,RefPos2,RefPos3};
+
     mainForm->PosMode		=PosMode	->currentIndex();
     mainForm->Freq			=Freq		->currentIndex();
     mainForm->Solution		=Solution   ->currentIndex();
@@ -548,13 +578,27 @@ void OptDialog::SetOpt(void)
     mainForm->SatEphem	  	=SatEphem	->currentIndex();
     mainForm->ExSats	  	=ExSats		->text();
     mainForm->NavSys	  	=0;
-    if (NavSys1->isChecked()) mainForm->NavSys|=SYS_GPS;
-    if (NavSys2->isChecked()) mainForm->NavSys|=SYS_GLO;
-    if (NavSys3->isChecked()) mainForm->NavSys|=SYS_GAL;
-    if (NavSys4->isChecked()) mainForm->NavSys|=SYS_QZS;
-    if (NavSys5->isChecked()) mainForm->NavSys|=SYS_SBS;
-    if (NavSys6->isChecked()) mainForm->NavSys|=SYS_CMP;
-    if (NavSys7->isChecked()) mainForm->NavSys|=SYS_IRN;
+    if(NavSys1->isChecked()) {
+        mainForm->NavSys|=SYS_GPS;
+    }
+    if(NavSys2->isChecked()) {
+        mainForm->NavSys|=SYS_GLO;
+    }
+    if(NavSys3->isChecked()) {
+        mainForm->NavSys|=SYS_GAL;
+    }
+    if(NavSys4->isChecked()) {
+        mainForm->NavSys|=SYS_QZS;
+    }
+    if(NavSys5->isChecked()) {
+        mainForm->NavSys|=SYS_SBS;
+    }
+    if(NavSys6->isChecked()) {
+        mainForm->NavSys|=SYS_CMP;
+    }
+    if(NavSys7->isChecked()) {
+        mainForm->NavSys|=SYS_IRN;
+    }
     mainForm->PosOpt[0]	  	=PosOpt1	->isChecked();
     mainForm->PosOpt[1]	  	=PosOpt2	->isChecked();
     mainForm->PosOpt[2]	  	=PosOpt3	->isChecked();
@@ -562,7 +606,7 @@ void OptDialog::SetOpt(void)
     mainForm->PosOpt[4]	  	=PosOpt5	->isChecked();
     mainForm->PosOpt[5]	  	=PosOpt6	->isChecked();
 //	mainForm->MapFunc		=MapFunc	->ItemIndex;
-	
+
     mainForm->AmbRes	  	=AmbRes		->currentIndex();
     mainForm->GloAmbRes	  	=GloAmbRes	->currentIndex();
     mainForm->BdsAmbRes	  	=BdsAmbRes	->currentIndex();
@@ -584,7 +628,7 @@ void OptDialog::SetOpt(void)
     mainForm->BaseLine[0]  	=BaselineLen->text().toDouble();
     mainForm->BaseLine[1]  	=BaselineSig->text().toDouble();
     mainForm->BaseLineConst	=BaselineConst->isChecked();
-	
+
     mainForm->SolFormat   	=SolFormat  ->currentIndex();
     mainForm->TimeFormat  	=TimeFormat ->currentIndex();
     mainForm->TimeDecimal  	=TimeDecimal->text().toDouble();
@@ -598,7 +642,7 @@ void OptDialog::SetOpt(void)
     mainForm->SolStatic	 	=SolStatic  ->currentIndex();
     mainForm->DebugTrace  	=DebugTrace ->currentIndex();
     mainForm->DebugStatus  	=DebugStatus->currentIndex();
-	
+
     mainForm->MeasErrR1	  =MeasErrR1  ->text().toDouble();
     mainForm->MeasErrR2	  =MeasErrR2  ->text().toDouble();
     mainForm->MeasErr2	  =MeasErr2   ->text().toDouble();
@@ -611,7 +655,7 @@ void OptDialog::SetOpt(void)
     mainForm->PrNoise3	  =PrNoise3   ->text().toDouble();
     mainForm->PrNoise4	  =PrNoise4   ->text().toDouble();
     mainForm->PrNoise5	  =PrNoise5   ->text().toDouble();
-	
+
     mainForm->RovAntPcv   =RovAntPcv	->isChecked();
     mainForm->RefAntPcv   =RefAntPcv	->isChecked();
     mainForm->RovAnt	  =RovAnt		->currentText();
@@ -622,11 +666,11 @@ void OptDialog::SetOpt(void)
     mainForm->RefAntE	  =RefAntE	->text().toDouble();
     mainForm->RefAntN	  =RefAntN	->text().toDouble();
     mainForm->RefAntU	  =RefAntU	->text().toDouble();
-	
+
     mainForm->RnxOpts1	  =RnxOpts1		->text();
     mainForm->RnxOpts2	  =RnxOpts2		->text();
     mainForm->PPPOpts	  =PPPOpts		->text();
-	
+
     mainForm->IntpRefObs  =IntpRefObs	->currentIndex();
     mainForm->SbasSat     =SbasSat		->text().toInt();
     mainForm->AntPcvFile  =AntPcvFile	->text();
@@ -641,48 +685,52 @@ void OptDialog::SetOpt(void)
     mainForm->RefPosType  =RefPosType	->currentIndex();
     GetPos(RovPosType->currentIndex(),editu,mainForm->RovPos);
     GetPos(RefPosType->currentIndex(),editr,mainForm->RefPos);
-	
+
     mainForm->RovList	  =RovList		->toPlainText();
     mainForm->BaseList	  =BaseList		->toPlainText();
-	
+
     mainForm->ExtErr	  =ExtErr;
-	
-	UpdateEnable();
+
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::LoadOpt(const QString &file)
 {
-    QLineEdit *editu[]={RovPos1,RovPos2,RovPos3};
-    QLineEdit *editr[]={RefPos1,RefPos2,RefPos3};
+    QLineEdit *editu[]= {RovPos1,RovPos2,RovPos3};
+    QLineEdit *editr[]= {RefPos1,RefPos2,RefPos3};
     QString buff;
     char id[32];
-	int sat;
-	prcopt_t prcopt=prcopt_default;
-	solopt_t solopt=solopt_default;
+    int sat;
+    prcopt_t prcopt=prcopt_default;
+    solopt_t solopt=solopt_default;
     filopt_t filopt;
-	
+
     memset(&filopt,0,sizeof(filopt_t));
 
-	resetsysopts();
-    if (!loadopts(qPrintable(file),sysopts)) return;
-	getsysopts(&prcopt,&solopt,&filopt);
-	
+    resetsysopts();
+    if(!loadopts(qPrintable(file),sysopts)) {
+        return;
+    }
+    getsysopts(&prcopt,&solopt,&filopt);
+
     PosMode		 ->setCurrentIndex(prcopt.mode);
     Freq		 ->setCurrentIndex(prcopt.nf>NFREQ-1?NFREQ-1:prcopt.nf-1);
     Solution	 ->setCurrentIndex(prcopt.soltype);
     ElMask		 ->setCurrentText(QString::number(prcopt.elmin*R2D,'f',0));
-	SnrMask						=prcopt.snrmask;
+    SnrMask						=prcopt.snrmask;
     DynamicModel ->setCurrentIndex(prcopt.dynamics);
     TideCorr	 ->setCurrentIndex(prcopt.tidecorr);
     IonoOpt		 ->setCurrentIndex(prcopt.ionoopt);
     TropOpt		 ->setCurrentIndex(prcopt.tropopt);
     SatEphem	 ->setCurrentIndex(prcopt.sateph);
     ExSats	     ->setText("");
-    for (sat=1;sat<=MAXSAT;sat++) {
-		if (!prcopt.exsats[sat-1]) continue;
-		satno2id(sat,id);
+    for(sat=1; sat<=MAXSAT; sat++) {
+        if(!prcopt.exsats[sat-1]) {
+            continue;
+        }
+        satno2id(sat,id);
         buff+=QString("%1%2%3").arg(buff.isEmpty()?"":" ").arg(prcopt.exsats[sat-1]==2?"+":"").arg(id);
-	}
+    }
     ExSats		 ->setText(buff);
     NavSys1	     ->setChecked(prcopt.navsys&SYS_GPS);
     NavSys2	     ->setChecked(prcopt.navsys&SYS_GLO);
@@ -697,7 +745,7 @@ void OptDialog::LoadOpt(const QString &file)
     PosOpt5	     ->setChecked(prcopt.posopt[4]);
     PosOpt6	     ->setChecked(prcopt.posopt[5]);
 //	MapFunc	     ->ItemIndex	=prcopt.mapfunc;
-	
+
     AmbRes		 ->setCurrentIndex(prcopt.modear);
     GloAmbRes	 ->setCurrentIndex(prcopt.glomodear);
     BdsAmbRes	 ->setCurrentIndex(prcopt.bdsmodear);
@@ -718,7 +766,7 @@ void OptDialog::LoadOpt(const QString &file)
     BaselineLen	 ->setText(QString::number(prcopt.baseline[0],'f',3));
     BaselineSig	 ->setText(QString::number(prcopt.baseline[1],'f',3));
     BaselineConst->setChecked(prcopt.baseline[0]>0.0);
-	
+
     SolFormat	 ->setCurrentIndex(solopt.posf);
     TimeFormat	 ->setCurrentIndex(solopt.timef==0?0:solopt.times+1);
     TimeDecimal	 ->setText(QString::number(solopt.timeu));
@@ -734,7 +782,7 @@ void OptDialog::LoadOpt(const QString &file)
     NmeaIntv2	 ->setText(QString::number(solopt.nmeaintv[1],'g',2));
     DebugTrace	 ->setCurrentIndex(solopt.trace);
     DebugStatus	 ->setCurrentIndex(solopt.sstat);
-	
+
     MeasErrR1	 ->setText(QString::number(prcopt.eratio[0],'f',1));
     MeasErrR2	 ->setText(QString::number(prcopt.eratio[1],'f',1));
     MeasErr2	 ->setText(QString::number(prcopt.err[1],'f',3));
@@ -747,7 +795,7 @@ void OptDialog::LoadOpt(const QString &file)
     PrNoise3	 ->setText(QString::number(prcopt.prn[2],'E',2));
     PrNoise4	 ->setText(QString::number(prcopt.prn[3],'E',2));
     PrNoise5	 ->setText(QString::number(prcopt.prn[4],'E',2));
-	
+
     RovAntPcv	 ->setChecked(*prcopt.anttype[0]);
     RefAntPcv	 ->setChecked(*prcopt.anttype[1]);
     RovAnt		 ->setCurrentText(prcopt.anttype[0]);
@@ -758,11 +806,11 @@ void OptDialog::LoadOpt(const QString &file)
     RefAntE		 ->setText(QString::number(prcopt.antdel[1][0],'f',4));
     RefAntN		 ->setText(QString::number(prcopt.antdel[1][1],'f',4));
     RefAntU		 ->setText(QString::number(prcopt.antdel[1][2],'f',4));
-	
+
     RnxOpts1	 ->setText(prcopt.rnxopt[0]);
     RnxOpts2	 ->setText(prcopt.rnxopt[1]);
     PPPOpts		 ->setText(prcopt.pppopt);
-	
+
     IntpRefObs	 ->setCurrentIndex(prcopt.intpref);
     SbasSat		 ->setText(QString::number(prcopt.sbassatsel));
     RovPosType	 ->setCurrentIndex(prcopt.rovpos==0?0:prcopt.rovpos+2);
@@ -771,7 +819,7 @@ void OptDialog::LoadOpt(const QString &file)
     RefPosTypeP					=RefPosType->currentIndex();
     SetPos(RovPosType->currentIndex(),editu,prcopt.ru);
     SetPos(RefPosType->currentIndex(),editr,prcopt.rb);
-	
+
     SatPcvFile ->setText(filopt.satantp);
     AntPcvFile ->setText(filopt.rcvantp);
     StaPosFile ->setText(filopt.stapos);
@@ -780,9 +828,9 @@ void OptDialog::LoadOpt(const QString &file)
     DCBFile	   ->setText(filopt.dcb);
     BLQFile	   ->setText(filopt.blq);
     IonoFile   ->setText(filopt.iono);
-	
-	ReadAntList();
-	UpdateEnable();
+
+    ReadAntList();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::SaveOpt(const QString &file)
@@ -800,34 +848,41 @@ void OptDialog::SaveOpt(const QString &file)
     QString RnxOpts1_Text=RnxOpts1->text();
     QString RnxOpts2_Text=RnxOpts2->text();
     QString PPPOpts_Text=PPPOpts->text();
-    QLineEdit *editu[]={RovPos1,RovPos2,RovPos3};
-    QLineEdit *editr[]={RefPos1,RefPos2,RefPos3};
+    QLineEdit *editu[]= {RovPos1,RovPos2,RovPos3};
+    QLineEdit *editr[]= {RefPos1,RefPos2,RefPos3};
     char buff[1024],*p,comment[256],s[64];
-	int sat,ex;
-	prcopt_t prcopt=prcopt_default;
-	solopt_t solopt=solopt_default;
+    int sat,ex;
+    prcopt_t prcopt=prcopt_default;
+    solopt_t solopt=solopt_default;
     filopt_t filopt;
-	
+
     memset(&filopt,0,sizeof(filopt_t));
 
     prcopt.mode		=PosMode	 ->currentIndex();
     prcopt.nf		=Freq		 ->currentIndex()+1;
     prcopt.soltype	=Solution	 ->currentIndex();
     prcopt.elmin	=ElMask	->currentText().toDouble()*D2R;
-	prcopt.snrmask	=SnrMask;
+    prcopt.snrmask	=SnrMask;
     prcopt.dynamics	=DynamicModel->currentIndex();
     prcopt.tidecorr	=TideCorr	 ->currentIndex();
     prcopt.ionoopt	=IonoOpt	 ->currentIndex();
     prcopt.tropopt	=TropOpt	 ->currentIndex();
     prcopt.sateph	=SatEphem	 ->currentIndex();
-    if (ExSats->text()!="") {
+    if(ExSats->text()!="") {
         strcpy(buff,qPrintable(ExSats_Text));
-		for (p=strtok(buff," ");p;p=strtok(NULL," ")) {
-			if (*p=='+') {ex=2; p++;} else ex=1;
-			if (!(sat=satid2no(p))) continue;
-			prcopt.exsats[sat-1]=ex;
-		}
-	}
+        for(p=strtok(buff," "); p; p=strtok(NULL," ")) {
+            if(*p=='+') {
+                ex=2;
+                p++;
+            } else {
+                ex=1;
+            }
+            if(!(sat=satid2no(p))) {
+                continue;
+            }
+            prcopt.exsats[sat-1]=ex;
+        }
+    }
     prcopt.navsys	= (NavSys1->isChecked()?SYS_GPS:0)|
                       (NavSys2->isChecked()?SYS_GLO:0)|
                       (NavSys3->isChecked()?SYS_GAL:0)|
@@ -841,7 +896,7 @@ void OptDialog::SaveOpt(const QString &file)
     prcopt.posopt[4]=PosOpt5	->isChecked();
     prcopt.posopt[5]=PosOpt6	->isChecked();
 //	prcopt.mapfunc	=MapFunc	->ItemIndex;
-	
+
     prcopt.modear	=AmbRes		->currentIndex();
     prcopt.glomodear=GloAmbRes	->currentIndex();
     prcopt.bdsmodear=BdsAmbRes	->currentIndex();
@@ -859,10 +914,10 @@ void OptDialog::SaveOpt(const QString &file)
     prcopt.thresslip=SlipThres	->text().toDouble();
     prcopt.armaxiter=ARIter		->text().toDouble();
     prcopt.niter	=NumIter	->text().toDouble();
-    if (prcopt.mode==PMODE_MOVEB&&BaselineConst->isChecked()) {
+    if(prcopt.mode==PMODE_MOVEB&&BaselineConst->isChecked()) {
         prcopt.baseline[0]=BaselineLen->text().toDouble();
         prcopt.baseline[1]=BaselineSig->text().toDouble();
-	}
+    }
     solopt.posf		=SolFormat	->currentIndex();
     solopt.timef	=TimeFormat	->currentIndex()==0?0:1;
     solopt.times	=TimeFormat	->currentIndex()==0?0:TimeFormat->currentIndex()-1;
@@ -879,7 +934,7 @@ void OptDialog::SaveOpt(const QString &file)
     solopt.nmeaintv[1]=NmeaIntv2->text().toDouble();
     solopt.trace	=DebugTrace	 ->currentIndex();
     solopt.sstat	=DebugStatus ->currentIndex();
-	
+
     prcopt.eratio[0]=MeasErrR1->text().toDouble();
     prcopt.eratio[1]=MeasErrR2->text().toDouble();
     prcopt.err[1]	=MeasErr2->text().toDouble();
@@ -892,27 +947,35 @@ void OptDialog::SaveOpt(const QString &file)
     prcopt.prn[2]	=PrNoise3->text().toDouble();
     prcopt.prn[3]	=PrNoise4->text().toDouble();
     prcopt.prn[4]	=PrNoise5->text().toDouble();
-	
-    if (RovAntPcv->isChecked()) strcpy(prcopt.anttype[0],qPrintable(RovAnt_Text));
-    if (RefAntPcv->isChecked()) strcpy(prcopt.anttype[1],qPrintable(RefAnt_Text));
+
+    if(RovAntPcv->isChecked()) {
+        strcpy(prcopt.anttype[0],qPrintable(RovAnt_Text));
+    }
+    if(RefAntPcv->isChecked()) {
+        strcpy(prcopt.anttype[1],qPrintable(RefAnt_Text));
+    }
     prcopt.antdel[0][0]=RovAntE->text().toDouble();
     prcopt.antdel[0][1]=RovAntN->text().toDouble();
     prcopt.antdel[0][2]=RovAntU->text().toDouble();
     prcopt.antdel[1][0]=RefAntE->text().toDouble();
     prcopt.antdel[1][1]=RefAntN->text().toDouble();
     prcopt.antdel[1][2]=RefAntU->text().toDouble();
-	
+
     prcopt.intpref	=IntpRefObs->currentIndex();
     prcopt.sbassatsel=SbasSat->text().toInt();
     prcopt.rovpos=RovPosType->currentIndex()<3?0:RovPosType->currentIndex()-2;
     prcopt.refpos=RefPosType->currentIndex()<3?0:RefPosType->currentIndex()-2;
-    if (prcopt.rovpos==0) GetPos(RovPosType->currentIndex(),editu,prcopt.ru);
-    if (prcopt.refpos==0) GetPos(RefPosType->currentIndex(),editr,prcopt.rb);
-	
+    if(prcopt.rovpos==0) {
+        GetPos(RovPosType->currentIndex(),editu,prcopt.ru);
+    }
+    if(prcopt.refpos==0) {
+        GetPos(RefPosType->currentIndex(),editr,prcopt.rb);
+    }
+
     strcpy(prcopt.rnxopt[0],qPrintable(RnxOpts1_Text));
     strcpy(prcopt.rnxopt[1],qPrintable(RnxOpts2_Text));
     strcpy(prcopt.pppopt,qPrintable(PPPOpts_Text));
-	
+
     strcpy(filopt.satantp,qPrintable(SatPcvFile_Text));
     strcpy(filopt.rcvantp,qPrintable(AntPcvFile_Text));
     strcpy(filopt.stapos, qPrintable(StaPosFile_Text));
@@ -921,11 +984,13 @@ void OptDialog::SaveOpt(const QString &file)
     strcpy(filopt.dcb,    qPrintable(DCBFile_Text));
     strcpy(filopt.blq,    qPrintable(BLQFile_Text));
     strcpy(filopt.iono,   qPrintable(IonoFile_Text));
-	
-	time2str(utc2gpst(timeget()),s,0);
+
+    time2str(utc2gpst(timeget()),s,0);
     sprintf(comment,"rtkpost_qt options (%s, v.%s %s)",s,VER_RTKLIB,PATCH_LEVEL);
-	setsysopts(&prcopt,&solopt,&filopt);
-    if (!saveopts(qPrintable(file),"w",comment,sysopts)) return;
+    setsysopts(&prcopt,&solopt,&filopt);
+    if(!saveopts(qPrintable(file),"w",comment,sysopts)) {
+        return;
+    }
 }
 //---------------------------------------------------------------------------
 void OptDialog::UpdateEnable(void)
@@ -934,7 +999,7 @@ void OptDialog::UpdateEnable(void)
     bool rtk=PMODE_KINEMA<=PosMode->currentIndex()&&PosMode->currentIndex()<=PMODE_FIXED;
     bool ppp=PosMode->currentIndex()>=PMODE_PPP_KINEMA;
     bool ar=rtk||ppp;
-	
+
     Freq           ->setEnabled(rel||ppp);
     Solution       ->setEnabled(rel||ppp);
     DynamicModel   ->setEnabled(rel);
@@ -945,7 +1010,7 @@ void OptDialog::UpdateEnable(void)
     PosOpt3        ->setEnabled(ppp);
     PosOpt4        ->setEnabled(ppp);
     PosOpt6        ->setEnabled(ppp);
-	
+
     AmbRes         ->setEnabled(ar);
     GloAmbRes      ->setEnabled(ar&&AmbRes->currentIndex()>0&&NavSys2->isChecked());
     BdsAmbRes      ->setEnabled(ar&&AmbRes->currentIndex()>0&&NavSys6->isChecked());
@@ -965,7 +1030,7 @@ void OptDialog::UpdateEnable(void)
     BaselineConst  ->setEnabled(PosMode->currentIndex()==PMODE_MOVEB);
     BaselineLen    ->setEnabled(BaselineConst->isChecked()&&PosMode->currentIndex()==PMODE_MOVEB);
     BaselineSig    ->setEnabled(BaselineConst->isChecked()&&PosMode->currentIndex()==PMODE_MOVEB);
-	
+
     OutputHead     ->setEnabled(SolFormat->currentIndex()<3);
     OutputOpt      ->setEnabled(SolFormat->currentIndex()<3);
     TimeFormat     ->setEnabled(SolFormat->currentIndex()<3);
@@ -976,8 +1041,8 @@ void OptDialog::UpdateEnable(void)
     OutputHeight   ->setEnabled(SolFormat->currentIndex()==0);
     OutputGeoid    ->setEnabled(SolFormat->currentIndex()==0&&OutputHeight->currentIndex()==1);
     SolStatic      ->setEnabled(PosMode->currentIndex()==PMODE_STATIC||
-                             PosMode->currentIndex()==PMODE_PPP_STATIC);
-	
+                                PosMode->currentIndex()==PMODE_PPP_STATIC);
+
     RovAntPcv      ->setEnabled(rel||ppp);
     RovAnt         ->setEnabled((rel||ppp)&&RovAntPcv->isChecked());
     RovAntE        ->setEnabled((rel||ppp)&&RovAntPcv->isChecked());
@@ -990,13 +1055,13 @@ void OptDialog::UpdateEnable(void)
     RefAntN        ->setEnabled(rel&&RefAntPcv->isChecked());
     RefAntU        ->setEnabled(rel&&RefAntPcv->isChecked());
     LabelRefAntD   ->setEnabled(rel&&RefAntPcv->isChecked());
-	
+
     RovPosType     ->setEnabled(PosMode->currentIndex()==PMODE_FIXED||PosMode->currentIndex()==PMODE_PPP_FIXED);
     RovPos1        ->setEnabled(RovPosType->isEnabled()&&RovPosType->currentIndex()<=2);
     RovPos2        ->setEnabled(RovPosType->isEnabled()&&RovPosType->currentIndex()<=2);
     RovPos3        ->setEnabled(RovPosType->isEnabled()&&RovPosType->currentIndex()<=2);
     BtnRovPos      ->setEnabled(RovPosType->isEnabled()&&RovPosType->currentIndex()<=2);
-	
+
     RefPosType     ->setEnabled(rel&&PosMode->currentIndex()!=PMODE_MOVEB);
     RefPos1        ->setEnabled(RefPosType->isEnabled()&&RefPosType->currentIndex()<=2);
     RefPos2        ->setEnabled(RefPosType->isEnabled()&&RefPosType->currentIndex()<=2);
@@ -1008,84 +1073,101 @@ void OptDialog::GetPos(int type, QLineEdit **edit, double *pos)
 {
     QString edit0_Text=edit[0]->text();
     QString edit1_Text=edit[1]->text();
-	double p[3]={0},dms1[3]={0},dms2[3]={0};
-	
-	if (type==1) { /* lat/lon/height dms/m */
+    double p[3]= {0},dms1[3]= {0},dms2[3]= {0};
+
+    if(type==1) {  /* lat/lon/height dms/m */
         QStringList tokens=edit0_Text.split(' ');
-        if (tokens.size()==3)
-            for (int i=0;i<3;i++) dms1[i]=tokens.at(i).toDouble();
+        if(tokens.size()==3)
+            for(int i=0; i<3; i++) {
+                dms1[i]=tokens.at(i).toDouble();
+            }
         tokens=edit1_Text.split(' ');
-        if (tokens.size()==3)
-            for (int i=0;i<3;i++) dms2[i]=tokens.at(i).toDouble();
-		p[0]=(dms1[0]<0?-1:1)*(fabs(dms1[0])+dms1[1]/60+dms1[2]/3600)*D2R;
-		p[1]=(dms2[0]<0?-1:1)*(fabs(dms2[0])+dms2[1]/60+dms2[2]/3600)*D2R;
+        if(tokens.size()==3)
+            for(int i=0; i<3; i++) {
+                dms2[i]=tokens.at(i).toDouble();
+            }
+        p[0]=(dms1[0]<0?-1:1)*(fabs(dms1[0])+dms1[1]/60+dms1[2]/3600)*D2R;
+        p[1]=(dms2[0]<0?-1:1)*(fabs(dms2[0])+dms2[1]/60+dms2[2]/3600)*D2R;
         p[2]=edit[2]->text().toDouble();
-		pos2ecef(p,pos);
-	}
-	else if (type==2) { /* x/y/z-ecef */
+        pos2ecef(p,pos);
+    } else if(type==2) { /* x/y/z-ecef */
         pos[0]=edit[0]->text().toDouble();
         pos[1]=edit[1]->text().toDouble();
         pos[2]=edit[2]->text().toDouble();
-	}
-	else {
+    } else {
         p[0]=edit[0]->text().toDouble()*D2R;
         p[1]=edit[1]->text().toDouble()*D2R;
         p[2]=edit[2]->text().toDouble();
-		pos2ecef(p,pos);
-	}
+        pos2ecef(p,pos);
+    }
 }
 //---------------------------------------------------------------------------
 void OptDialog::SetPos(int type, QLineEdit **edit, double *pos)
 {
-	double p[3],dms1[3],dms2[3],s1,s2;
-	
-	if (type==1) { /* lat/lon/height dms/m */
-		ecef2pos(pos,p); s1=p[0]<0?-1:1; s2=p[1]<0?-1:1;
-		p[0]=fabs(p[0])*R2D+1E-12; p[1]=fabs(p[1])*R2D+1E-12;
-		dms1[0]=floor(p[0]); p[0]=(p[0]-dms1[0])*60.0;
-		dms1[1]=floor(p[0]); dms1[2]=(p[0]-dms1[1])*60.0;
-		dms2[0]=floor(p[1]); p[1]=(p[1]-dms2[0])*60.0;
-		dms2[1]=floor(p[1]); dms2[2]=(p[1]-dms2[1])*60.0;
+    double p[3],dms1[3],dms2[3],s1,s2;
+
+    if(type==1) {  /* lat/lon/height dms/m */
+        ecef2pos(pos,p);
+        s1=p[0]<0?-1:1;
+        s2=p[1]<0?-1:1;
+        p[0]=fabs(p[0])*R2D+1E-12;
+        p[1]=fabs(p[1])*R2D+1E-12;
+        dms1[0]=floor(p[0]);
+        p[0]=(p[0]-dms1[0])*60.0;
+        dms1[1]=floor(p[0]);
+        dms1[2]=(p[0]-dms1[1])*60.0;
+        dms2[0]=floor(p[1]);
+        p[1]=(p[1]-dms2[0])*60.0;
+        dms2[1]=floor(p[1]);
+        dms2[2]=(p[1]-dms2[1])*60.0;
         edit[0]->setText(QString("%1 %2 %3").arg(s1*dms1[0],0,'f',0).arg(dms1[1],2,'f',0).arg(dms1[2],9,'f',6));
         edit[1]->setText(QString("%1 %2 %3").arg(s2*dms2[0],0,'f',0).arg(dms2[1],2,'f',0).arg(dms2[2],9,'f',6));
         edit[2]->setText(QString("%1").arg(p[2],0,'f',4));
-	}
-	else if (type==2) { /* x/y/z-ecef */
+    } else if(type==2) { /* x/y/z-ecef */
         edit[0]->setText(QString::number(pos[0],'f',4));
         edit[1]->setText(QString::number(pos[1],'f',4));
         edit[2]->setText(QString::number(pos[2],'f',4));
-	}
-	else {
-		ecef2pos(pos,p);
+    } else {
+        ecef2pos(pos,p);
         edit[0]->setText(QString::number(p[0]*R2D,'f',9));
         edit[1]->setText(QString::number(p[1]*R2D,'f',9));
         edit[2]->setText(QString::number(p[2],'f',4));
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void OptDialog::ReadAntList(void)
 {
     QString AntPcvFile_Text=AntPcvFile->text();
-    pcvs_t pcvs={0,0,0};
-	char *p;
-	
-    if (!readpcv(qPrintable(AntPcvFile_Text),&pcvs)) return;
-	
+    pcvs_t pcvs= {0,0,0};
+    char *p;
+
+    if(!readpcv(qPrintable(AntPcvFile_Text),&pcvs)) {
+        return;
+    }
+
     RovAnt->clear();
     RefAnt->clear();
 
-    RovAnt->addItem("");RefAnt->addItem("");
-    RovAnt->addItem("*");RefAnt->addItem("*");
+    RovAnt->addItem("");
+    RefAnt->addItem("");
+    RovAnt->addItem("*");
+    RefAnt->addItem("*");
 
-	for (int i=0;i<pcvs.n;i++) {
-		if (pcvs.pcv[i].sat) continue;
-		if ((p=strchr(pcvs.pcv[i].type,' '))) *p='\0';
-		if (i>0&&!strcmp(pcvs.pcv[i].type,pcvs.pcv[i-1].type)) continue;
+    for(int i=0; i<pcvs.n; i++) {
+        if(pcvs.pcv[i].sat) {
+            continue;
+        }
+        if((p=strchr(pcvs.pcv[i].type,' '))) {
+            *p='\0';
+        }
+        if(i>0&&!strcmp(pcvs.pcv[i].type,pcvs.pcv[i-1].type)) {
+            continue;
+        }
         RovAnt->addItem(pcvs.pcv[i].type);
         RefAnt->addItem(pcvs.pcv[i].type);
     }
-	
-	free(pcvs.pcv);
+
+    free(pcvs.pcv);
 }
 //---------------------------------------------------------------------------
 void OptDialog::BtnHelpClick()
@@ -1099,17 +1181,17 @@ void OptDialog::BtnHelpClick()
 //---------------------------------------------------------------------------
 void OptDialog::ExtEna0Click()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::ExtEna1Click()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::ExtEna2Click()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OptDialog::BtnExtOptClick()
@@ -1125,7 +1207,9 @@ void OptDialog::BtnMaskClick()
     MaskOptDialog *maskOptDialog= new MaskOptDialog(this);
     maskOptDialog->Mask=SnrMask;
     maskOptDialog->exec();
-    if (maskOptDialog->result()!=QDialog::Accepted) return;
+    if(maskOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
     SnrMask=maskOptDialog->Mask;
 
     delete  maskOptDialog;
@@ -1133,7 +1217,7 @@ void OptDialog::BtnMaskClick()
 //---------------------------------------------------------------------------
 void OptDialog::NavSys6Click()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 

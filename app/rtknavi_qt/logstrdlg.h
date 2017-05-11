@@ -47,7 +47,7 @@ private:
     void UpdateEnable(void);
 
 public:
-	int StreamC[3],Stream[3],LogTimeTag,LogAppend;
+    int StreamC[3],Stream[3],LogTimeTag,LogAppend;
     QString Paths[3][4],SwapInterval;
     QString History[10],MntpHist[10];
 

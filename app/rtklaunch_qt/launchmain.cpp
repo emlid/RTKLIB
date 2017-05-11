@@ -41,7 +41,7 @@ MainForm::MainForm(QWidget *parent)
 
     setWindowTitle(tr("RTKLIB v.%1 %2").arg(VER_RTKLIB).arg(PATCH_LEVEL));
     setWindowIcon(QIcon(":/icons/rtk9.bmp"));
-    
+
     QCoreApplication::setApplicationName("rtklaunch_qt");
     QCoreApplication::setApplicationVersion("1.0");
 
@@ -56,17 +56,18 @@ MainForm::MainForm(QWidget *parent)
     parser.addOption(titleOption);
 
     QCommandLineOption trayOption(QStringList() << "tray",
-            QCoreApplication::translate("main", "only show tray icon"));
+                                  QCoreApplication::translate("main", "only show tray icon"));
     parser.addOption(trayOption);
 
     parser.process(*QApplication::instance());
 
     bool tray=parser.isSet(trayOption);
 
-    if (parser.isSet(titleOption))
+    if(parser.isSet(titleOption)) {
         setWindowTitle(parser.value(titleOption));
+    }
 
-    if (tray) {
+    if(tray) {
         setVisible(false);
         TrayIcon.setVisible(true);
     }
@@ -102,7 +103,9 @@ MainForm::MainForm(QWidget *parent)
 //---------------------------------------------------------------------------
 void MainForm::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     QSettings settings(IniFile,QSettings::IniFormat);
 
@@ -113,9 +116,11 @@ void MainForm::showEvent(QShowEvent *event)
            settings.value("pos/height", 79).toInt());
 }
 //---------------------------------------------------------------------------
-void MainForm::closeEvent(QCloseEvent *event )
+void MainForm::closeEvent(QCloseEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     QSettings settings(IniFile,QSettings::IniFormat);
     settings.setValue("pos/left",    pos().x());
@@ -127,56 +132,70 @@ void MainForm::closeEvent(QCloseEvent *event )
 void MainForm::BtnPlotClick()
 {
     QString cmd1="./rtkplot_qt",cmd2="../../../bin/rtkplot_qt",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void MainForm::BtnConvClick()
 {
     QString cmd1="./rtkconv_qt",cmd2="../../../bin/rtkconv_qt",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void MainForm::BtnStrClick()
 {
     QString cmd1="./strsvr_qt",cmd2="../../../bin/strsvr_qt",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void MainForm::BtnPostClick()
 {
     QString cmd1="./rtkpost_qt",cmd2="../../../bin/rtkpost_qt",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void MainForm::BtnNtripClick()
 {
     QString cmd1="./srctblbrows_qt",cmd2="../../../bin/srctblbrows_qt",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void MainForm::BtnNaviClick()
 {
     QString cmd1="./rtknavi_qt",cmd2="../../../bin/rtknavi_qt",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 void MainForm::BtnGetClick()
 {
     QString cmd1="./rtkget_qt",cmd2="../../../bin/rtkget_qt",opts="";
-    
-    if (!ExecCmd(cmd1+opts)) ExecCmd(cmd2+opts);
+
+    if(!ExecCmd(cmd1+opts)) {
+        ExecCmd(cmd2+opts);
+    }
 }
 //---------------------------------------------------------------------------
 int MainForm::ExecCmd(const QString &cmd)
 {
-     return QProcess::startDetached(cmd); /* FIXME: show option not yet supported */
- }
+    return QProcess::startDetached(cmd); /* FIXME: show option not yet supported */
+}
 //---------------------------------------------------------------------------
 void MainForm::BtnTrayClick()
 {
@@ -186,7 +205,9 @@ void MainForm::BtnTrayClick()
 //---------------------------------------------------------------------------
 void MainForm::TrayIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    if (reason!=QSystemTrayIcon::DoubleClick) return;
+    if(reason!=QSystemTrayIcon::DoubleClick) {
+        return;
+    }
 
     setVisible(true);
     TrayIcon.setVisible(false);

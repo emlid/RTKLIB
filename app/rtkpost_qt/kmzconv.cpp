@@ -47,12 +47,14 @@ ConvDialog::ConvDialog(QWidget *parent)
     connect(FormatKML,SIGNAL(clicked(bool)),this,SLOT(FormatKMLClick()));
     connect(FormatGPX,SIGNAL(clicked(bool)),this,SLOT(FormatGPXClick()));
 
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::showEvent(QShowEvent* event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     FormatGPX->setChecked(!FormatKML->isChecked());
     GoogleEarthFile->setText(mainForm->GoogleEarthFile);
@@ -61,22 +63,22 @@ void ConvDialog::showEvent(QShowEvent* event)
 void ConvDialog::SetInput(const QString &File)
 {
     InputFile->setText(File);
-	UpdateOutFile();
+    UpdateOutFile();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::TimeSpanClick()
 {
-	UpdateEnable();	
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::AddOffsetClick()
 {
-	UpdateEnable();	
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::TimeIntFClick()
 {
-	UpdateEnable();	
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::BtnInputFileClick()
@@ -87,73 +89,85 @@ void ConvDialog::BtnInputFileClick()
 void ConvDialog::BtnConvertClick()
 {
     QString InputFile_Text=InputFile->text(),OutputFile_Text=OutputFile->text();
-	int stat;
+    int stat;
     QString cmd;
     char file[1024],kmlfile[1024],*p;
-    double offset[3]={0},tint=0.0;
-    gtime_t ts={0,0},te={0,0};
+    double offset[3]= {0},tint=0.0;
+    gtime_t ts= {0,0},te= {0,0};
 
-	ShowMsg("");
+    ShowMsg("");
 
-    if (InputFile->text()==""||OutputFile->text()=="") return;
+    if(InputFile->text()==""||OutputFile->text()=="") {
+        return;
+    }
 
     ShowMsg(tr("converting ..."));
 
-    if (TimeSpan->isChecked()) {
+    if(TimeSpan->isChecked()) {
         QDateTime start(TimeY1->date(),TimeH1->time());
         QDateTime end(TimeY2->date(),TimeH2->time());
-        ts.time=start.toTime_t();ts.sec=start.time().msec()/1000;
-        te.time=end.toTime_t();te.sec=end.time().msec()/1000;
-	}
+        ts.time=start.toTime_t();
+        ts.sec=start.time().msec()/1000;
+        te.time=end.toTime_t();
+        te.sec=end.time().msec()/1000;
+    }
 
-    if (AddOffset->isChecked()) {
+    if(AddOffset->isChecked()) {
         offset[0]=Offset1->text().toDouble();
         offset[1]=Offset2->text().toDouble();
         offset[2]=Offset3->text().toDouble();
-	}
+    }
 
-    if (TimeIntF->isChecked()) tint=TimeInt->text().toDouble();
+    if(TimeIntF->isChecked()) {
+        tint=TimeInt->text().toDouble();
+    }
 
     strcpy(file,qPrintable(InputFile_Text));
 
-    if (FormatKML->isChecked()) {
-        if (Compress->isChecked()) {
+    if(FormatKML->isChecked()) {
+        if(Compress->isChecked()) {
             strcpy(kmlfile,file);
-            if (!(p=strrchr(kmlfile,'.'))) p=kmlfile+strlen(kmlfile);
+            if(!(p=strrchr(kmlfile,'.'))) {
+                p=kmlfile+strlen(kmlfile);
+            }
             strcpy(p,".kml");
         }
         stat=convkml(file,Compress->isChecked()?kmlfile:qPrintable(OutputFile_Text),
                      ts,te,tint,QFlags->currentIndex(),offset,
                      TrackColor->currentIndex(),PointColor->currentIndex(),
                      OutputAlt->currentIndex(),OutputTime->currentIndex());
-    }
-    else {
+    } else {
         stat=convgpx(file,Compress->isChecked()?kmlfile:qPrintable(OutputFile_Text),
                      ts,te,tint,QFlags->currentIndex(),offset,
                      TrackColor->currentIndex(),PointColor->currentIndex(),
                      OutputAlt->currentIndex(),OutputTime->currentIndex());
     }
 
-    if (stat<0) {
-        if      (stat==-1) ShowMsg(tr("error : read input file"));
-        else if (stat==-2) ShowMsg(tr("error : input file format"));
-        else if (stat==-3) ShowMsg(tr("error : no data in input file"));
-        else               ShowMsg(tr("error : write kml file"));
-		return;
-	}
-    if (FormatKML->isChecked()&&Compress->isChecked()) {
+    if(stat<0) {
+        if(stat==-1) {
+            ShowMsg(tr("error : read input file"));
+        } else if(stat==-2) {
+            ShowMsg(tr("error : input file format"));
+        } else if(stat==-3) {
+            ShowMsg(tr("error : no data in input file"));
+        } else {
+            ShowMsg(tr("error : write kml file"));
+        }
+        return;
+    }
+    if(FormatKML->isChecked()&&Compress->isChecked()) {
 #ifdef Q_OS_WIN
         cmd=QString("zip.exe -j -m %1 %2").arg(OutputFile->text()).arg(kmlfile); //TODO: zip for other platforms
 #endif
 #ifdef Q_OS_LINUX
         cmd=QString("gzip -3 %1 %2").arg(OutputFile->text()).arg(kmlfile);
 #endif
-        if (!ExecCmd(cmd)) {
+        if(!ExecCmd(cmd)) {
             ShowMsg(tr("error : zip execution"));
-			return;
-		}
-	}
-	ShowMsg("done");
+            return;
+        }
+    }
+    ShowMsg("done");
 }
 //---------------------------------------------------------------------------
 void ConvDialog::BtnCloseClick()
@@ -163,7 +177,7 @@ void ConvDialog::BtnCloseClick()
 //---------------------------------------------------------------------------
 void ConvDialog::CompressClick()
 {
-	UpdateOutFile();
+    UpdateOutFile();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::UpdateEnable(void)
@@ -198,21 +212,28 @@ int ConvDialog::ExecCmd(const QString &cmd)
 void ConvDialog::ShowMsg(const QString &msg)
 {
     Message->setText(msg);
-    if (msg.contains("error")) Message->setStyleSheet("QLabel {color : red}");
-    else Message->setStyleSheet("QLabel {color : blue}");
+    if(msg.contains("error")) {
+        Message->setStyleSheet("QLabel {color : red}");
+    } else {
+        Message->setStyleSheet("QLabel {color : blue}");
+    }
 }
 //---------------------------------------------------------------------------
 void ConvDialog::InputFileChange()
 {
-	UpdateOutFile();
+    UpdateOutFile();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::UpdateOutFile(void)
 {
     QString InputFile_Text=InputFile->text();
-    if (InputFile_Text=="") return;
+    if(InputFile_Text=="") {
+        return;
+    }
     QFileInfo fi(InputFile_Text);
-    if (fi.suffix()==NULL) return;
+    if(fi.suffix()==NULL) {
+        return;
+    }
     InputFile_Text=QDir::toNativeSeparators(fi.absolutePath()+"/"+fi.baseName());
     InputFile_Text+=FormatGPX->isChecked()?".gpx":(Compress->isChecked()?".kmz":".kml");
     OutputFile->setText(InputFile_Text);
@@ -244,7 +265,9 @@ void ConvDialog::BtnViewClick()
 {
     QString file=OutputFile->text();
 
-    if (file=="") return;
+    if(file=="") {
+        return;
+    }
     viewer->setWindowTitle(file);
     viewer->show();
     viewer->Read(file);

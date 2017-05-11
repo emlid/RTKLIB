@@ -30,74 +30,74 @@
 /* structures for ERB protocol -----------------------------------------------*/
 #pragma pack(push,1)
 struct erb_ver {
-	uint32_t timeGPS;
-	uint8_t verH;
-	uint8_t verM;
-	uint8_t verL;
+    uint32_t timeGPS;
+    uint8_t verH;
+    uint8_t verM;
+    uint8_t verL;
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct erb_pos {
-	uint32_t timeGPS;
-	double lng;
-	double lat;
-	double altEl;
-	double altMsl;
-	uint32_t accHor;
-	uint32_t accVer;
+    uint32_t timeGPS;
+    double lng;
+    double lat;
+    double altEl;
+    double altMsl;
+    uint32_t accHor;
+    uint32_t accVer;
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct erb_stat {
-	uint32_t timeGPS;
-	uint16_t weekGPS;
-	uint8_t fixType;
-	uint8_t fixStatus;
-	uint8_t numSV;
+    uint32_t timeGPS;
+    uint16_t weekGPS;
+    uint8_t fixType;
+    uint8_t fixStatus;
+    uint8_t numSV;
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct erb_dops {
-	uint32_t timeGPS;
-	uint16_t dopGeo;
-	uint16_t dopPos;
-	uint16_t dopVer;
-	uint16_t dopHor;
+    uint32_t timeGPS;
+    uint16_t dopGeo;
+    uint16_t dopPos;
+    uint16_t dopVer;
+    uint16_t dopHor;
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct erb_vel {
-	uint32_t timeGPS;
-	int32_t velN;
-	int32_t velE;
-	int32_t velD;
-	uint32_t speed;
-	int32_t heading;
-	uint32_t accS;
+    uint32_t timeGPS;
+    int32_t velN;
+    int32_t velE;
+    int32_t velD;
+    uint32_t speed;
+    int32_t heading;
+    uint32_t accS;
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct erb_svi_head {
-	uint32_t timeGPS;
-	uint8_t nSV;
+    uint32_t timeGPS;
+    uint8_t nSV;
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct erb_svi_sat {
-	uint8_t idSV;
-	uint8_t typeSV;
-	int32_t carPh;
-	int32_t psRan;
-	int32_t freqD;
-	uint16_t snr;
-	uint16_t azim;
-	uint16_t elev;
+    uint8_t idSV;
+    uint8_t typeSV;
+    int32_t carPh;
+    int32_t psRan;
+    int32_t freqD;
+    uint16_t snr;
+    uint16_t azim;
+    uint16_t elev;
 };
 #pragma pack(pop)
 
@@ -108,7 +108,7 @@ static void calculatesum(const char *buff, int len, unsigned char *cka,
     int i;
     *cka=0;
     *ckb=0;
-    for (i=2;i<len;i++) {
+    for(i=2; i<len; i++) {
         *cka += buff[i];
         *ckb += *cka;
     }
@@ -152,13 +152,13 @@ static void buildstat(char *payload, struct erb_stat status, const uint32_t time
 {
     uint8_t fixStatus,fixType;
 
-    if (sol->stat == SOLQ_SINGLE) {
+    if(sol->stat == SOLQ_SINGLE) {
         fixStatus = 0x01;
         fixType = 0x01;
-    } else if (sol->stat == SOLQ_FLOAT) {
+    } else if(sol->stat == SOLQ_FLOAT) {
         fixStatus = 0x01;
         fixType = 0x02;
-    } else if (sol->stat == SOLQ_FIX) {
+    } else if(sol->stat == SOLQ_FIX) {
         fixStatus = 0x01;
         fixType = 0x03;
     } else {
@@ -212,7 +212,7 @@ static int buildsvi(char *payload, struct erb_svi_head sviHead, struct erb_svi_s
     sviHead.nSV = nSV;
     memcpy(payload, &sviHead, LENGTH_SVI_HEAD);
 
-    for (i=0;i<nSV;i++) {
+    for(i=0; i<nSV; i++) {
         sviSat[i].idSV = sol->idSV[i];
         sviSat[i].typeSV = sol->typeSV[i];
         sviSat[i].carPh = sol->carPh[i];

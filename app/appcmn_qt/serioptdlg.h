@@ -25,7 +25,7 @@ public slots:
 
 public:
     QString Path,Cmds[2];
-	int Opt,CmdEna[2];
+    int Opt,CmdEna[2];
 
     explicit SerialOptDialog(QWidget*);
 };

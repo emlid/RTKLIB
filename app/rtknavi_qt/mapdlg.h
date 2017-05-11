@@ -32,15 +32,15 @@ public slots:
 private:
     QPixmap Plot;
     QString RefName;
-	double CentPos0[3];
-	int Scale,PntIndex,Drag,X0,Y0;
+    double CentPos0[3];
+    int Scale,PntIndex,Drag,X0,Y0;
     PntDialog *pntDialog;
-	
+
     void  DrawVertGraph(QPainter &c,const double *sol,
-		const int *stat, int psol, int psols, int psole, int nsol, int currentstat);
+                        const int *stat, int psol, int psols, int psole, int nsol, int currentstat);
     QPoint  PosToPoint(const double *pos);
     QPoint  PosToGraphP(const double *pos, const double *ref,
-        int index, int npos, QRect rect);
+                        int index, int npos, QRect rect);
     void  DrawPoint(QPainter &c,const double *pos, QString name, QColor color);
     void  DrawVel(QPainter &c,const double *vel);
     void  DrawScale(QPainter &c);
@@ -51,13 +51,13 @@ private:
     void  UpdatePntList(void);
     void  UpdateEnable(void);
 public:
-	double CurrentPos[3],RefPos[3],CentPos[3];
-	
+    double CurrentPos[3],RefPos[3],CentPos[3];
+
     void  ResetRef(void);
     void  UpdateMap(const double *sol, const double *solref,
-		const double *vel, const int *stat, int psol, int psols, int psole,
-        int nsol, QString *solstr, int currentstat);
-     MapDialog(QWidget* parent);
+                    const double *vel, const int *stat, int psol, int psols, int psole,
+                    int nsol, QString *solstr, int currentstat);
+    MapDialog(QWidget* parent);
 };
 //---------------------------------------------------------------------------
 #endif

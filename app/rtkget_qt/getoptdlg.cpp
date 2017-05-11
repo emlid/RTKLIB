@@ -46,7 +46,9 @@ void DownOptDialog::BtnLogFileClick()
 //---------------------------------------------------------------------------
 void DownOptDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
 
     HoldErr  ->setChecked(mainForm->HoldErr);

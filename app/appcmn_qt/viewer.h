@@ -28,12 +28,12 @@ public slots:
 private:
     QString File;
     QString TextStr;
-	
+
     void ReadText(const QString &file);
     void UpdateText(void);
 
 public:
-	int Option;
+    int Option;
     static QColor Color1,Color2;
     static QFont FontD;
 

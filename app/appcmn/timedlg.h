@@ -11,13 +11,13 @@
 class TTimeDialog : public TForm
 {
 __published:
-	TButton *BtnOk;
-	TLabel *Message;
-	void __fastcall FormShow(TObject *Sender);
+    TButton *BtnOk;
+    TLabel *Message;
+    void __fastcall FormShow(TObject *Sender);
 private:
 public:
-	gtime_t Time;
-	__fastcall TTimeDialog(TComponent* Owner);
+    gtime_t Time;
+    __fastcall TTimeDialog(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TTimeDialog *TimeDialog;

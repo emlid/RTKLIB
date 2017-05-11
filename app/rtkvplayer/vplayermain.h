@@ -45,11 +45,11 @@ __published:
     void __fastcall BtnExitClick(TObject *Sender);
     void __fastcall Timer1Timer(TObject *Sender);
     void __fastcall ProgressBarMouseDown(TObject *Sender, TMouseButton Button, TShiftState Shift,
-          float X, float Y);
+                                         float X, float Y);
     void __fastcall ProgressBarMouseUp(TObject *Sender, TMouseButton Button, TShiftState Shift,
-          float X, float Y);
+                                       float X, float Y);
     void __fastcall ProgressBarMouseMove(TObject *Sender, TShiftState Shift, float X,
-          float Y);
+                                         float Y);
     void __fastcall FormResize(TObject *Sender);
     void __fastcall BtnPosStartClick(TObject *Sender);
     void __fastcall FormShow(TObject *Sender);
@@ -71,9 +71,9 @@ private:
     void __fastcall UpdateVideo(void);
     void __fastcall LoadOptions(void);
     void __fastcall SaveOptions(void);
-    
+
     BEGIN_MESSAGE_MAP
-    MESSAGE_HANDLER(WM_DROPFILES, TWMDropFiles, DropFiles);
+        MESSAGE_HANDLER(WM_DROPFILES, TWMDropFiles, DropFiles);
     END_MESSAGE_MAP(TForm);
 public:
     __fastcall TMainForm(TComponent* Owner);

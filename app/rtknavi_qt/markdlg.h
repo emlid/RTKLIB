@@ -28,9 +28,9 @@ private:
 public:
     QString Marker,Comment;
     int PosMode,NMark;
-	
+
     explicit QMarkDialog(QWidget *parent);
-	
+
 };
 //---------------------------------------------------------------------------
 #endif

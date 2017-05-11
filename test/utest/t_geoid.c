@@ -8,7 +8,7 @@
 
 /* latitude, longitude, geoid height (m) */
 /* reference : http://sps.unavco.org/geoid */
-static double poss[][3]={
+static double poss[][3]= {
     { 90.001*D2R,  80.000*D2R,  0.000},
     {-90.001*D2R,  80.000*D2R,  0.000},
     { 30.000*D2R, 360.000*D2R,  0.000},
@@ -43,27 +43,27 @@ static char *file4=DATADIR "gsigeome.ver4";
 void utest1(void)
 {
     int ret;
-    
+
     ret=opengeoid(10,file1);
-        assert(ret==0); /* no model */
+    assert(ret==0); /* no model */
     ret=opengeoid(GEOID_EGM96_M150,"../../../geoiddata/WW15MGH.DAA");
-        assert(ret==0); /* no file */
+    assert(ret==0); /* no file */
     ret=opengeoid(GEOID_EMBEDDED,"");
-        assert(ret==1);
+    assert(ret==1);
     closegeoid();
     ret=opengeoid(GEOID_EGM96_M150,file1);
-        assert(ret==1);
+    assert(ret==1);
     closegeoid();
     ret=opengeoid(GEOID_EGM2008_M10,file2);
-        assert(ret==1);
+    assert(ret==1);
     closegeoid();
     ret=opengeoid(GEOID_EGM2008_M25,file3);
-        assert(ret==1);
+    assert(ret==1);
     closegeoid();
     ret=opengeoid(GEOID_GSI2000_M15,file4);
-        assert(ret==1);
+    assert(ret==1);
     closegeoid();
-    
+
     printf("%s utset1 : OK\n",__FILE__);
 }
 /* print difference */
@@ -71,55 +71,59 @@ void printgeoid(const double *pos, double *h, int n)
 {
     int i;
     printf("%7.3f %8.3f %9.4f: ",pos[0]*R2D,pos[1]*R2D,pos[2]);
-    for (i=0;i<n;i++) printf(" %9.4f",h[i]);
+    for(i=0; i<n; i++) {
+        printf(" %9.4f",h[i]);
+    }
     printf(" :");
-    for (i=1;i<n;i++) printf(" %9.4f",h[i]!=0.0?h[i]-h[0]:0.0);
+    for(i=1; i<n; i++) {
+        printf(" %9.4f",h[i]!=0.0?h[i]-h[0]:0.0);
+    }
     printf("\n");
 }
 /* geoidh() (1) */
 void utest2(void)
 {
-    double h[64][6]={{0}};
+    double h[64][6]= {{0}};
     int i,j=0;
-    
+
     opengeoid(GEOID_EGM96_M150,file1); /* reference */
-    for (i=0;poss[i][0]!=0.0;i++) {
+    for(i=0; poss[i][0]!=0.0; i++) {
         h[i][j]=geoidh(poss[i]);
     }
     j++;
     closegeoid();
-    
+
     opengeoid(GEOID_EMBEDDED,"");
-    for (i=0;poss[i][0]!=0.0;i++) {
+    for(i=0; poss[i][0]!=0.0; i++) {
         h[i][j]=geoidh(poss[i]);
     }
     j++;
     closegeoid();
-    
+
     opengeoid(GEOID_EGM2008_M10,file2);
-    for (i=0;poss[i][0]!=0.0;i++) {
+    for(i=0; poss[i][0]!=0.0; i++) {
         h[i][j]=geoidh(poss[i]);
     }
     j++;
     closegeoid();
-    
+
     opengeoid(GEOID_EGM2008_M25,file3);
-    for (i=0;poss[i][0]!=0.0;i++) {
+    for(i=0; poss[i][0]!=0.0; i++) {
         h[i][j]=geoidh(poss[i]);
     }
     j++;
     closegeoid();
-    
+
     opengeoid(GEOID_GSI2000_M15,file4);
-    for (i=0;poss[i][0]!=0.0;i++) {
+    for(i=0; poss[i][0]!=0.0; i++) {
         h[i][j]=geoidh(poss[i]);
     }
     j++;
     closegeoid();
-    
-    for (i=0;poss[i][0]!=0.0;i++) {
+
+    for(i=0; poss[i][0]!=0.0; i++) {
         printgeoid(poss[i],h[i],5);
-        
+
         assert(fabs(h[i][0]-poss[i][2])<1.0);
     }
     printf("%s utset2 : OK\n",__FILE__);
@@ -129,34 +133,36 @@ void utest3(void)
 {
     double pos[3],h[6],dhmax[6],dh;
     int i,j,k,nlat=113,nlon=237;
-    
-    for (i=0;i<=nlat;i++) for (j=0;j<=nlon;j++) {
-        pos[0]=(90.0-i*180.0/nlat)*D2R;
-        pos[1]=j*360.0/nlon*D2R;
-        pos[2]=0.0;
-        opengeoid(GEOID_EGM96_M150,file1); /* reference */
-        h[0]=geoidh(pos);
-        closegeoid();
-        opengeoid(GEOID_EMBEDDED,"");
-        h[1]=geoidh(pos);
-        closegeoid();
-        opengeoid(GEOID_EGM2008_M10,file2);
-        h[2]=geoidh(pos);
-        closegeoid();
-        opengeoid(GEOID_EGM2008_M25,file3);
-        h[3]=geoidh(pos);
-        closegeoid();
-        opengeoid(GEOID_GSI2000_M15,file4);
-        h[4]=geoidh(pos);
-        closegeoid();
-        printgeoid(pos,h,5);
-        for (k=1;k<5;k++) {
-            dh=h[k]!=0.0?h[k]-h[0]:0.0;
-            if (fabs(dh)>fabs(dhmax[k])) dhmax[k]=dh;
+
+    for(i=0; i<=nlat; i++) for(j=0; j<=nlon; j++) {
+            pos[0]=(90.0-i*180.0/nlat)*D2R;
+            pos[1]=j*360.0/nlon*D2R;
+            pos[2]=0.0;
+            opengeoid(GEOID_EGM96_M150,file1); /* reference */
+            h[0]=geoidh(pos);
+            closegeoid();
+            opengeoid(GEOID_EMBEDDED,"");
+            h[1]=geoidh(pos);
+            closegeoid();
+            opengeoid(GEOID_EGM2008_M10,file2);
+            h[2]=geoidh(pos);
+            closegeoid();
+            opengeoid(GEOID_EGM2008_M25,file3);
+            h[3]=geoidh(pos);
+            closegeoid();
+            opengeoid(GEOID_GSI2000_M15,file4);
+            h[4]=geoidh(pos);
+            closegeoid();
+            printgeoid(pos,h,5);
+            for(k=1; k<5; k++) {
+                dh=h[k]!=0.0?h[k]-h[0]:0.0;
+                if(fabs(dh)>fabs(dhmax[k])) {
+                    dhmax[k]=dh;
+                }
+            }
         }
-    }
     printf("max difference                                                                 :");
-    for (i=1;i<5;i++) {
+    for(i=1; i<5; i++) {
         printf(" %9.4f",dhmax[i]);
         assert(fabs(dhmax[i])<10.0);
     }

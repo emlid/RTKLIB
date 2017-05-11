@@ -29,13 +29,13 @@ public slots:
     void SelFmtChange(int);
 
 private:
-	int TypeF,ConFmt,ScrollPos,FontScale,ObsMode;
+    int TypeF,ConFmt,ScrollPos,FontScale,ObsMode;
     QStringList ConBuff;
     QStringList header;
-	rtcm_t rtcm;
-	raw_t raw;
+    rtcm_t rtcm;
+    raw_t raw;
     QTimer timer1,timer2;
-	
+
     void ClearTable(void);
     void SetRtk(void);
     void SetSat(void);

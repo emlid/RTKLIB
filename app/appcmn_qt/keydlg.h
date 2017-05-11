@@ -19,7 +19,7 @@ protected:
     void showEvent(QShowEvent*);
 
 public:
-	int Flag;
+    int Flag;
     explicit KeyDialog(QWidget* parent);
 };
 //---------------------------------------------------------------------------

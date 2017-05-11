@@ -24,7 +24,7 @@ private:
     int  ExecCmd(QString cmd, int show);
 
 public:
-	int Opt;
+    int Opt;
     QString Path,History[MAXHIST],MntpHist[MAXHIST];
 
     explicit TcpOptDialog(QWidget* parent);

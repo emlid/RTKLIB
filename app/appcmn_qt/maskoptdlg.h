@@ -23,7 +23,7 @@ private:
     void  UpdateEnable(void);
 
 public:
-	snrmask_t Mask;
+    snrmask_t Mask;
     explicit MaskOptDialog(QWidget* parent);
 };
 //---------------------------------------------------------------------------

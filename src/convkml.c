@@ -37,7 +37,7 @@ static void outtrack(FILE *f, const solbuf_t *solbuf, const char *color,
 {
     double pos[3];
     int i;
-    
+
     fprintf(f,"<Placemark>\n");
     fprintf(f,"<name>Rover Track</name>\n");
     fprintf(f,"<Style>\n");
@@ -46,12 +46,17 @@ static void outtrack(FILE *f, const solbuf_t *solbuf, const char *color,
     fprintf(f,"</LineStyle>\n");
     fprintf(f,"</Style>\n");
     fprintf(f,"<LineString>\n");
-    if (outalt) fprintf(f,"<altitudeMode>absolute</altitudeMode>\n");
+    if(outalt) {
+        fprintf(f,"<altitudeMode>absolute</altitudeMode>\n");
+    }
     fprintf(f,"<coordinates>\n");
-    for (i=0;i<solbuf->n;i++) {
+    for(i=0; i<solbuf->n; i++) {
         ecef2pos(solbuf->data[i].rr,pos);
-        if      (outalt==0) pos[2]=0.0;
-        else if (outalt==2) pos[2]-=geoidh(pos);
+        if(outalt==0) {
+            pos[2]=0.0;
+        } else if(outalt==2) {
+            pos[2]-=geoidh(pos);
+        }
         fprintf(f,"%13.9f,%12.9f,%5.3f\n",pos[1]*R2D,pos[0]*R2D,pos[2]);
     }
     fprintf(f,"</coordinates>\n");
@@ -64,15 +69,20 @@ static void outpoint(FILE *fp, gtime_t time, const double *pos,
 {
     double ep[6],alt=0.0;
     char str[256]="";
-    
+
     fprintf(fp,"<Placemark>\n");
-    if (*label) fprintf(fp,"<name>%s</name>\n",label);
+    if(*label) {
+        fprintf(fp,"<name>%s</name>\n",label);
+    }
     fprintf(fp,"<styleUrl>#P%d</styleUrl>\n",style);
-    if (outtime) {
-        if      (outtime==2) time=gpst2utc(time);
-        else if (outtime==3) time=timeadd(gpst2utc(time),9*3600.0);
+    if(outtime) {
+        if(outtime==2) {
+            time=gpst2utc(time);
+        } else if(outtime==3) {
+            time=timeadd(gpst2utc(time),9*3600.0);
+        }
         time2epoch(time,ep);
-        if (!*label&&fmod(ep[5]+0.005,TINT)<0.01) {
+        if(!*label&&fmod(ep[5]+0.005,TINT)<0.01) {
             sprintf(str,"%02.0f:%02.0f:%02.0f",ep[3],ep[4],ep[5]);
             fprintf(fp,"<name>%s</name>\n",str);
         }
@@ -81,7 +91,7 @@ static void outpoint(FILE *fp, gtime_t time, const double *pos,
         fprintf(fp,"<TimeStamp><when>%s</when></TimeStamp>\n",str);
     }
     fprintf(fp,"<Point>\n");
-    if (outalt) {
+    if(outalt) {
         fprintf(fp,"<extrude>1</extrude>\n");
         fprintf(fp,"<altitudeMode>absolute</altitudeMode>\n");
         alt=pos[2]-(outalt==2?geoidh(pos):0.0);
@@ -97,17 +107,17 @@ static int savekml(const char *file, const solbuf_t *solbuf, int tcolor,
 {
     FILE *fp;
     double pos[3];
-    int i,qcolor[]={0,1,2,5,4,3,0};
-    char *color[]={
+    int i,qcolor[]= {0,1,2,5,4,3,0};
+    char *color[]= {
         "ffffffff","ff008800","ff00aaff","ff0000ff","ff00ffff","ffff00ff"
     };
-    if (!(fp=fopen(file,"w"))) {
+    if(!(fp=fopen(file,"w"))) {
         fprintf(stderr,"file open error : %s\n",file);
         return 0;
     }
     fprintf(fp,"%s\n%s\n",HEADKML1,HEADKML2);
     fprintf(fp,"<Document>\n");
-    for (i=0;i<6;i++) {
+    for(i=0; i<6; i++) {
         fprintf(fp,"<Style id=\"P%d\">\n",i);
         fprintf(fp,"  <IconStyle>\n");
         fprintf(fp,"    <color>%s</color>\n",color[i]);
@@ -116,20 +126,20 @@ static int savekml(const char *file, const solbuf_t *solbuf, int tcolor,
         fprintf(fp,"  </IconStyle>\n");
         fprintf(fp,"</Style>\n");
     }
-    if (tcolor>0) {
+    if(tcolor>0) {
         outtrack(fp,solbuf,color[tcolor-1],outalt,outtime);
     }
-    if (pcolor>0) {
+    if(pcolor>0) {
         fprintf(fp,"<Folder>\n");
         fprintf(fp,"  <name>Rover Position</name>\n");
-        for (i=0;i<solbuf->n;i++) {
+        for(i=0; i<solbuf->n; i++) {
             ecef2pos(solbuf->data[i].rr,pos);
             outpoint(fp,solbuf->data[i].time,pos,"",
                      pcolor==5?qcolor[solbuf->data[i].stat]:pcolor-1,outalt,outtime);
         }
         fprintf(fp,"</Folder>\n");
     }
-    if (norm(solbuf->rb,3)>0.0) {
+    if(norm(solbuf->rb,3)>0.0) {
         ecef2pos(solbuf->rb,pos);
         outpoint(fp,solbuf->data[0].time,pos,"Reference Position",0,outalt,0);
     }
@@ -159,38 +169,48 @@ extern int convkml(const char *infile, const char *outfile, gtime_t ts,
                    gtime_t te, double tint, int qflg, double *offset,
                    int tcolor, int pcolor, int outalt, int outtime)
 {
-    solbuf_t solbuf={0};
-    double rr[3]={0},pos[3],dr[3];
+    solbuf_t solbuf= {0};
+    double rr[3]= {0},pos[3],dr[3];
     int i,j;
     char *p,file[1024];
-    
+
     trace(3,"convkml : infile=%s outfile=%s\n",infile,outfile);
-    
-    if (!*outfile) {
-        if ((p=strrchr(infile,'.'))) {
+
+    if(!*outfile) {
+        if((p=strrchr(infile,'.'))) {
             strncpy(file,infile,p-infile);
             strcpy(file+(p-infile),".kml");
+        } else {
+            sprintf(file,"%s.kml",infile);
         }
-        else sprintf(file,"%s.kml",infile);
+    } else {
+        strcpy(file,outfile);
     }
-    else strcpy(file,outfile);
-    
+
     /* read solution file */
-    if (!readsolt((char **)&infile,1,ts,te,tint,qflg,&solbuf)) return -1;
-    
+    if(!readsolt((char **)&infile,1,ts,te,tint,qflg,&solbuf)) {
+        return -1;
+    }
+
     /* mean position */
-    for (i=0;i<3;i++) {
-        for (j=0;j<solbuf.n;j++) rr[i]+=solbuf.data[j].rr[i];
+    for(i=0; i<3; i++) {
+        for(j=0; j<solbuf.n; j++) {
+            rr[i]+=solbuf.data[j].rr[i];
+        }
         rr[i]/=solbuf.n;
     }
     /* add offset */
     ecef2pos(rr,pos);
     enu2ecef(pos,offset,dr);
-    for (i=0;i<solbuf.n;i++) {
-        for (j=0;j<3;j++) solbuf.data[i].rr[j]+=dr[j];
+    for(i=0; i<solbuf.n; i++) {
+        for(j=0; j<3; j++) {
+            solbuf.data[i].rr[j]+=dr[j];
+        }
     }
-    if (norm(solbuf.rb,3)>0.0) {
-        for (i=0;i<3;i++) solbuf.rb[i]+=dr[i];
+    if(norm(solbuf.rb,3)>0.0) {
+        for(i=0; i<3; i++) {
+            solbuf.rb[i]+=dr[i];
+        }
     }
     /* save kml file */
     return savekml(file,&solbuf,tcolor,pcolor,outalt,outtime)?0:-4;

@@ -9,7 +9,7 @@
 TConfDialog *ConfDialog;
 //---------------------------------------------------------------------------
 __fastcall TConfDialog::TConfDialog(TComponent* Owner)
-	: TForm(Owner)
+    : TForm(Owner)
 {
 }
 //---------------------------------------------------------------------------

@@ -16,7 +16,9 @@ RcvOptDialog::RcvOptDialog(QWidget* parent)
 //---------------------------------------------------------------------------
 void RcvOptDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     OptionE->setText(Option);
 }

@@ -43,19 +43,23 @@ extern int execcmd_to(const char *cmd)
 {
 #ifdef WIN32
     PROCESS_INFORMATION info;
-    STARTUPINFO si={0};
+    STARTUPINFO si= {0};
     DWORD stat;
     char cmds[4096];
-    
+
     si.cb=sizeof(si);
     sprintf(cmds,"cmd /c %s",cmd);
-    if (!CreateProcess(NULL,(LPTSTR)cmds,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,
-                       NULL,&si,&info)) return -1;
-    
-    while (WaitForSingleObject(info.hProcess,10)==WAIT_TIMEOUT) {
+    if(!CreateProcess(NULL,(LPTSTR)cmds,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,
+                      NULL,&si,&info)) {
+        return -1;
+    }
+
+    while(WaitForSingleObject(info.hProcess,10)==WAIT_TIMEOUT) {
         showmsg("");
     }
-    if (!GetExitCodeProcess(info.hProcess,&stat)) stat=-1;
+    if(!GetExitCodeProcess(info.hProcess,&stat)) {
+        stat=-1;
+    }
     CloseHandle(info.hProcess);
     CloseHandle(info.hThread);
     return (int)stat;
@@ -69,22 +73,32 @@ static void genpath(const char *file, const char *name, gtime_t time, int seqno,
 {
     char buff[1024],*p,*q,*r,*env,var[1024]="";
     char l_name[1024]="",u_name[1024]="";
-    
-    for (p=l_name,q=(char *)name;(*p=(char)tolower(*q));p++,q++) ;
-    for (p=u_name,q=(char *)name;(*p=(char)toupper(*q));p++,q++) ;
-    
-    for (p=buff,q=(char *)file;(*p=*q);p++,q++) {
-        if (*q=='%') q++; else continue;
-        if      (*q=='s'||*q=='r') p+=sprintf(p,"%s",l_name)-1;
-        else if (*q=='S'||*q=='R') p+=sprintf(p,"%s",u_name)-1;
-        else if (*q=='N') p+=sprintf(p,"%d",seqno)-1;
-        else if (*q=='{'&&(r=strchr(q+1,'}'))) {
+
+    for(p=l_name,q=(char *)name; (*p=(char)tolower(*q)); p++,q++) ;
+    for(p=u_name,q=(char *)name; (*p=(char)toupper(*q)); p++,q++) ;
+
+    for(p=buff,q=(char *)file; (*p=*q); p++,q++) {
+        if(*q=='%') {
+            q++;
+        } else {
+            continue;
+        }
+        if(*q=='s'||*q=='r') {
+            p+=sprintf(p,"%s",l_name)-1;
+        } else if(*q=='S'||*q=='R') {
+            p+=sprintf(p,"%s",u_name)-1;
+        } else if(*q=='N') {
+            p+=sprintf(p,"%d",seqno)-1;
+        } else if(*q=='{'&&(r=strchr(q+1,'}'))) {
             strncpy(var,q+1,r-q-1);
             var[r-q-1]='\0';
-            if ((env=getenv(var))) p+=sprintf(p,"%s",env)-1;
+            if((env=getenv(var))) {
+                p+=sprintf(p,"%s",env)-1;
+            }
             q=r;
+        } else {
+            q--;
         }
-        else q--;
     }
     reppath(buff,path,time,"","");
 }
@@ -92,13 +106,17 @@ static void genpath(const char *file, const char *name, gtime_t time, int seqno,
 static char *parse_str(char *buff, char *str, int nmax)
 {
     char *p,*q,sep[]=" \r\n";
-    
-    for (p=buff;*p&&*p==' ';p++) ;
-    
-    if (*p=='"') sep[0]=*p++; /* enclosed within quotation marks */
-    
-    for (q=str;*p&&!strchr(sep,*p);p++) {
-        if (q<str+nmax-1) *q++=*p;
+
+    for(p=buff; *p&&*p==' '; p++) ;
+
+    if(*p=='"') {
+        sep[0]=*p++;    /* enclosed within quotation marks */
+    }
+
+    for(q=str; *p&&!strchr(sep,*p); p++) {
+        if(q<str+nmax-1) {
+            *q++=*p;
+        }
     }
     *q='\0';
     return *p?p+1:p;
@@ -107,12 +125,16 @@ static char *parse_str(char *buff, char *str, int nmax)
 static int cmp_str(const char *str1, const char *str2)
 {
     char s1[35],s2[35],*p,*q;
-    
+
     sprintf(s1,"^%s$",str1);
     sprintf(s2,"^%s$",str2);
-    
-    for (p=s1,q=strtok(s2,"*");q;q=strtok(NULL,"*")) {
-        if ((p=strstr(p,q))) p+=strlen(q); else break;
+
+    for(p=s1,q=strtok(s2,"*"); q; q=strtok(NULL,"*")) {
+        if((p=strstr(p,q))) {
+            p+=strlen(q);
+        } else {
+            break;
+        }
     }
     return p!=NULL;
 }
@@ -120,9 +142,13 @@ static int cmp_str(const char *str1, const char *str2)
 static void remot2local(const char *remot, const char *dir, char *local)
 {
     char *p;
-    
-    if ((p=strrchr(remot,'/'))) p++; else p=(char *)remot;
-    
+
+    if((p=strrchr(remot,'/'))) {
+        p++;
+    } else {
+        p=(char *)remot;
+    }
+
     sprintf(local,"%s%c%s",dir,FILEPATHSEP,p);
 }
 /* test file existence -------------------------------------------------------*/
@@ -133,7 +159,9 @@ static int exist_file(const char *local)
     return stat!=0xFFFFFFFF;
 #else
     struct stat buff;
-    if (stat(local,&buff)) return 0;
+    if(stat(local,&buff)) {
+        return 0;
+    }
     return buff.st_mode&S_IRUSR;
 #endif
 }
@@ -142,30 +170,38 @@ static int test_file(const char *local)
 {
     char buff[1024],*p;
     int comp=0;
-    
+
     strcpy(buff,local);
-    
-    if ((p=strrchr(buff,'.'))&&
-        (!strcmp(p,".z")||!strcmp(p,".gz")||!strcmp(p,".zip")||
-         !strcmp(p,".Z")||!strcmp(p,".GZ")||!strcmp(p,".ZIP"))) {
+
+    if((p=strrchr(buff,'.'))&&
+            (!strcmp(p,".z")||!strcmp(p,".gz")||!strcmp(p,".zip")||
+             !strcmp(p,".Z")||!strcmp(p,".GZ")||!strcmp(p,".ZIP"))) {
         *p='\0';
-        if (exist_file(buff)) return 1;
+        if(exist_file(buff)) {
+            return 1;
+        }
         comp=1;
     }
-    if ((p=strrchr(buff,'.'))&&strlen(p)==4&&(*(p+3)=='d'||*(p+3)=='D')) {
+    if((p=strrchr(buff,'.'))&&strlen(p)==4&&(*(p+3)=='d'||*(p+3)=='D')) {
         *(p+3)=*(p+3)=='d'?'o':'O';
-        if (exist_file(buff)) return 1;
+        if(exist_file(buff)) {
+            return 1;
+        }
         comp=1;
     }
-    if (!exist_file(buff)) return 0;
+    if(!exist_file(buff)) {
+        return 0;
+    }
     return comp?2:1;
 }
 /* free download paths -------------------------------------------------------*/
 static void free_path(paths_t *paths)
 {
     int i;
-    if (!paths) return;
-    for (i=0;i<paths->n;i++) {
+    if(!paths) {
+        return;
+    }
+    for(i=0; i<paths->n; i++) {
         free(paths->path[i].remot);
         free(paths->path[i].local);
     }
@@ -176,22 +212,22 @@ static int add_path(paths_t *paths, const char *remot, const char *dir)
 {
     path_t *paths_path;
     char local[1024];
-    
-    if (paths->n>=paths->nmax) {
+
+    if(paths->n>=paths->nmax) {
         paths->nmax=paths->nmax<=0?1024:paths->nmax*2;
         paths_path=(path_t *)realloc(paths->path,sizeof(path_t)*paths->nmax);
-        if (!paths_path) {
+        if(!paths_path) {
             free_path(paths);
             return 0;
         }
         paths->path=paths_path;
     }
     remot2local(remot,dir,local);
-    
+
     paths->path[paths->n].remot=paths->path[paths->n].local=NULL;
-    
-    if (!(paths->path[paths->n].remot=(char *)malloc(strlen(remot)+1))||
-        !(paths->path[paths->n].local=(char *)malloc(strlen(local)+1))) {
+
+    if(!(paths->path[paths->n].remot=(char *)malloc(strlen(remot)+1))||
+            !(paths->path[paths->n].local=(char *)malloc(strlen(local)+1))) {
         free_path(paths);
         return 0;
     }
@@ -207,29 +243,40 @@ static int gen_path(gtime_t time, gtime_t time_p, int seqnos, int seqnoe,
 {
     char remot[1024],remot_p[1024],dir_t[1024];
     int i;
-    
-    if (!*dir) dir=url->dir;
-    if (!*dir) dir=".";
-    
-    if (strstr(url->path,"%N")) {
-        for (i=seqnos;i<=seqnoe;i++) {
-            genpath(url->path,sta,time,i,remot);
-            genpath(dir      ,sta,time,i,dir_t);
-            if (time_p.time) {
-                genpath(url->path,sta,time_p,i,remot_p);
-                if (!strcmp(remot_p,remot)) continue;
-            }
-            if (!add_path(paths,remot,dir_t)) return 0;
-        }
+
+    if(!*dir) {
+        dir=url->dir;
     }
-    else {
-        genpath(url->path,sta,time,0,remot);
-        genpath(dir      ,sta,time,0,dir_t);
-        if (time_p.time) {
-            genpath(url->path,sta,time_p,0,remot_p);
-            if (!strcmp(remot_p,remot)) return 1;
+    if(!*dir) {
+        dir=".";
+    }
+
+    if(strstr(url->path,"%N")) {
+        for(i=seqnos; i<=seqnoe; i++) {
+            genpath(url->path,sta,time,i,remot);
+            genpath(dir,sta,time,i,dir_t);
+            if(time_p.time) {
+                genpath(url->path,sta,time_p,i,remot_p);
+                if(!strcmp(remot_p,remot)) {
+                    continue;
+                }
+            }
+            if(!add_path(paths,remot,dir_t)) {
+                return 0;
+            }
         }
-        if (!add_path(paths,remot,dir_t)) return 0;
+    } else {
+        genpath(url->path,sta,time,0,remot);
+        genpath(dir,sta,time,0,dir_t);
+        if(time_p.time) {
+            genpath(url->path,sta,time_p,0,remot_p);
+            if(!strcmp(remot_p,remot)) {
+                return 1;
+            }
+        }
+        if(!add_path(paths,remot,dir_t)) {
+            return 0;
+        }
     }
     return 1;
 }
@@ -239,16 +286,15 @@ static int gen_paths(gtime_t time, gtime_t time_p, int seqnos, int seqnoe,
                      paths_t *paths)
 {
     int i;
-    
-    if (strstr(url->path,"%s")||strstr(url->path,"%S")) {
-        for (i=0;i<nsta;i++) {
-            if (!gen_path(time,time_p,seqnos,seqnoe,url,stas[i],dir,paths)) {
+
+    if(strstr(url->path,"%s")||strstr(url->path,"%S")) {
+        for(i=0; i<nsta; i++) {
+            if(!gen_path(time,time_p,seqnos,seqnoe,url,stas[i],dir,paths)) {
                 return 0;
             }
         }
-    }
-    else {
-        if (!gen_path(time,time_p,seqnos,seqnoe,url,"",dir,paths)) {
+    } else {
+        if(!gen_path(time,time_p,seqnos,seqnoe,url,"",dir,paths)) {
             return 0;
         }
     }
@@ -258,14 +304,19 @@ static int gen_paths(gtime_t time, gtime_t time_p, int seqnos, int seqnoe,
 static void compact_paths(paths_t *paths)
 {
     int i,j,k;
-    
-    for (i=0;i<paths->n;i++) {
-        for (j=i+1;j<paths->n;j++) {
-            if (strcmp(paths->path[i].remot,paths->path[j].remot)) continue;
+
+    for(i=0; i<paths->n; i++) {
+        for(j=i+1; j<paths->n; j++) {
+            if(strcmp(paths->path[i].remot,paths->path[j].remot)) {
+                continue;
+            }
             free(paths->path[j].remot);
             free(paths->path[j].local);
-            for (k=j;k<paths->n-1;k++) paths->path[k]=paths->path[k+1];
-            paths->n--; j--;
+            for(k=j; k<paths->n-1; k++) {
+                paths->path[k]=paths->path[k+1];
+            }
+            paths->n--;
+            j--;
         }
     }
 }
@@ -273,42 +324,56 @@ static void compact_paths(paths_t *paths)
 static int mkdir_r(const char *dir)
 {
     char pdir[1024],*p;
-    
+
 #ifdef WIN32
     HANDLE h;
     WIN32_FIND_DATA data;
-    
-    if (!*dir||!strcmp(dir+1,":\\")) return 1;
-    
+
+    if(!*dir||!strcmp(dir+1,":\\")) {
+        return 1;
+    }
+
     strcpy(pdir,dir);
-    if ((p=strrchr(pdir,FILEPATHSEP))) {
+    if((p=strrchr(pdir,FILEPATHSEP))) {
         *p='\0';
         h=FindFirstFile(pdir,&data);
-        if (h==INVALID_HANDLE_VALUE) {
-            if (!mkdir_r(pdir)) return 0;
+        if(h==INVALID_HANDLE_VALUE) {
+            if(!mkdir_r(pdir)) {
+                return 0;
+            }
+        } else {
+            FindClose(h);
         }
-        else FindClose(h);
     }
-    if (CreateDirectory(dir,NULL)||
-        GetLastError()==ERROR_ALREADY_EXISTS) return 1;
-    
+    if(CreateDirectory(dir,NULL)||
+            GetLastError()==ERROR_ALREADY_EXISTS) {
+        return 1;
+    }
+
     trace(2,"directory generation error: dir=%s\n",dir);
     return 0;
 #else
     FILE *fp;
-    
-    if (!*dir) return 1;
-    
-    strcpy(pdir,dir);
-    if ((p=strrchr(pdir,FILEPATHSEP))) {
-        *p='\0';
-        if (!(fp=fopen(pdir,"r"))) {
-            if (!mkdir_r(pdir)) return 0;
-        }
-        else fclose(fp);
+
+    if(!*dir) {
+        return 1;
     }
-    if (!mkdir(dir,0777)||errno==EEXIST) return 1;
-    
+
+    strcpy(pdir,dir);
+    if((p=strrchr(pdir,FILEPATHSEP))) {
+        *p='\0';
+        if(!(fp=fopen(pdir,"r"))) {
+            if(!mkdir_r(pdir)) {
+                return 0;
+            }
+        } else {
+            fclose(fp);
+        }
+    }
+    if(!mkdir(dir,0777)||errno==EEXIST) {
+        return 1;
+    }
+
     trace(2,"directory generation error: dir=%s\n",dir);
     return 0;
 #endif
@@ -320,27 +385,33 @@ static int get_list(const path_t *path, const char *usr, const char *pwd,
     FILE *fp;
     char cmd[4096],env[1024]="",remot[1024],*opt="",*opt2="",*p;
     int stat;
-    
+
 #ifndef WIN32
     opt2=" -o /dev/null";
 #endif
     remove(FTP_LISTING);
-    
+
     strcpy(remot,path->remot);
-    
-    if ((p=strrchr(remot,'/'))) strcpy(p+1,"__REQUEST_LIST__"); else return 0;
-    
-    if (*proxy) {
+
+    if((p=strrchr(remot,'/'))) {
+        strcpy(p+1,"__REQUEST_LIST__");
+    } else {
+        return 0;
+    }
+
+    if(*proxy) {
         sprintf(env,"set ftp_proxy=http://%s & ",proxy);
         opt="--proxy=on ";
     }
     sprintf(cmd,"%s%s %s --ftp-user=%s --ftp-password=%s --glob=off "
             "--passive-ftp --no-remove-listing -N %s-t 1 -T %d%s\n",
             env,FTP_CMD,remot,usr,pwd,opt,FTP_TIMEOUT,opt2);
-    
+
     execcmd_to(cmd);
-    
-    if (!(fp=fopen(FTP_LISTING,"r"))) return 0;
+
+    if(!(fp=fopen(FTP_LISTING,"r"))) {
+        return 0;
+    }
     fclose(fp);
     return 1;
 }
@@ -350,24 +421,40 @@ static int test_list(const path_t *path)
     FILE *fp;
     char buff[1024],*file,*list,*p;
     int i;
-    
-    if (!(fp=fopen(FTP_LISTING,"r"))) return 1;
-    
-    if ((p=strrchr(path->remot,'/'))) file=p+1; else return 1;
-    
+
+    if(!(fp=fopen(FTP_LISTING,"r"))) {
+        return 1;
+    }
+
+    if((p=strrchr(path->remot,'/'))) {
+        file=p+1;
+    } else {
+        return 1;
+    }
+
     /* search file in remote file list */
-    while (fgets(buff,sizeof(buff),fp)) {
-        
+    while(fgets(buff,sizeof(buff),fp)) {
+
         /* remove symbolic link */
-        if ((p=strstr(buff,"->"))) *p='\0';
-        
-        for (i=strlen(buff)-1;i>=0;i--) {
-            if (strchr(" \r\n",buff[i])) buff[i]='\0'; else break;
+        if((p=strstr(buff,"->"))) {
+            *p='\0';
+        }
+
+        for(i=strlen(buff)-1; i>=0; i--) {
+            if(strchr(" \r\n",buff[i])) {
+                buff[i]='\0';
+            } else {
+                break;
+            }
         }
         /* file as last field */
-        if ((p=strrchr(buff,' '))) list=p+1; else list=buff;
-        
-        if (!strcmp(file,list)) {
+        if((p=strrchr(buff,' '))) {
+            list=p+1;
+        } else {
+            list=buff;
+        }
+
+        if(!strcmp(file,list)) {
             fclose(fp);
             return 1;
         }
@@ -383,116 +470,135 @@ static int exec_down(const path_t *path, char *remot_p, const char *usr,
     char dir[1024],errfile[1024],tmpfile[1024],cmd[4096],env[1024]="";
     char opt[1024]="",*opt2="",*p;
     int ret,proto;
-    
+
 #ifndef WIN32
     opt2=" 2> /dev/null";
 #endif
     strcpy(dir,path->local);
-    if ((p=strrchr(dir,FILEPATHSEP))) *p='\0';
-    
-    if      (!strncmp(path->remot,"ftp://" ,6)) proto=0;
-    else if (!strncmp(path->remot,"http://",7)) proto=1;
-    else {
+    if((p=strrchr(dir,FILEPATHSEP))) {
+        *p='\0';
+    }
+
+    if(!strncmp(path->remot,"ftp://",6)) {
+        proto=0;
+    } else if(!strncmp(path->remot,"http://",7)) {
+        proto=1;
+    } else {
         trace(2,"exec_down: invalid path %s\n",path->remot);
         showmsg("STAT=X");
-        if (fp) fprintf(fp,"%s ERROR (INVALID PATH)\n",path->remot);
+        if(fp) {
+            fprintf(fp,"%s ERROR (INVALID PATH)\n",path->remot);
+        }
         n[1]++;
         return 0;
     }
     /* test local file existence */
-    if (!(opts&DLOPT_FORCE)&&test_file(path->local)) {
+    if(!(opts&DLOPT_FORCE)&&test_file(path->local)) {
         showmsg("STAT=.");
-        if (fp) fprintf(fp,"%s in %s\n",path->remot,dir);
+        if(fp) {
+            fprintf(fp,"%s in %s\n",path->remot,dir);
+        }
         n[2]++;
         return 0;
     }
     showmsg("STAT=_");
-    
+
     /* get remote file list */
-    if ((p=strrchr(path->remot,'/'))&&
-        strncmp(path->remot,remot_p,p-path->remot)) {
-        
-        if (get_list(path,usr,pwd,proxy)) {
+    if((p=strrchr(path->remot,'/'))&&
+            strncmp(path->remot,remot_p,p-path->remot)) {
+
+        if(get_list(path,usr,pwd,proxy)) {
             strcpy(remot_p,path->remot);
         }
     }
     /* test file in listing */
-    if (proto==0&&!test_list(path)) {
+    if(proto==0&&!test_list(path)) {
         showmsg("STAT=x");
-        if (fp) fprintf(fp,"%s NO_FILE\n",path->remot);
+        if(fp) {
+            fprintf(fp,"%s NO_FILE\n",path->remot);
+        }
         n[1]++;
         return 0;
     }
     /* generate local directory recursively */
-    if (!mkdir_r(dir)) {
+    if(!mkdir_r(dir)) {
         showmsg("STAT=X");
-        if (fp) fprintf(fp,"%s -> %s ERROR (LOCAL DIR)\n",path->remot,dir);
+        if(fp) {
+            fprintf(fp,"%s -> %s ERROR (LOCAL DIR)\n",path->remot,dir);
+        }
         n[3]++;
         return 0;
     }
     /* proxy option */
-    if (*proxy) {
+    if(*proxy) {
         sprintf(env,"set %s_proxy=http://%s & ",proto==0?"ftp":"http",proxy);
         sprintf(opt," --proxy=on ");
     }
     /* download command */
     sprintf(errfile,"%s.err",path->local);
-    if (proto==0) {
+    if(proto==0) {
         sprintf(cmd,"%s%s %s --ftp-user=%s --ftp-password=%s --glob=off "
                 "--passive-ftp %s-t %d -T %d -O \"%s\" -o \"%s\"%s\n",
                 env,FTP_CMD,path->remot,usr,pwd,opt,FTP_RETRY,FTP_TIMEOUT,
                 path->local,errfile,opt2);
-    }
-    else {
-        if (*pwd) {
+    } else {
+        if(*pwd) {
             sprintf(opt+strlen(opt)," --http-user=%s --http-password=%s ",usr,
                     pwd);
         }
         sprintf(cmd,"%s%s %s %s-t %d -T %d -O \"%s\" -o \"%s\"%s\n",env,FTP_CMD,
                 path->remot,opt,FTP_RETRY,FTP_TIMEOUT,path->local,errfile,opt2);
     }
-    if (fp) fprintf(fp,"%s -> %s",path->remot,dir);
-    
+    if(fp) {
+        fprintf(fp,"%s -> %s",path->remot,dir);
+    }
+
     /* execute download command */
-    if ((ret=execcmd_to(cmd))) {
-        if ((proto==0&&ret==FTP_NOFILE)||
-            (proto==1&&ret==HTTP_NOFILE)) {
+    if((ret=execcmd_to(cmd))) {
+        if((proto==0&&ret==FTP_NOFILE)||
+                (proto==1&&ret==HTTP_NOFILE)) {
             showmsg("STAT=x");
-            if (fp) fprintf(fp," NO_FILE\n");
+            if(fp) {
+                fprintf(fp," NO_FILE\n");
+            }
             n[1]++;
-        }
-        else {
+        } else {
             trace(2,"exec_down: %s error %d\n",proto==0?"ftp":"http",ret);
             showmsg("STAT=X");
-            if (fp) fprintf(fp," ERROR (%d)\n",ret);
+            if(fp) {
+                fprintf(fp," ERROR (%d)\n",ret);
+            }
             n[3]++;
         }
         remove(path->local);
-        if (!(opts&DLOPT_HOLDERR)) {
+        if(!(opts&DLOPT_HOLDERR)) {
             remove(errfile);
         }
         return ret==2;
     }
     remove(errfile);
-    
+
     /* uncompress download file */
-    if (!(opts&DLOPT_KEEPCMP)&&(p=strrchr(path->local,'.'))&&
-        (!strcmp(p,".z")||!strcmp(p,".gz")||!strcmp(p,".zip")||
-         !strcmp(p,".Z")||!strcmp(p,".GZ")||!strcmp(p,".ZIP"))) {
-        
-        if (rtk_uncompress(path->local,tmpfile)) {
+    if(!(opts&DLOPT_KEEPCMP)&&(p=strrchr(path->local,'.'))&&
+            (!strcmp(p,".z")||!strcmp(p,".gz")||!strcmp(p,".zip")||
+             !strcmp(p,".Z")||!strcmp(p,".GZ")||!strcmp(p,".ZIP"))) {
+
+        if(rtk_uncompress(path->local,tmpfile)) {
             remove(path->local);
-        }
-        else {
+        } else {
             trace(2,"exec_down: uncompress error\n");
             showmsg("STAT=C");
-            if (fp) fprintf(fp," ERROR (UNCOMP)\n");
+            if(fp) {
+                fprintf(fp," ERROR (UNCOMP)\n");
+            }
             n[3]++;
             return 0;
         }
     }
     showmsg("STAT=o");
-    if (fp) fprintf(fp," OK\n");
+    if(fp) {
+        fprintf(fp," OK\n");
+    }
     n[0]++;
     return 0;
 }
@@ -504,26 +610,29 @@ static int test_local(gtime_t ts, gtime_t te, double ti, const char *path,
     gtime_t time;
     char remot[1024],remot_p[1024],dir_t[1024],local[1024],str[1024];
     int stat,abort=0;
-    
-    for (time=ts;timediff(time,te)<=1E-3;time=timeadd(time,ti)) {
-        
+
+    for(time=ts; timediff(time,te)<=1E-3; time=timeadd(time,ti)) {
+
         sprintf(str,"%s->%s",path,local);
-        
-        if (showmsg(str)) {
+
+        if(showmsg(str)) {
             abort=1;
             break;
         }
         genpath(path,sta,time,0,remot);
-        genpath(dir ,sta,time,0,dir_t);
+        genpath(dir,sta,time,0,dir_t);
         remot2local(remot,dir_t,local);
-        
+
         stat=test_file(local);
-        
+
         fprintf(fp," %s",stat==0?"-":(stat==1?"o":"z"));
-        
+
         showmsg("STAT=%s",stat==0?"x":(stat==1?"o":"z"));
-        
-        (*nt)++; if (stat) (*nc)++;
+
+        (*nt)++;
+        if(stat) {
+            (*nc)++;
+        }
     }
     fprintf(fp,"\n");
     return abort;
@@ -534,20 +643,19 @@ static int test_locals(gtime_t ts, gtime_t te, double ti, const url_t *url,
                        FILE *fp)
 {
     int i;
-    
-    if (strstr(url->path,"%s")||strstr(url->path,"%S")) {
+
+    if(strstr(url->path,"%s")||strstr(url->path,"%S")) {
         fprintf(fp,"%s\n",url->type);
-        for (i=0;i<nsta;i++) {
+        for(i=0; i<nsta; i++) {
             fprintf(fp,"%-12s:",stas[i]);
-            if (test_local(ts,te,ti,url->path,stas[i],*dir?dir:url->dir,nc+i,
-                           nt+i,fp)) {
+            if(test_local(ts,te,ti,url->path,stas[i],*dir?dir:url->dir,nc+i,
+                          nt+i,fp)) {
                 return 1;
             }
         }
-    }
-    else {
+    } else {
         fprintf(fp,"%-12s:",url->type);
-        if (test_local(ts,te,ti,url->path,"",*dir?dir:url->dir,nc,nt,fp)) {
+        if(test_local(ts,te,ti,url->path,"",*dir?dir:url->dir,nc,nt,fp)) {
             return 1;
         }
     }
@@ -558,10 +666,10 @@ static int print_total(const url_t *url, char **stas, int nsta, int *nc,
                        int *nt, FILE *fp)
 {
     int i;
-    
-    if (strstr(url->path,"%s")||strstr(url->path,"%S")) {
+
+    if(strstr(url->path,"%s")||strstr(url->path,"%S")) {
         fprintf(fp,"%s\n",url->type);
-        for (i=0;i<nsta;i++) {
+        for(i=0; i<nsta; i++) {
             fprintf(fp,"%-12s: %5d/%5d\n",stas[i],nc[i],nt[i]);
         }
         return nsta;
@@ -615,29 +723,35 @@ extern int dl_readurls(const char *file, char **types, int ntype, url_t *urls,
     FILE *fp;
     char buff[2048],type[32],path[1024],dir[1024],*p;
     int i,n=0;
-    
-    if (!(fp=fopen(file,"r"))) {
+
+    if(!(fp=fopen(file,"r"))) {
         fprintf(stderr,"options file read error %s\n",file);
         return 0;
     }
-    for (i=0;i<ntype;i++) {
+    for(i=0; i<ntype; i++) {
         rewind(fp);
-        while (fgets(buff,sizeof(buff),fp)&&n<nmax) {
-            if ((p=strchr(buff,'#'))) *p='\0';
+        while(fgets(buff,sizeof(buff),fp)&&n<nmax) {
+            if((p=strchr(buff,'#'))) {
+                *p='\0';
+            }
             p=buff;
             p=parse_str(p,type,sizeof(type));
             p=parse_str(p,path,sizeof(path));
-            p=parse_str(p,dir ,sizeof(dir ));
-            if (!*type||!*path) continue;
-            if (!cmp_str(type,types[i])) continue;
+            p=parse_str(p,dir,sizeof(dir));
+            if(!*type||!*path) {
+                continue;
+            }
+            if(!cmp_str(type,types[i])) {
+                continue;
+            }
             strcpy(urls[n  ].type,type);
             strcpy(urls[n  ].path,path);
-            strcpy(urls[n++].dir ,dir );
+            strcpy(urls[n++].dir,dir);
         }
     }
     fclose(fp);
-    
-    if (n<=0) {
+
+    if(n<=0) {
         fprintf(stderr,"no url in options file %s\n",file);
         return 0;
     }
@@ -658,20 +772,22 @@ extern int dl_readstas(const char *file, char **stas, int nmax)
     FILE *fp;
     char buff[4096],*p;
     int n=0;
-    
-    if (!(fp=fopen(file,"r"))) {
+
+    if(!(fp=fopen(file,"r"))) {
         fprintf(stderr,"station list file read error %s\n",file);
         return 0;
     }
-    while (fgets(buff,sizeof(buff),fp)&&n<nmax) {
-        if ((p=strchr(buff,'#'))) *p='\0';
-        for (p=strtok(buff," \r\n");p&&n<nmax;p=strtok(NULL," \r\n")) {
+    while(fgets(buff,sizeof(buff),fp)&&n<nmax) {
+        if((p=strchr(buff,'#'))) {
+            *p='\0';
+        }
+        for(p=strtok(buff," \r\n"); p&&n<nmax; p=strtok(NULL," \r\n")) {
             strcpy(stas[n++],p);
         }
     }
     fclose(fp);
-    
-    if (n<=0) {
+
+    if(n<=0) {
         fprintf(stderr,"no station in station file %s\n",file);
         return 0;
     }
@@ -707,51 +823,54 @@ extern int dl_exec(gtime_t ts, gtime_t te, double ti, int seqnos, int seqnoe,
                    const char *dir, const char *usr, const char *pwd,
                    const char *proxy, int opts, char *msg, FILE *fp)
 {
-    paths_t paths={0};
-    gtime_t ts_p={0};
+    paths_t paths= {0};
+    gtime_t ts_p= {0};
     char str[2048],remot_p[1024]="";
-    int i,n[4]={0};
+    int i,n[4]= {0};
     unsigned int tick=tickget();
-    
+
     showmsg("STAT=_");
-    
+
     /* generate download paths  */
-    while (timediff(ts,te)<1E-3) {
-        
-        for (i=0;i<nurl;i++) {
-            if (!gen_paths(ts,ts_p,seqnos,seqnoe,urls+i,stas,nsta,dir,&paths)) {
+    while(timediff(ts,te)<1E-3) {
+
+        for(i=0; i<nurl; i++) {
+            if(!gen_paths(ts,ts_p,seqnos,seqnoe,urls+i,stas,nsta,dir,&paths)) {
                 free_path(&paths);
                 return 0;
             }
         }
-        ts_p=ts; ts=timeadd(ts,ti);
+        ts_p=ts;
+        ts=timeadd(ts,ti);
     }
     /* compact download paths */
     compact_paths(&paths);
-    
-    if (paths.n<=0) {
+
+    if(paths.n<=0) {
         sprintf(msg,"no download data");
         return 0;
     }
-    for (i=0;i<paths.n;i++) {
-        
+    for(i=0; i<paths.n; i++) {
+
         sprintf(str,"%s->%s (%d/%d)",paths.path[i].remot,paths.path[i].local,i+1,
                 paths.n);
-        if (showmsg(str)) break;
-        
+        if(showmsg(str)) {
+            break;
+        }
+
         /* execute download */
-        if (exec_down(paths.path+i,remot_p,usr,pwd,proxy,opts,n,fp)) {
+        if(exec_down(paths.path+i,remot_p,usr,pwd,proxy,opts,n,fp)) {
             break;
         }
     }
-    if (!(opts&DLOPT_HOLDLST)) {
+    if(!(opts&DLOPT_HOLDLST)) {
         remove(FTP_LISTING);
     }
     sprintf(msg,"OK=%d No_File=%d Skip=%d Error=%d (Time=%.1f s)",n[0],n[1],n[2],
             n[3],(tickget()-tick)*0.001);
-    
+
     free_path(&paths);
-    
+
     return 1;
 }
 /* execute local file test -----------------------------------------------------
@@ -776,63 +895,78 @@ extern void dl_test(gtime_t ts, gtime_t te, double ti, const url_t *urls,
     double tow;
     char year[32],date[32],date_p[32];
     int i,j,n,m,*nc,*nt,week,flag,abort=0;
-    
-    if (ncol<1) ncol=1; else if (ncol>200) ncol=200;
-     
+
+    if(ncol<1) {
+        ncol=1;
+    } else if(ncol>200) {
+        ncol=200;
+    }
+
     fprintf(fp,"** LOCAL DATA AVAILABILITY (%s, %s) **\n\n",
             time_str(timeget(),0),*dir?dir:"*");
-    
-    for (i=n=0;i<nurl;i++) {
+
+    for(i=n=0; i<nurl; i++) {
         n+=strstr(urls[i].path,"%s")||strstr(urls[i].path,"%S")?nsta:1;
     }
     nc=imat(n,1);
     nt=imat(n,1);
-    for (i=0;i<n;i++) nc[i]=nt[i]=0;
-    
-    for (;timediff(ts,te)<1E-3&&!abort;ts=timeadd(ts,ti*ncol)) {
-        
+    for(i=0; i<n; i++) {
+        nc[i]=nt[i]=0;
+    }
+
+    for(; timediff(ts,te)<1E-3&&!abort; ts=timeadd(ts,ti*ncol)) {
+
         genpath(datefmt==0?"   %Y-":"%Y/%m/","",ts,0,year);
-        if      (datefmt<=1) fprintf(fp,"%s %s",datefmt==0?"DOY ":"DATE",year);
-        else                 fprintf(fp,"WEEK          ");
-        *date_p='\0'; flag=0;
-        
+        if(datefmt<=1) {
+            fprintf(fp,"%s %s",datefmt==0?"DOY ":"DATE",year);
+        } else {
+            fprintf(fp,"WEEK          ");
+        }
+        *date_p='\0';
+        flag=0;
+
         m=datefmt==2?1:2;
-        
-        for (i=0;i<(ncol+m-1)/m;i++) {
+
+        for(i=0; i<(ncol+m-1)/m; i++) {
             time=timeadd(ts,ti*i*m);
-            if (timediff(time,te)>=1E-3) break;
-            
-            if (datefmt<=1) {
+            if(timediff(time,te)>=1E-3) {
+                break;
+            }
+
+            if(datefmt<=1) {
                 genpath(datefmt==0?"%n":"%d","",time,0,date);
                 fprintf(fp,"%-4s",strcmp(date,date_p)?date:"");
-            }
-            else {
-                if (fabs(time2gpst(time,&week))<1.0) {
-                    fprintf(fp,"%04d",week); flag=1;
-                }
-                else {
-                    fprintf(fp,"%s",flag?"":"  "); flag=0;
+            } else {
+                if(fabs(time2gpst(time,&week))<1.0) {
+                    fprintf(fp,"%04d",week);
+                    flag=1;
+                } else {
+                    fprintf(fp,"%s",flag?"":"  ");
+                    flag=0;
                 }
             }
             strcpy(date_p,date);
         }
         fprintf(fp,"\n");
-        
-        for (i=j=0;i<nurl&&!abort;i++) {
+
+        for(i=j=0; i<nurl&&!abort; i++) {
             time=timeadd(ts,ti*ncol-1.0);
-            if (timediff(time,te)>=0.0) time=te;
-            
+            if(timediff(time,te)>=0.0) {
+                time=te;
+            }
+
             /* test local files */
             abort=test_locals(ts,time,ti,urls+i,stas,nsta,dir,nc+j,nt+j,fp);
-            
+
             j+=strstr(urls[i].path,"%s")||strstr(urls[i].path,"%S")?nsta:1;
         }
         fprintf(fp,"\n");
     }
     fprintf(fp,"# COUNT     : FILES/TOTAL\n");
-    
-    for (i=j=0;i<nurl;i++) {
+
+    for(i=j=0; i<nurl; i++) {
         j+=print_total(urls+i,stas,nsta,nc+j,nt+j,fp);
     }
-    free(nc); free(nt);
+    free(nc);
+    free(nt);
 }

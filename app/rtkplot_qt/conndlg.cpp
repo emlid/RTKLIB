@@ -10,13 +10,13 @@
 
 //---------------------------------------------------------------------------
 
- ConnectDialog::ConnectDialog(QWidget *parent)
+ConnectDialog::ConnectDialog(QWidget *parent)
     : QDialog(parent)
 {
     setupUi(this);
 
-	Stream1=Stream2=Format1=Format2=0;
-	CmdEna1[0]=CmdEna1[1]=CmdEna2[0]=CmdEna2[1]=0;
+    Stream1=Stream2=Format1=Format2=0;
+    CmdEna1[0]=CmdEna1[1]=CmdEna2[0]=CmdEna2[1]=0;
 
     connect(BtnCancel,SIGNAL(clicked(bool)),this,SLOT(reject()));
     connect(BtnOk,SIGNAL(clicked(bool)),this,SLOT(BtnOkClick()));
@@ -32,14 +32,20 @@
 //---------------------------------------------------------------------------
 void  ConnectDialog::showEvent(QShowEvent*event)
 {
-	int str[]={STR_NONE,STR_SERIAL,STR_TCPCLI,STR_TCPSVR,STR_NTRIPCLI,STR_FILE};
+    int str[]= {STR_NONE,STR_SERIAL,STR_TCPCLI,STR_TCPSVR,STR_NTRIPCLI,STR_FILE};
 
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-	for (int i=0;i<6;i++) {
-        if (str[i]==Stream1) SelStream1->setCurrentIndex(i);
-        if (str[i]==Stream2) SelStream2->setCurrentIndex(i);
-	}
+    for(int i=0; i<6; i++) {
+        if(str[i]==Stream1) {
+            SelStream1->setCurrentIndex(i);
+        }
+        if(str[i]==Stream2) {
+            SelStream2->setCurrentIndex(i);
+        }
+    }
     SolFormat1->setCurrentIndex(Format1);
     SolFormat2->setCurrentIndex(Format2);
     TimeFormS->setCurrentIndex(TimeForm);
@@ -48,12 +54,12 @@ void  ConnectDialog::showEvent(QShowEvent*event)
     TimeOutTimeE->setText(QString::number(TimeOutTime));
     ReConnTimeE ->setText(QString::number(ReConnTime));
 
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::BtnOkClick()
 {
-	int str[]={STR_NONE,STR_SERIAL,STR_TCPCLI,STR_TCPSVR,STR_NTRIPCLI,STR_FILE};
+    int str[]= {STR_NONE,STR_SERIAL,STR_TCPCLI,STR_TCPSVR,STR_NTRIPCLI,STR_FILE};
 
     Stream1=str[SelStream1->currentIndex()];
     Stream2=str[SelStream2->currentIndex()];
@@ -70,24 +76,44 @@ void  ConnectDialog::BtnOkClick()
 //---------------------------------------------------------------------------
 void  ConnectDialog::BtnOpt1Click()
 {
-    switch (SelStream1->currentIndex()) {
-		case 1: SerialOpt1(0); break;
-		case 2: TcpOpt1 (1);   break;
-		case 3: TcpOpt1 (0);   break;
-		case 4: TcpOpt1 (3);   break;
-		case 5: FileOpt1(0);   break;
-	}
+    switch(SelStream1->currentIndex()) {
+    case 1:
+        SerialOpt1(0);
+        break;
+    case 2:
+        TcpOpt1(1);
+        break;
+    case 3:
+        TcpOpt1(0);
+        break;
+    case 4:
+        TcpOpt1(3);
+        break;
+    case 5:
+        FileOpt1(0);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::BtnOpt2Click()
 {
-    switch (SelStream2->currentIndex()) {
-		case 1: SerialOpt2(0); break;
-		case 2: TcpOpt2 (1);   break;
-		case 3: TcpOpt2 (0);   break;
-		case 4: TcpOpt2 (3);   break;
-		case 5: FileOpt2(0);   break;
-	}
+    switch(SelStream2->currentIndex()) {
+    case 1:
+        SerialOpt2(0);
+        break;
+    case 2:
+        TcpOpt2(1);
+        break;
+    case 3:
+        TcpOpt2(0);
+        break;
+    case 4:
+        TcpOpt2(3);
+        break;
+    case 5:
+        FileOpt2(0);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::BtnCmd1Click()
@@ -99,7 +125,9 @@ void  ConnectDialog::BtnCmd1Click()
     dialog.CmdEna[1]=CmdEna1[1];
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
 
     Cmds1  [0]=dialog.Cmds  [0];
     Cmds1  [1]=dialog.Cmds  [1];
@@ -116,7 +144,9 @@ void  ConnectDialog::BtnCmd2Click()
     dialog.CmdEna[1]=CmdEna2[1];
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
 
     Cmds2  [0]=dialog.Cmds  [0];
     Cmds2  [1]=dialog.Cmds  [1];
@@ -126,22 +156,22 @@ void  ConnectDialog::BtnCmd2Click()
 //---------------------------------------------------------------------------
 void  ConnectDialog::SelStream1Change()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::SelStream2Change()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::SolFormat1Change()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::SolFormat2Change()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::SerialOpt1(int opt)
@@ -152,7 +182,9 @@ void  ConnectDialog::SerialOpt1(int opt)
     dialog.Opt=opt;
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths1[0]=dialog.Path;
 }
@@ -165,7 +197,9 @@ void  ConnectDialog::SerialOpt2(int opt)
     dialog.Opt=opt;
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths2[0]=dialog.Path;
 }
@@ -176,15 +210,25 @@ void  ConnectDialog::TcpOpt1(int opt)
 
     dialog.Path=Paths1[1];
     dialog.Opt=opt;
-    for (int i=0;i<MAXHIST;i++) dialog.History [i]=TcpHistory [i];
-    for (int i=0;i<MAXHIST;i++) dialog.MntpHist[i]=TcpMntpHist[i];
+    for(int i=0; i<MAXHIST; i++) {
+        dialog.History [i]=TcpHistory [i];
+    }
+    for(int i=0; i<MAXHIST; i++) {
+        dialog.MntpHist[i]=TcpMntpHist[i];
+    }
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths1[1]=dialog.Path;
-    for (int i=0;i<MAXHIST;i++) TcpHistory [i]=dialog.History [i];
-    for (int i=0;i<MAXHIST;i++) TcpMntpHist[i]=dialog.MntpHist[i];
+    for(int i=0; i<MAXHIST; i++) {
+        TcpHistory [i]=dialog.History [i];
+    }
+    for(int i=0; i<MAXHIST; i++) {
+        TcpMntpHist[i]=dialog.MntpHist[i];
+    }
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::TcpOpt2(int opt)
@@ -193,15 +237,25 @@ void  ConnectDialog::TcpOpt2(int opt)
 
     dialog.Path=Paths2[1];
     dialog.Opt=opt;
-    for (int i=0;i<MAXHIST;i++) dialog.History [i]=TcpHistory [i];
-    for (int i=0;i<MAXHIST;i++) dialog.MntpHist[i]=TcpMntpHist[i];
+    for(int i=0; i<MAXHIST; i++) {
+        dialog.History [i]=TcpHistory [i];
+    }
+    for(int i=0; i<MAXHIST; i++) {
+        dialog.MntpHist[i]=TcpMntpHist[i];
+    }
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths2[1]=dialog.Path;
-    for (int i=0;i<MAXHIST;i++) TcpHistory [i]=dialog.History [i];
-    for (int i=0;i<MAXHIST;i++) TcpMntpHist[i]=dialog.MntpHist[i];
+    for(int i=0; i<MAXHIST; i++) {
+        TcpHistory [i]=dialog.History [i];
+    }
+    for(int i=0; i<MAXHIST; i++) {
+        TcpMntpHist[i]=dialog.MntpHist[i];
+    }
 }
 //---------------------------------------------------------------------------
 void  ConnectDialog::FileOpt1(int opt)
@@ -212,7 +266,9 @@ void  ConnectDialog::FileOpt1(int opt)
     dialog.Opt=opt;
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths1[2]=dialog.Path;
 }
@@ -225,7 +281,9 @@ void  ConnectDialog::FileOpt2(int opt)
     dialog.Opt=opt;
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths2[2]=dialog.Path;
 }
@@ -245,10 +303,10 @@ void  ConnectDialog::UpdateEnable(void)
     Label6      ->setEnabled(SolFormat1->currentIndex()==0||SolFormat2->currentIndex()==0);
     Label7      ->setEnabled(SolFormat1->currentIndex()!=3||SolFormat2->currentIndex()!=3);
     Label8      ->setEnabled((2<=SelStream1->currentIndex()&&SelStream1->currentIndex()<=4)||
-                          (2<=SelStream2->currentIndex()&&SelStream2->currentIndex()<=4));
+                             (2<=SelStream2->currentIndex()&&SelStream2->currentIndex()<=4));
     TimeOutTimeE->setEnabled((2<=SelStream1->currentIndex()&&SelStream1->currentIndex()<=4)||
-                          (2<=SelStream2->currentIndex()&&SelStream2->currentIndex()<=4));
+                             (2<=SelStream2->currentIndex()&&SelStream2->currentIndex()<=4));
     ReConnTimeE ->setEnabled((2<=SelStream1->currentIndex()&&SelStream1->currentIndex()<=4)||
-                          (2<=SelStream2->currentIndex()&&SelStream2->currentIndex()<=4));
+                             (2<=SelStream2->currentIndex()&&SelStream2->currentIndex()<=4));
 }
 //---------------------------------------------------------------------------

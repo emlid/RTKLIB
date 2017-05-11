@@ -18,11 +18,15 @@ CodeOptDialog::CodeOptDialog(QWidget *parent, ConvOptDialog *c)
 //---------------------------------------------------------------------------
 void CodeOptDialog::showEvent(QShowEvent* event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-    char mask[7][64]={""};
-	
-    for (int i=0;i<7;i++) strcpy(mask[i],qPrintable(convOptDialog->CodeMask[i]));
+    char mask[7][64]= {""};
+
+    for(int i=0; i<7; i++) {
+        strcpy(mask[i],qPrintable(convOptDialog->CodeMask[i]));
+    }
     G01->setChecked(mask[0][ 0]=='1');
     G02->setChecked(mask[0][ 1]=='1');
     G03->setChecked(mask[0][ 2]=='1');
@@ -105,100 +109,268 @@ void CodeOptDialog::showEvent(QShowEvent* event)
     S24->setChecked(mask[4][23]=='1');
     S25->setChecked(mask[4][24]=='1');
     S26->setChecked(mask[4][25]=='1');
-	
-	UpdateEnable();
+
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void CodeOptDialog::BtnOkClick()
 {
-    char mask[7][64]={""};
-	
-    for (int i=0;i<7;i++)
-        for (int j=0;j<MAXCODE;j++) mask[i][j]='0';
-    if (G01->isChecked()) mask[0][ 0]='1';
-    if (G02->isChecked()) mask[0][ 1]='1';
-    if (G03->isChecked()) mask[0][ 2]='1';
-    if (G04->isChecked()) mask[0][ 3]='1';
-    if (G05->isChecked()) mask[0][ 4]='1';
-    if (G06->isChecked()) mask[0][ 5]='1';
-    if (G07->isChecked()) mask[0][ 6]='1';
-    if (G08->isChecked()) mask[0][ 7]='1';
-    if (G14->isChecked()) mask[0][13]='1';
-    if (G15->isChecked()) mask[0][14]='1';
-    if (G16->isChecked()) mask[0][15]='1';
-    if (G17->isChecked()) mask[0][16]='1';
-    if (G18->isChecked()) mask[0][17]='1';
-    if (G19->isChecked()) mask[0][18]='1';
-    if (G20->isChecked()) mask[0][19]='1';
-    if (G21->isChecked()) mask[0][20]='1';
-    if (G22->isChecked()) mask[0][21]='1';
-    if (G23->isChecked()) mask[0][22]='1';
-    if (G24->isChecked()) mask[0][23]='1';
-    if (G25->isChecked()) mask[0][24]='1';
-    if (G26->isChecked()) mask[0][25]='1';
-    if (R01->isChecked()) mask[1][ 0]='1';
-    if (R02->isChecked()) mask[1][ 1]='1';
-    if (R14->isChecked()) mask[1][13]='1';
-    if (R19->isChecked()) mask[1][18]='1';
-    if (R44->isChecked()) mask[1][43]='1';
-    if (R45->isChecked()) mask[1][44]='1';
-    if (R46->isChecked()) mask[1][45]='1';
-    if (E01->isChecked()) mask[2][ 0]='1';
-    if (E10->isChecked()) mask[2][ 9]='1';
-    if (E11->isChecked()) mask[2][10]='1';
-    if (E12->isChecked()) mask[2][11]='1';
-    if (E13->isChecked()) mask[2][12]='1';
-    if (E24->isChecked()) mask[2][23]='1';
-    if (E25->isChecked()) mask[2][24]='1';
-    if (E26->isChecked()) mask[2][25]='1';
-    if (E27->isChecked()) mask[2][26]='1';
-    if (E28->isChecked()) mask[2][27]='1';
-    if (E29->isChecked()) mask[2][28]='1';
-    if (E30->isChecked()) mask[2][29]='1';
-    if (E31->isChecked()) mask[2][30]='1';
-    if (E32->isChecked()) mask[2][31]='1';
-    if (E33->isChecked()) mask[2][32]='1';
-    if (E34->isChecked()) mask[2][33]='1';
-    if (E37->isChecked()) mask[2][36]='1';
-    if (E38->isChecked()) mask[2][37]='1';
-    if (E39->isChecked()) mask[2][38]='1';
-    if (J01->isChecked()) mask[3][ 0]='1';
-    if (J07->isChecked()) mask[3][ 6]='1';
-    if (J08->isChecked()) mask[3][ 7]='1';
-    if (J13->isChecked()) mask[3][12]='1';
-    if (J12->isChecked()) mask[3][11]='1';
-    if (J16->isChecked()) mask[3][15]='1';
-    if (J17->isChecked()) mask[3][16]='1';
-    if (J18->isChecked()) mask[3][17]='1';
-    if (J24->isChecked()) mask[3][23]='1';
-    if (J25->isChecked()) mask[3][24]='1';
-    if (J26->isChecked()) mask[3][25]='1';
-    if (J35->isChecked()) mask[3][34]='1';
-    if (J36->isChecked()) mask[3][35]='1';
-    if (J33->isChecked()) mask[3][32]='1';
-    if (C47->isChecked()) mask[5][46]='1';
-    if (C48->isChecked()) mask[5][47]='1';
-    if (C12->isChecked()) mask[5][11]='1';
-    if (C27->isChecked()) mask[5][26]='1';
-    if (C28->isChecked()) mask[5][27]='1';
-    if (C29->isChecked()) mask[5][28]='1';
-    if (C42->isChecked()) mask[5][41]='1';
-    if (C43->isChecked()) mask[5][42]='1';
-    if (C33->isChecked()) mask[5][32]='1';
-    if (I49->isChecked()) mask[3][48]='1';
-    if (I50->isChecked()) mask[3][49]='1';
-    if (I51->isChecked()) mask[3][50]='1';
-    if (I26->isChecked()) mask[3][25]='1';
-    if (I52->isChecked()) mask[3][51]='1';
-    if (I53->isChecked()) mask[3][52]='1';
-    if (I54->isChecked()) mask[3][53]='1';
-    if (I55->isChecked()) mask[3][54]='1';
-    if (S01->isChecked()) mask[4][ 0]='1';
-    if (S24->isChecked()) mask[4][23]='1';
-    if (S25->isChecked()) mask[4][24]='1';
-    if (S26->isChecked()) mask[4][25]='1';
+    char mask[7][64]= {""};
 
-    for (int i=0;i<6;i++) convOptDialog->CodeMask[i]=mask[i];
+    for(int i=0; i<7; i++)
+        for(int j=0; j<MAXCODE; j++) {
+            mask[i][j]='0';
+        }
+    if(G01->isChecked()) {
+        mask[0][ 0]='1';
+    }
+    if(G02->isChecked()) {
+        mask[0][ 1]='1';
+    }
+    if(G03->isChecked()) {
+        mask[0][ 2]='1';
+    }
+    if(G04->isChecked()) {
+        mask[0][ 3]='1';
+    }
+    if(G05->isChecked()) {
+        mask[0][ 4]='1';
+    }
+    if(G06->isChecked()) {
+        mask[0][ 5]='1';
+    }
+    if(G07->isChecked()) {
+        mask[0][ 6]='1';
+    }
+    if(G08->isChecked()) {
+        mask[0][ 7]='1';
+    }
+    if(G14->isChecked()) {
+        mask[0][13]='1';
+    }
+    if(G15->isChecked()) {
+        mask[0][14]='1';
+    }
+    if(G16->isChecked()) {
+        mask[0][15]='1';
+    }
+    if(G17->isChecked()) {
+        mask[0][16]='1';
+    }
+    if(G18->isChecked()) {
+        mask[0][17]='1';
+    }
+    if(G19->isChecked()) {
+        mask[0][18]='1';
+    }
+    if(G20->isChecked()) {
+        mask[0][19]='1';
+    }
+    if(G21->isChecked()) {
+        mask[0][20]='1';
+    }
+    if(G22->isChecked()) {
+        mask[0][21]='1';
+    }
+    if(G23->isChecked()) {
+        mask[0][22]='1';
+    }
+    if(G24->isChecked()) {
+        mask[0][23]='1';
+    }
+    if(G25->isChecked()) {
+        mask[0][24]='1';
+    }
+    if(G26->isChecked()) {
+        mask[0][25]='1';
+    }
+    if(R01->isChecked()) {
+        mask[1][ 0]='1';
+    }
+    if(R02->isChecked()) {
+        mask[1][ 1]='1';
+    }
+    if(R14->isChecked()) {
+        mask[1][13]='1';
+    }
+    if(R19->isChecked()) {
+        mask[1][18]='1';
+    }
+    if(R44->isChecked()) {
+        mask[1][43]='1';
+    }
+    if(R45->isChecked()) {
+        mask[1][44]='1';
+    }
+    if(R46->isChecked()) {
+        mask[1][45]='1';
+    }
+    if(E01->isChecked()) {
+        mask[2][ 0]='1';
+    }
+    if(E10->isChecked()) {
+        mask[2][ 9]='1';
+    }
+    if(E11->isChecked()) {
+        mask[2][10]='1';
+    }
+    if(E12->isChecked()) {
+        mask[2][11]='1';
+    }
+    if(E13->isChecked()) {
+        mask[2][12]='1';
+    }
+    if(E24->isChecked()) {
+        mask[2][23]='1';
+    }
+    if(E25->isChecked()) {
+        mask[2][24]='1';
+    }
+    if(E26->isChecked()) {
+        mask[2][25]='1';
+    }
+    if(E27->isChecked()) {
+        mask[2][26]='1';
+    }
+    if(E28->isChecked()) {
+        mask[2][27]='1';
+    }
+    if(E29->isChecked()) {
+        mask[2][28]='1';
+    }
+    if(E30->isChecked()) {
+        mask[2][29]='1';
+    }
+    if(E31->isChecked()) {
+        mask[2][30]='1';
+    }
+    if(E32->isChecked()) {
+        mask[2][31]='1';
+    }
+    if(E33->isChecked()) {
+        mask[2][32]='1';
+    }
+    if(E34->isChecked()) {
+        mask[2][33]='1';
+    }
+    if(E37->isChecked()) {
+        mask[2][36]='1';
+    }
+    if(E38->isChecked()) {
+        mask[2][37]='1';
+    }
+    if(E39->isChecked()) {
+        mask[2][38]='1';
+    }
+    if(J01->isChecked()) {
+        mask[3][ 0]='1';
+    }
+    if(J07->isChecked()) {
+        mask[3][ 6]='1';
+    }
+    if(J08->isChecked()) {
+        mask[3][ 7]='1';
+    }
+    if(J13->isChecked()) {
+        mask[3][12]='1';
+    }
+    if(J12->isChecked()) {
+        mask[3][11]='1';
+    }
+    if(J16->isChecked()) {
+        mask[3][15]='1';
+    }
+    if(J17->isChecked()) {
+        mask[3][16]='1';
+    }
+    if(J18->isChecked()) {
+        mask[3][17]='1';
+    }
+    if(J24->isChecked()) {
+        mask[3][23]='1';
+    }
+    if(J25->isChecked()) {
+        mask[3][24]='1';
+    }
+    if(J26->isChecked()) {
+        mask[3][25]='1';
+    }
+    if(J35->isChecked()) {
+        mask[3][34]='1';
+    }
+    if(J36->isChecked()) {
+        mask[3][35]='1';
+    }
+    if(J33->isChecked()) {
+        mask[3][32]='1';
+    }
+    if(C47->isChecked()) {
+        mask[5][46]='1';
+    }
+    if(C48->isChecked()) {
+        mask[5][47]='1';
+    }
+    if(C12->isChecked()) {
+        mask[5][11]='1';
+    }
+    if(C27->isChecked()) {
+        mask[5][26]='1';
+    }
+    if(C28->isChecked()) {
+        mask[5][27]='1';
+    }
+    if(C29->isChecked()) {
+        mask[5][28]='1';
+    }
+    if(C42->isChecked()) {
+        mask[5][41]='1';
+    }
+    if(C43->isChecked()) {
+        mask[5][42]='1';
+    }
+    if(C33->isChecked()) {
+        mask[5][32]='1';
+    }
+    if(I49->isChecked()) {
+        mask[3][48]='1';
+    }
+    if(I50->isChecked()) {
+        mask[3][49]='1';
+    }
+    if(I51->isChecked()) {
+        mask[3][50]='1';
+    }
+    if(I26->isChecked()) {
+        mask[3][25]='1';
+    }
+    if(I52->isChecked()) {
+        mask[3][51]='1';
+    }
+    if(I53->isChecked()) {
+        mask[3][52]='1';
+    }
+    if(I54->isChecked()) {
+        mask[3][53]='1';
+    }
+    if(I55->isChecked()) {
+        mask[3][54]='1';
+    }
+    if(S01->isChecked()) {
+        mask[4][ 0]='1';
+    }
+    if(S24->isChecked()) {
+        mask[4][23]='1';
+    }
+    if(S25->isChecked()) {
+        mask[4][24]='1';
+    }
+    if(S26->isChecked()) {
+        mask[4][25]='1';
+    }
+
+    for(int i=0; i<6; i++) {
+        convOptDialog->CodeMask[i]=mask[i];
+    }
 
     accept();
 }

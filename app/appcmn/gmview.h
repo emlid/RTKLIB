@@ -14,22 +14,22 @@
 class TGoogleMapView : public TForm
 {
 __published:
-	TPanel *Panel1;
-	TPanel *Panel2;
-	TCppWebBrowser *WebBrowser;
-	TPanel *Panel5;
-	TButton *BtnClose;
-	TSpeedButton *BtnHome;
-	void __fastcall BtnCloseClick(TObject *Sender);
-	void __fastcall FormCreate(TObject *Sender);
-	void __fastcall BtnHomeClick(TObject *Sender);
+    TPanel *Panel1;
+    TPanel *Panel2;
+    TCppWebBrowser *WebBrowser;
+    TPanel *Panel5;
+    TButton *BtnClose;
+    TSpeedButton *BtnHome;
+    void __fastcall BtnCloseClick(TObject *Sender);
+    void __fastcall FormCreate(TObject *Sender);
+    void __fastcall BtnHomeClick(TObject *Sender);
 
 
 private:
     void __fastcall ExecFunc(AnsiString func);
 
 public:
-	__fastcall TGoogleMapView(TComponent* Owner);
+    __fastcall TGoogleMapView(TComponent* Owner);
     void __fastcall ShowHome(void);
     int  __fastcall GetState(void);
     void __fastcall ClearMark(void);

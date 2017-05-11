@@ -25,7 +25,7 @@ private:
 
     KeyDialog *keyDlg;
 public:
-	int Opt;
+    int Opt;
     QString Path,History[MAXHIST],MntpHist[MAXHIST];
     explicit FtpOptDialog(QWidget *parent);
 };

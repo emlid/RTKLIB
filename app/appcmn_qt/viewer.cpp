@@ -20,7 +20,7 @@ TextViewer::TextViewer(QWidget* parent)
 {
     setupUi(this);
 
-	Option=1;
+    Option=1;
 
     viewerOptDialog=new ViewerOptDialog(this);
 
@@ -34,33 +34,33 @@ TextViewer::TextViewer(QWidget* parent)
 //---------------------------------------------------------------------------
 void TextViewer::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-	if (Option==0) {
+    if(Option==0) {
         BtnReload->setVisible(false);
         BtnRead  ->setVisible(false);
-	}
-	else if (Option==2) {
+    } else if(Option==2) {
         BtnReload->setVisible(false);
         BtnRead  ->setText(tr("Save..."));
-	}
+    }
 
-	UpdateText();
+    UpdateText();
 }
 //---------------------------------------------------------------------------
 void TextViewer::BtnReloadClick()
 {
-	Read(File);
+    Read(File);
 }
 //---------------------------------------------------------------------------
 void TextViewer::BtnReadClick()
 {
-    if (BtnRead->text()==tr("Save...")) {
+    if(BtnRead->text()==tr("Save...")) {
         Save(QDir::toNativeSeparators(QFileDialog::getSaveFileName(this,QString(),File)));
-	}
-	else {
+    } else {
         Read(QDir::toNativeSeparators(QFileDialog::getOpenFileName(this,QString(),File)));
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void TextViewer::BtnOptClick()
@@ -70,16 +70,18 @@ void TextViewer::BtnOptClick()
     viewerOptDialog->Color2=Color2;
 
     viewerOptDialog->move(this->size().width()/2-viewerOptDialog->size().width()/2,
-        this->size().height()/2-viewerOptDialog->size().height()/2);
+                          this->size().height()/2-viewerOptDialog->size().height()/2);
     viewerOptDialog->exec();
 
-    if (viewerOptDialog->result()!=QDialog::Accepted) return;
+    if(viewerOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     FontD=viewerOptDialog->Font;
     Color1=viewerOptDialog->Color1;
     Color2=viewerOptDialog->Color2;
 
-	UpdateText();
+    UpdateText();
 }
 //---------------------------------------------------------------------------
 void TextViewer::BtnCloseClick()
@@ -94,19 +96,23 @@ void TextViewer::BtnFindClick()
 //---------------------------------------------------------------------------
 bool TextViewer::Read(const QString &path)
 {
-    char file[256],*p[]={file};
-    if (expath(qPrintable(path),p,1)<1) return false;
+    char file[256],*p[]= {file};
+    if(expath(qPrintable(path),p,1)<1) {
+        return false;
+    }
 
     QFile f(file);
 
-    if (!f.open(QIODevice::ReadOnly)) return false;
+    if(!f.open(QIODevice::ReadOnly)) {
+        return false;
+    }
     Text->setPlainText("");
 
     TextStr=f.readAll();
     Text->appendPlainText(TextStr);
 
     setWindowTitle(file);
-	File=file;
+    File=file;
 
     return true;
 }
@@ -115,10 +121,12 @@ bool TextViewer::Save(const QString &file)
 {
     QFile f(file);
 
-    if (!f.open(QIODevice::WriteOnly)) return false;
+    if(!f.open(QIODevice::WriteOnly)) {
+        return false;
+    }
 
     f.write(Text->toPlainText().toLocal8Bit());
-	File=file;
+    File=file;
 
     return true;
 }

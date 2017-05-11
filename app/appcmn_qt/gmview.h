@@ -17,8 +17,11 @@ class GMPageState : public QObject
     Q_OBJECT
     Q_PROPERTY(QString text MEMBER text NOTIFY textChanged)
 public:
-    explicit GMPageState(QObject *parent=NULL): QObject(parent){}
-    QString getText() {return text;}
+    explicit GMPageState(QObject *parent=NULL): QObject(parent) {}
+    QString getText()
+    {
+        return text;
+    }
 signals:
     void textChanged(const QString &text);
 private:
@@ -45,9 +48,9 @@ protected:
     void resizeEvent(QResizeEvent*);
 
 private:
-	int State;
-	double Lat,Lon,Zoom;
-	double MarkPos[2][2];
+    int State;
+    double Lat,Lon,Zoom;
+    double MarkPos[2][2];
     QTimer Timer1;
     bool loaded;
 #ifdef QWEBKIT

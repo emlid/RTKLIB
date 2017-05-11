@@ -14,11 +14,19 @@ ConvOptDialog::ConvOptDialog(QWidget *parent)
 
     codeOptDialog = new CodeOptDialog(this,this);
 
-	int glo=MAXPRNGLO,gal=MAXPRNGAL,qzs=MAXPRNQZS,cmp=MAXPRNCMP;
-    if (glo<=0) Nav2->setEnabled(false);
-    if (gal<=0) Nav3->setEnabled(false);
-    if (qzs<=0) Nav4->setEnabled(false);
-    if (cmp<=0) Nav6->setEnabled(false);
+    int glo=MAXPRNGLO,gal=MAXPRNGAL,qzs=MAXPRNQZS,cmp=MAXPRNCMP;
+    if(glo<=0) {
+        Nav2->setEnabled(false);
+    }
+    if(gal<=0) {
+        Nav3->setEnabled(false);
+    }
+    if(qzs<=0) {
+        Nav4->setEnabled(false);
+    }
+    if(cmp<=0) {
+        Nav6->setEnabled(false);
+    }
 
     connect(BtnCancel,SIGNAL(clicked(bool)),this,SLOT(reject()));
     connect(BtnOk,SIGNAL(clicked(bool)),this,SLOT(BtnOkClick()));
@@ -27,12 +35,14 @@ ConvOptDialog::ConvOptDialog(QWidget *parent)
     connect(RnxFile,SIGNAL(clicked(bool)),this,SLOT(RnxFileClick()));
     connect(RnxVer,SIGNAL(currentIndexChanged(int)),this,SLOT(RnxVerChange()));
 
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvOptDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     RnxVer->setCurrentIndex(mainWindow->RnxVer);
     RnxFile->setChecked(mainWindow->RnxFile);
@@ -58,7 +68,9 @@ void ConvOptDialog::showEvent(QShowEvent *event)
     Comment0->setText(mainWindow->Comment[0]);
     Comment1->setText(mainWindow->Comment[1]);
     RcvOption->setText(mainWindow->RcvOption);
-    for (int i=0;i<6;i++) CodeMask[i]=mainWindow->CodeMask[i];
+    for(int i=0; i<6; i++) {
+        CodeMask[i]=mainWindow->CodeMask[i];
+    }
     AutoPos->setChecked(mainWindow->AutoPos);
     ScanObs->setChecked(mainWindow->ScanObs);
     OutIono->setChecked(mainWindow->OutIono);
@@ -85,8 +97,8 @@ void ConvOptDialog::showEvent(QShowEvent *event)
     Freq7->setChecked(mainWindow->FreqType&FREQTYPE_L9);
     ExSats->setText(mainWindow->ExSats);
     TraceLevel->setCurrentIndex(mainWindow->TraceLevel);
-	
-	UpdateEnable();
+
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvOptDialog::BtnOkClick()
@@ -115,32 +127,70 @@ void ConvOptDialog::BtnOkClick()
     mainWindow->Comment[0]=Comment0->text();
     mainWindow->Comment[1]=Comment1->text();
     mainWindow->RcvOption=RcvOption->text();
-    for (int i=0;i<6;i++) mainWindow->CodeMask[i]=CodeMask[i];
+    for(int i=0; i<6; i++) {
+        mainWindow->CodeMask[i]=CodeMask[i];
+    }
     mainWindow->AutoPos=AutoPos->isChecked();
     mainWindow->ScanObs=ScanObs->isChecked();
     mainWindow->OutIono=OutIono->isChecked();
     mainWindow->OutTime=OutTime->isChecked();
     mainWindow->OutLeaps=OutLeaps->isChecked();
-	
-	int navsys=0,obstype=0,freqtype=0;
-    if (Nav1->isChecked()) navsys|=SYS_GPS;
-    if (Nav2->isChecked()) navsys|=SYS_GLO;
-    if (Nav3->isChecked()) navsys|=SYS_GAL;
-    if (Nav4->isChecked()) navsys|=SYS_QZS;
-    if (Nav5->isChecked()) navsys|=SYS_SBS;
-    if (Nav6->isChecked()) navsys|=SYS_CMP;
-    if (Nav7->isChecked()) navsys|=SYS_IRN;
-    if (Obs1->isChecked()) obstype|=OBSTYPE_PR;
-    if (Obs2->isChecked()) obstype|=OBSTYPE_CP;
-    if (Obs3->isChecked()) obstype|=OBSTYPE_DOP;
-    if (Obs4->isChecked()) obstype|=OBSTYPE_SNR;
-    if (Freq1->isChecked()) freqtype|=FREQTYPE_L1;
-    if (Freq2->isChecked()) freqtype|=FREQTYPE_L2;
-    if (Freq3->isChecked()) freqtype|=FREQTYPE_L5;
-    if (Freq4->isChecked()) freqtype|=FREQTYPE_L6;
-    if (Freq5->isChecked()) freqtype|=FREQTYPE_L7;
-    if (Freq6->isChecked()) freqtype|=FREQTYPE_L8;
-    if (Freq7->isChecked()) freqtype|=FREQTYPE_L9;
+
+    int navsys=0,obstype=0,freqtype=0;
+    if(Nav1->isChecked()) {
+        navsys|=SYS_GPS;
+    }
+    if(Nav2->isChecked()) {
+        navsys|=SYS_GLO;
+    }
+    if(Nav3->isChecked()) {
+        navsys|=SYS_GAL;
+    }
+    if(Nav4->isChecked()) {
+        navsys|=SYS_QZS;
+    }
+    if(Nav5->isChecked()) {
+        navsys|=SYS_SBS;
+    }
+    if(Nav6->isChecked()) {
+        navsys|=SYS_CMP;
+    }
+    if(Nav7->isChecked()) {
+        navsys|=SYS_IRN;
+    }
+    if(Obs1->isChecked()) {
+        obstype|=OBSTYPE_PR;
+    }
+    if(Obs2->isChecked()) {
+        obstype|=OBSTYPE_CP;
+    }
+    if(Obs3->isChecked()) {
+        obstype|=OBSTYPE_DOP;
+    }
+    if(Obs4->isChecked()) {
+        obstype|=OBSTYPE_SNR;
+    }
+    if(Freq1->isChecked()) {
+        freqtype|=FREQTYPE_L1;
+    }
+    if(Freq2->isChecked()) {
+        freqtype|=FREQTYPE_L2;
+    }
+    if(Freq3->isChecked()) {
+        freqtype|=FREQTYPE_L5;
+    }
+    if(Freq4->isChecked()) {
+        freqtype|=FREQTYPE_L6;
+    }
+    if(Freq5->isChecked()) {
+        freqtype|=FREQTYPE_L7;
+    }
+    if(Freq6->isChecked()) {
+        freqtype|=FREQTYPE_L8;
+    }
+    if(Freq7->isChecked()) {
+        freqtype|=FREQTYPE_L9;
+    }
     mainWindow->NavSys=navsys;
     mainWindow->ObsType=obstype;
     mainWindow->FreqType=freqtype;
@@ -152,37 +202,65 @@ void ConvOptDialog::BtnOkClick()
 //---------------------------------------------------------------------------
 void ConvOptDialog::RnxFileClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvOptDialog::RnxVerChange()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvOptDialog::AutoPosClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvOptDialog::BtnMaskClick()
-{    
+{
     codeOptDialog->NavSys=0;
     codeOptDialog->FreqType=0;
-    if (Nav1->isChecked()) codeOptDialog->NavSys|=SYS_GPS;
-    if (Nav2->isChecked()) codeOptDialog->NavSys|=SYS_GLO;
-    if (Nav3->isChecked()) codeOptDialog->NavSys|=SYS_GAL;
-    if (Nav4->isChecked()) codeOptDialog->NavSys|=SYS_QZS;
-    if (Nav5->isChecked()) codeOptDialog->NavSys|=SYS_SBS;
-    if (Nav6->isChecked()) codeOptDialog->NavSys|=SYS_CMP;
-    if (Nav7->isChecked()) codeOptDialog->NavSys|=SYS_IRN;
-    if (Freq1->isChecked()) codeOptDialog->FreqType|=FREQTYPE_L1;
-    if (Freq2->isChecked()) codeOptDialog->FreqType|=FREQTYPE_L2;
-    if (Freq3->isChecked()) codeOptDialog->FreqType|=FREQTYPE_L5;
-    if (Freq4->isChecked()) codeOptDialog->FreqType|=FREQTYPE_L6;
-    if (Freq5->isChecked()) codeOptDialog->FreqType|=FREQTYPE_L7;
-    if (Freq6->isChecked()) codeOptDialog->FreqType|=FREQTYPE_L8;
-    if (Freq7->isChecked()) codeOptDialog->FreqType|=FREQTYPE_L9;
+    if(Nav1->isChecked()) {
+        codeOptDialog->NavSys|=SYS_GPS;
+    }
+    if(Nav2->isChecked()) {
+        codeOptDialog->NavSys|=SYS_GLO;
+    }
+    if(Nav3->isChecked()) {
+        codeOptDialog->NavSys|=SYS_GAL;
+    }
+    if(Nav4->isChecked()) {
+        codeOptDialog->NavSys|=SYS_QZS;
+    }
+    if(Nav5->isChecked()) {
+        codeOptDialog->NavSys|=SYS_SBS;
+    }
+    if(Nav6->isChecked()) {
+        codeOptDialog->NavSys|=SYS_CMP;
+    }
+    if(Nav7->isChecked()) {
+        codeOptDialog->NavSys|=SYS_IRN;
+    }
+    if(Freq1->isChecked()) {
+        codeOptDialog->FreqType|=FREQTYPE_L1;
+    }
+    if(Freq2->isChecked()) {
+        codeOptDialog->FreqType|=FREQTYPE_L2;
+    }
+    if(Freq3->isChecked()) {
+        codeOptDialog->FreqType|=FREQTYPE_L5;
+    }
+    if(Freq4->isChecked()) {
+        codeOptDialog->FreqType|=FREQTYPE_L6;
+    }
+    if(Freq5->isChecked()) {
+        codeOptDialog->FreqType|=FREQTYPE_L7;
+    }
+    if(Freq6->isChecked()) {
+        codeOptDialog->FreqType|=FREQTYPE_L8;
+    }
+    if(Freq7->isChecked()) {
+        codeOptDialog->FreqType|=FREQTYPE_L9;
+    }
 
     codeOptDialog->show();
 }

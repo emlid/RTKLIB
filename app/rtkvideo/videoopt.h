@@ -35,19 +35,19 @@ __published:
     TButton *BtnFile;
     TLabel *Label5;
     TSaveDialog *SaveDialog;
-	TEdit *EditCapSize;
-	TLabel *Label7;
-	TComboBox *SelCapPos;
-	TLabel *Label8;
-	TComboColorBox *SelCapColor;
-	TLabel *Label6;
-	TEdit *EditCodecQuality;
+    TEdit *EditCapSize;
+    TLabel *Label7;
+    TComboBox *SelCapPos;
+    TLabel *Label8;
+    TComboColorBox *SelCapColor;
+    TLabel *Label6;
+    TEdit *EditCodecQuality;
     void __fastcall FormShow(TObject *Sender);
     void __fastcall SelDevChange(TObject *Sender);
     void __fastcall BtnOkClick(TObject *Sender);
     void __fastcall ChkTcpPortChange(TObject *Sender);
     void __fastcall BtnFileClick(TObject *Sender);
-	void __fastcall SelCapPosChange(TObject *Sender);
+    void __fastcall SelCapPosChange(TObject *Sender);
 private:
     void __fastcall UpdateProf(void);
     void __fastcall UpdateEnable(void);

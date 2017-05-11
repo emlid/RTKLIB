@@ -20,7 +20,7 @@ QString color2String(const QColor &c);
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 PlotOptDialog::PlotOptDialog(QWidget *parent)
-   : QDialog(parent)
+    : QDialog(parent)
 {
     setupUi(this);
 
@@ -64,9 +64,11 @@ PlotOptDialog::PlotOptDialog(QWidget *parent)
 //---------------------------------------------------------------------------
 void PlotOptDialog::showEvent(QShowEvent *event)
 {
-    int i,marks[]={1,2,3,4,5,10,15,20};
-    
-    if (event->spontaneous()) return;
+    int i,marks[]= {1,2,3,4,5,10,15,20};
+
+    if(event->spontaneous()) {
+        return;
+    }
 
     TimeLabel  ->setCurrentIndex(plot->TimeLabel);
     LatLonFmt  ->setCurrentIndex(plot->LatLonFmt);
@@ -82,14 +84,18 @@ void PlotOptDialog::showEvent(QShowEvent *event)
     ShowScale  ->setCurrentIndex(plot->ShowScale);
     ShowCompass->setCurrentIndex(plot->ShowCompass);
     PlotStyle  ->setCurrentIndex(plot->PlotStyle);
-    for (i=0;i<8;i++) {
-        if (marks[i]==plot->MarkSize) MarkSize->setCurrentIndex(i);
+    for(i=0; i<8; i++) {
+        if(marks[i]==plot->MarkSize) {
+            MarkSize->setCurrentIndex(i);
+        }
     }
-    for (int i=0;i<8;i++)
-        for (int j=0;j<2;j++)
+    for(int i=0; i<8; i++)
+        for(int j=0; j<2; j++) {
             MColor[j][i]=plot->MColor[j][i];
-    for (int i=0;i<4;i++)
+        }
+    for(int i=0; i<4; i++) {
         CColor[i]=plot->CColor[i];
+    }
 
     MColor1 ->setStyleSheet(QString("background-color: %1;").arg(color2String(plot->MColor[0][1])));
     MColor2 ->setStyleSheet(QString("background-color: %1;").arg(color2String(plot->MColor[0][2])));
@@ -107,13 +113,13 @@ void PlotOptDialog::showEvent(QShowEvent *event)
     Color2 ->setStyleSheet(QString("QLabel {background-color: %1;}").arg(color2String(plot->CColor[1])));
     Color3 ->setStyleSheet(QString("QLabel {background-color: %1;}").arg(color2String(plot->CColor[2])));
     Color4 ->setStyleSheet(QString("QLabel {background-color: %1;}").arg(color2String(plot->CColor[3])));
-    
+
     FontOpt=plot->Font;
     UpdateFont();
-    
+
     ElMask ->setCurrentText(QString::number(plot->ElMask));
     MaxDop ->setCurrentText(QString::number(plot->MaxDop));
-    MaxMP  ->setCurrentText(QString::number(plot->MaxMP ));
+    MaxMP  ->setCurrentText(QString::number(plot->MaxMP));
     YRange ->setCurrentText(QString::number(plot->YRange));
     Origin ->setCurrentIndex(plot->Origin);
     RcvPos ->setCurrentIndex(plot->RcvPos);
@@ -128,7 +134,7 @@ void PlotOptDialog::showEvent(QShowEvent *event)
     NavSys6->setChecked(plot->NavSys&SYS_CMP);
     NavSys7->setChecked(plot->NavSys&SYS_IRN);
     AnimCycle->setCurrentText(QString::number(plot->AnimCycle));
-    RefCycle ->setText(QString::number(plot->RefCycle ));
+    RefCycle ->setText(QString::number(plot->RefCycle));
     HideLowSat->setCurrentIndex(plot->HideLowSat);
     ElMaskP->setCurrentIndex(plot->ElMaskP);
     ExSats->setText(plot->ExSats);
@@ -137,14 +143,14 @@ void PlotOptDialog::showEvent(QShowEvent *event)
     RnxOpts->setText(plot->RnxOpts);
     TLEFile->setText(plot->TLEFile);
     TLESatFile->setText(plot->TLESatFile);
-    
+
     UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void PlotOptDialog::BtnOKClick()
 {
-    int marks[]={1,2,3,4,5,10,15,20};
-    
+    int marks[]= {1,2,3,4,5,10,15,20};
+
     plot->TimeLabel  =TimeLabel  ->currentIndex();
     plot->LatLonFmt  =LatLonFmt  ->currentIndex();
     plot->AutoScale  =AutoScale  ->currentIndex();
@@ -160,14 +166,16 @@ void PlotOptDialog::BtnOKClick()
     plot->ShowCompass=ShowCompass->currentIndex();
     plot->PlotStyle  =PlotStyle  ->currentIndex();
     plot->MarkSize=marks[MarkSize->currentIndex()];
-    for (int i=0;i<8;i++)
-        for (int j=0;j<2;j++)
+    for(int i=0; i<8; i++)
+        for(int j=0; j<2; j++) {
             plot->MColor[j][i]=MColor[j][i];
-    for (int i=0;i<4;i++)
+        }
+    for(int i=0; i<4; i++) {
         plot->CColor[i]=CColor[i];
+    }
 
     plot->Font=FontOpt;
-    
+
     plot->ElMask=ElMask->currentText().toDouble();
     plot->MaxDop=MaxDop->currentText().toDouble();
     plot->MaxMP =MaxMP ->currentText().toDouble();
@@ -201,27 +209,55 @@ void PlotOptDialog::BtnOKClick()
 void PlotOptDialog::MColorClick()
 {
     QToolButton *button=dynamic_cast<QToolButton *>(QObject::sender());
-    if (!button) return;
+    if(!button) {
+        return;
+    }
 
     QColorDialog dialog(this);
     QColor *current=&MColor[0][1];
 
-    if (button==MColor1)  current=&MColor[0][1];
-    if (button==MColor2)  current=&MColor[0][2];
-    if (button==MColor3)  current=&MColor[0][3];
-    if (button==MColor4)  current=&MColor[0][4];
-    if (button==MColor5)  current=&MColor[0][5];
-    if (button==MColor6)  current=&MColor[0][6];
-    if (button==MColor7)  current=&MColor[1][1];
-    if (button==MColor8)  current=&MColor[1][2];
-    if (button==MColor9)  current=&MColor[1][3];
-    if (button==MColor10) current=&MColor[1][4];
-    if (button==MColor11) current=&MColor[1][5];
-    if (button==MColor12) current=&MColor[1][6];
+    if(button==MColor1) {
+        current=&MColor[0][1];
+    }
+    if(button==MColor2) {
+        current=&MColor[0][2];
+    }
+    if(button==MColor3) {
+        current=&MColor[0][3];
+    }
+    if(button==MColor4) {
+        current=&MColor[0][4];
+    }
+    if(button==MColor5) {
+        current=&MColor[0][5];
+    }
+    if(button==MColor6) {
+        current=&MColor[0][6];
+    }
+    if(button==MColor7) {
+        current=&MColor[1][1];
+    }
+    if(button==MColor8) {
+        current=&MColor[1][2];
+    }
+    if(button==MColor9) {
+        current=&MColor[1][3];
+    }
+    if(button==MColor10) {
+        current=&MColor[1][4];
+    }
+    if(button==MColor11) {
+        current=&MColor[1][5];
+    }
+    if(button==MColor12) {
+        current=&MColor[1][6];
+    }
     dialog.setCurrentColor(*current);
 
     dialog.exec();
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
     button->setStyleSheet(QString("background-color: %1").arg(color2String(dialog.currentColor())));
     *current=dialog.currentColor();
 }
@@ -231,7 +267,9 @@ void PlotOptDialog::BtnColor1Click()
     QColorDialog dialog(this);
     dialog.setCurrentColor(CColor[0]);
     dialog.exec();
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
     Color1->setStyleSheet(QString("QLabel {background-color: %1;}").arg(color2String(dialog.currentColor())));
     CColor[0]=dialog.currentColor();
 }
@@ -241,7 +279,9 @@ void PlotOptDialog::BtnColor2Click()
     QColorDialog dialog(this);
     dialog.setCurrentColor(CColor[1]);
     dialog.exec();
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
     Color2->setStyleSheet(QString("QLabel {background-color: %1;}").arg(color2String(dialog.currentColor())));
     CColor[1]=dialog.currentColor();
 }
@@ -251,7 +291,9 @@ void PlotOptDialog::BtnColor3Click()
     QColorDialog dialog(this);
     dialog.setCurrentColor(CColor[2]);
     dialog.exec();
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
     Color3->setStyleSheet(QString("QLabel {background-color: %1;}").arg(color2String(dialog.currentColor())));
     CColor[2]=dialog.currentColor();
 }
@@ -261,7 +303,9 @@ void PlotOptDialog::BtnColor4Click()
     QColorDialog dialog(this);
     dialog.setCurrentColor(CColor[3]);
     dialog.exec();
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
     Color4->setStyleSheet(QString("QLabel {background-color: %1;}").arg(color2String(dialog.currentColor())));
     CColor[3]=dialog.currentColor();
 }
@@ -273,7 +317,9 @@ void PlotOptDialog::BtnFontClick()
     dialog.setCurrentFont(FontOpt);
     dialog.exec();
 
-    if (dialog.result()!=QDialog::Accepted) return;
+    if(dialog.result()!=QDialog::Accepted) {
+        return;
+    }
     FontOpt=dialog.currentFont();
     UpdateFont();
 }
@@ -299,11 +345,13 @@ void PlotOptDialog::BtnRefPosClick()
     refDialog->RovPos[1]=RefPos2->text().toDouble();
     refDialog->RovPos[2]=RefPos3->text().toDouble();
     refDialog->move(pos().x()+size().width()/2-refDialog->size().width()/2,
-        pos().y()+size().height()/2-refDialog->size().height()/2);
+                    pos().y()+size().height()/2-refDialog->size().height()/2);
 
     refDialog->exec();
 
-    if (refDialog->result()!=QDialog::Accepted) return;
+    if(refDialog->result()!=QDialog::Accepted) {
+        return;
+    }
     RefPos1->setText(QString::number(refDialog->Pos[0]));
     RefPos2->setText(QString::number(refDialog->Pos[1]));
     RefPos3->setText(QString::number(refDialog->Pos[2]));
@@ -343,8 +391,10 @@ void PlotOptDialog::BtnTLEViewClick()
 {
     TextViewer *viewer;
     QString file=TLEFile->text();
-    
-    if (file=="") return;
+
+    if(file=="") {
+        return;
+    }
     viewer=new TextViewer(this);
     viewer->setWindowTitle(file);
     viewer->show();
@@ -355,8 +405,10 @@ void PlotOptDialog::BtnTLESatViewClick()
 {
     TextViewer *viewer;
     QString file=TLESatFile->text();
-    
-    if (file=="") return;
+
+    if(file=="") {
+        return;
+    }
     viewer=new TextViewer(this);
     viewer->setWindowTitle(file);
     viewer->show();

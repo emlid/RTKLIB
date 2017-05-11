@@ -12,43 +12,51 @@
 extern Plot *plot;
 
 //---------------------------------------------------------------------------
- SkyImgDialog::SkyImgDialog(QWidget *parent)
+SkyImgDialog::SkyImgDialog(QWidget *parent)
     : QDialog(parent)
 {
-     setupUi(this);
+    setupUi(this);
 
-     connect(BtnClose,SIGNAL(clicked(bool)),this,SLOT(BtnCloseClick()));
-     connect(BtnGenMask,SIGNAL(clicked(bool)),this,SLOT(BtnGenMaskClick()));
-     connect(BtnLoad,SIGNAL(clicked(bool)),this,SLOT(BtnLoadClick()));
-     connect(BtnSave,SIGNAL(clicked(bool)),this,SLOT(BtnSaveClick()));
-     connect(BtnUpdate,SIGNAL(clicked(bool)),this,SLOT(BtnUpdateClick()));
-     connect(SkyRes,SIGNAL(currentIndexChanged(int)),this,SLOT(SkyResChange()));
-     connect(SkyElMask,SIGNAL(clicked(bool)),this,SLOT(SkyElMaskClicked()));
-     connect(SkyDestCorr,SIGNAL(clicked(bool)),this,SLOT(SkyDestCorrClicked()));
-     connect(SkyFlip,SIGNAL(clicked(bool)),this,SLOT(SkyFlipClicked()));
-     connect(SkyBinarize,SIGNAL(clicked(bool)),this,SLOT(SkyBinarizeClicked()));
+    connect(BtnClose,SIGNAL(clicked(bool)),this,SLOT(BtnCloseClick()));
+    connect(BtnGenMask,SIGNAL(clicked(bool)),this,SLOT(BtnGenMaskClick()));
+    connect(BtnLoad,SIGNAL(clicked(bool)),this,SLOT(BtnLoadClick()));
+    connect(BtnSave,SIGNAL(clicked(bool)),this,SLOT(BtnSaveClick()));
+    connect(BtnUpdate,SIGNAL(clicked(bool)),this,SLOT(BtnUpdateClick()));
+    connect(SkyRes,SIGNAL(currentIndexChanged(int)),this,SLOT(SkyResChange()));
+    connect(SkyElMask,SIGNAL(clicked(bool)),this,SLOT(SkyElMaskClicked()));
+    connect(SkyDestCorr,SIGNAL(clicked(bool)),this,SLOT(SkyDestCorrClicked()));
+    connect(SkyFlip,SIGNAL(clicked(bool)),this,SLOT(SkyFlipClicked()));
+    connect(SkyBinarize,SIGNAL(clicked(bool)),this,SLOT(SkyBinarizeClicked()));
 }
 //---------------------------------------------------------------------------
 void  SkyImgDialog::showEvent(QShowEvent* event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-	UpdateField();
-	UpdateEnable();
+    UpdateField();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  SkyImgDialog::BtnSaveClick()
 {
     QFile fp;
     QString file=plot->SkyImageFile;
-	if (file=="") return;
-	UpdateSky();
-	file=file+".tag";
+    if(file=="") {
+        return;
+    }
+    UpdateSky();
+    file=file+".tag";
     fp.setFileName(file);
-    if (QFile::exists(file)) {
-        if (QMessageBox::question(this,file,tr("File exists. Overwrite it?"))!=QMessageBox::Yes) return;
-	}
-    if (!fp.open(QIODevice::WriteOnly)) return;
+    if(QFile::exists(file)) {
+        if(QMessageBox::question(this,file,tr("File exists. Overwrite it?"))!=QMessageBox::Yes) {
+            return;
+        }
+    }
+    if(!fp.open(QIODevice::WriteOnly)) {
+        return;
+    }
 
     QString data;
     data=QString("%% sky image tag file: rtkplot %1 %2\n\n").arg(VER_RTKLIB).arg(PATCH_LEVEL);
@@ -62,9 +70,9 @@ void  SkyImgDialog::BtnSaveClick()
     data+=QString("resample= %1\n").arg(plot->SkyRes);
     data+=QString("flip    = %1\n").arg(plot->SkyFlip);
     data+=QString("dest    = %1 %2 %3 %4 %5 %6 %7 %8 %9s\n")
-        .arg(plot->SkyDest[1],0,'g',6).arg(plot->SkyDest[2],0,'g',6).arg(plot->SkyDest[3],0,'g',6).arg(plot->SkyDest[4],0,'g',6)
-        .arg(plot->SkyDest[5],0,'g',6).arg(plot->SkyDest[6],0,'g',6).arg(plot->SkyDest[7],0,'g',6).arg(plot->SkyDest[8],0,'g',6)
-        .arg(plot->SkyDest[9],0,'g',6);
+          .arg(plot->SkyDest[1],0,'g',6).arg(plot->SkyDest[2],0,'g',6).arg(plot->SkyDest[3],0,'g',6).arg(plot->SkyDest[4],0,'g',6)
+          .arg(plot->SkyDest[5],0,'g',6).arg(plot->SkyDest[6],0,'g',6).arg(plot->SkyDest[7],0,'g',6).arg(plot->SkyDest[8],0,'g',6)
+          .arg(plot->SkyDest[9],0,'g',6);
     data+=QString("elmask  = %1\n").arg(plot->SkyElMask);
     data+=QString("binarize= %1\n").arg(plot->SkyBinarize);
     data+=QString("binthr1 = %1\n").arg(plot->SkyBinThres1,0,'f',2);
@@ -74,7 +82,7 @@ void  SkyImgDialog::BtnSaveClick()
 //---------------------------------------------------------------------------
 void  SkyImgDialog::BtnUpdateClick()
 {
-	UpdateSky();
+    UpdateSky();
 }
 //---------------------------------------------------------------------------
 void  SkyImgDialog::BtnCloseClick()
@@ -158,23 +166,23 @@ void  SkyImgDialog::UpdateEnable(void)
 //---------------------------------------------------------------------------
 void  SkyImgDialog::SkyElMaskClicked()
 {
-	UpdateSky();
+    UpdateSky();
 }
 //---------------------------------------------------------------------------
 void  SkyImgDialog::SkyDestCorrClicked()
 {
-	UpdateSky();
-	UpdateEnable();
+    UpdateSky();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  SkyImgDialog::SkyFlipClicked()
 {
-	UpdateSky();
+    UpdateSky();
 }
 //---------------------------------------------------------------------------
 void  SkyImgDialog::SkyResChange()
 {
-	UpdateSky();
+    UpdateSky();
 }
 //---------------------------------------------------------------------------
 void  SkyImgDialog::BtnLoadClick()
@@ -191,24 +199,34 @@ void  SkyImgDialog::BtnGenMaskClick()
     QImage &bm=plot->SkyImageR;
     double r,ca,sa,el,el0;
     int x,y,w,h,az,n;
-    
-    w=bm.width(); h=bm.height();
-    if (w<=0||h<=0) return;
-    
-    for (az=0;az<=360;az++) {
+
+    w=bm.width();
+    h=bm.height();
+    if(w<=0||h<=0) {
+        return;
+    }
+
+    for(az=0; az<=360; az++) {
         ca=cos(az*D2R);
         sa=sin(az*D2R);
-        for (el=90.0,n=0,el0=0.0;el>=0.0;el-=0.1) {
+        for(el=90.0,n=0,el0=0.0; el>=0.0; el-=0.1) {
             r=(1.0-el/90.0)*plot->SkyScaleR;
             x=(int)floor(w/2.0+sa*r+0.5);
             y=(int)floor(h/2.0+ca*r+0.5);
-            if (x<0||x>=w||y<0||y>=h) continue;
-            QRgb pix=bm.pixel(x,y);
-            if (qRed(pix)<255&&qGreen(pix)<255&&qBlue(pix)<255) {
-                if (++n==1) el0=el;
-                if (n>=5) break;
+            if(x<0||x>=w||y<0||y>=h) {
+                continue;
             }
-            else n=0;
+            QRgb pix=bm.pixel(x,y);
+            if(qRed(pix)<255&&qGreen(pix)<255&&qBlue(pix)<255) {
+                if(++n==1) {
+                    el0=el;
+                }
+                if(n>=5) {
+                    break;
+                }
+            } else {
+                n=0;
+            }
         }
         plot->ElMaskData[az]=el0==90.0?0.0:el0*D2R;
     }
@@ -218,7 +236,7 @@ void  SkyImgDialog::BtnGenMaskClick()
 
 void  SkyImgDialog::SkyBinarizeClicked()
 {
-	UpdateSky();
-	UpdateEnable();
+    UpdateSky();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------

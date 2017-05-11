@@ -9,12 +9,12 @@
 #include "cmdoptdlg.h"
 
 //---------------------------------------------------------------------------
- CmdOptDialog::CmdOptDialog(QWidget* parent)
+CmdOptDialog::CmdOptDialog(QWidget* parent)
     : QDialog(parent)
 {
     setupUi(this);
 
-	CmdEna[0]=CmdEna[1]=1;
+    CmdEna[0]=CmdEna[1]=1;
 
     connect(BtnOk,SIGNAL(clicked()),this,SLOT(BtnOkClick()));
     connect(BtnCancel,SIGNAL(clicked()),this,SLOT(reject()));
@@ -27,7 +27,9 @@
 //---------------------------------------------------------------------------
 void CmdOptDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     OpenCmd->clear();
     CloseCmd->clear();
@@ -37,7 +39,7 @@ void CmdOptDialog::showEvent(QShowEvent *event)
     ChkOpenCmd->setChecked(CmdEna[0]);
     ChkCloseCmd->setChecked(CmdEna[1]);
 
-	UpdateEnable();
+    UpdateEnable();
 }
 
 //---------------------------------------------------------------------------
@@ -55,9 +57,9 @@ void  CmdOptDialog::BtnOkClick()
 void  CmdOptDialog::BtnLoadClick()
 {
     QString OpenDialog_FileName;
-    QPlainTextEdit *cmd[]={OpenCmd,CloseCmd};
+    QPlainTextEdit *cmd[]= {OpenCmd,CloseCmd};
     QByteArray buff;
-	int n=0;
+    int n=0;
 
     OpenDialog_FileName=QDir::toNativeSeparators(QFileDialog::getOpenFileName(this));
     QFile f(OpenDialog_FileName);
@@ -67,10 +69,15 @@ void  CmdOptDialog::BtnLoadClick()
     cmd[0]->clear();
     cmd[1]->clear();
 
-    while (!f.atEnd()) {
+    while(!f.atEnd()) {
         buff=f.readLine(0);
-        if (buff[0]=='@') {n=1; continue;}
-        if (buff[buff.length()-1]=='\n') buff[buff.length()-1]='\0';
+        if(buff[0]=='@') {
+            n=1;
+            continue;
+        }
+        if(buff[buff.length()-1]=='\n') {
+            buff[buff.length()-1]='\0';
+        }
         cmd[n]->appendPlainText(buff);
     }
 }
@@ -84,7 +91,9 @@ void  CmdOptDialog::BtnSaveClick()
     SaveDialog_FileName=QDir::toNativeSeparators(QFileDialog::getSaveFileName(this));
     QFile fp(SaveDialog_FileName);
 
-    if (!fp.open(QIODevice::WriteOnly)) return;
+    if(!fp.open(QIODevice::WriteOnly)) {
+        return;
+    }
 
     fp.write(OpenCmd_Text);
     fp.write("\n@\n");
@@ -94,13 +103,13 @@ void  CmdOptDialog::BtnSaveClick()
 //---------------------------------------------------------------------------
 void  CmdOptDialog::ChkCloseCmdClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 
 //---------------------------------------------------------------------------
 void  CmdOptDialog::ChkOpenCmdClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 
 //---------------------------------------------------------------------------

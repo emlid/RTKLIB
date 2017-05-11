@@ -29,7 +29,9 @@ FileSelDialog::FileSelDialog(QWidget *parent)
 #endif
     Panel2->layout()->addWidget(DirSelector);
     DirSelector->setModel(dirModel);
-    DirSelector->hideColumn(1); DirSelector->hideColumn(2);DirSelector->hideColumn(3); //only show names
+    DirSelector->hideColumn(1);
+    DirSelector->hideColumn(2);
+    DirSelector->hideColumn(3); //only show names
 
     fileModel = new QFileSystemModel(this);
     fileModel->setFilter((fileModel->filter()& ~QDir::Dirs & ~QDir::AllDirs));
@@ -44,26 +46,33 @@ FileSelDialog::FileSelDialog(QWidget *parent)
     connect(Filter,SIGNAL(currentIndexChanged(QString)),this,SLOT(FilterClick()));
 
 }
-FileSelDialog::~FileSelDialog() {
+FileSelDialog::~FileSelDialog()
+{
     delete DirSelector;
 }
 
 //---------------------------------------------------------------------------
 void  FileSelDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     QFileInfoList drives=QDir::drives();
-    if (drives.size()>1&&drives.at(0).filePath()!="/"){
+    if(drives.size()>1&&drives.at(0).filePath()!="/") {
         Panel1->setVisible(true);
         DriveSel->clear();
 
-        foreach (const QFileInfo & drive,drives) {
+        foreach(const QFileInfo & drive,drives) {
             DriveSel->addItem(drive.filePath());
         }
-    } else Panel1->setVisible(false); // do not show drive selection on unix
+    } else {
+        Panel1->setVisible(false);    // do not show drive selection on unix
+    }
 
-    if (Dir=="") Dir=drives.at(0).filePath();
+    if(Dir=="") {
+        Dir=drives.at(0).filePath();
+    }
 
     DriveSel->setCurrentText(Dir.mid(0,Dir.indexOf(":")+2));
     dirModel->setRootPath(Dir);

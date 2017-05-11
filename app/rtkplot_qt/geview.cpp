@@ -38,7 +38,7 @@
 extern Plot *plot;
 
 //---------------------------------------------------------------------------
- GoogleEarthView::GoogleEarthView(QWidget *parent)
+GoogleEarthView::GoogleEarthView(QWidget *parent)
     : QMainWindow(parent)
 {
     setupUi(this);
@@ -101,7 +101,7 @@ extern Plot *plot;
 void  GoogleEarthView::FormCreate()
 {
     QString dir;
-    
+
     dir=qApp->applicationDirPath(); // exe directory
     dir=dir+"/"+RTKPLOT_GE_FILE;
 #ifdef QWEBKIT
@@ -125,7 +125,9 @@ void  GoogleEarthView::FormCreate()
 //---------------------------------------------------------------------------
 void GoogleEarthView::PageLoaded(bool ok)
 {
-    if (!ok) return;
+    if(!ok) {
+        return;
+    }
 
     loaded=true;
 #ifdef QWEBENGINE
@@ -140,7 +142,9 @@ void GoogleEarthView::PageLoaded(bool ok)
 //---------------------------------------------------------------------------
 void  GoogleEarthView::Timer1Timer()
 {
-    if (!GetState()) return;
+    if(!GetState()) {
+        return;
+    }
 
     State=1;
     SetView(Lat,Lon,Range,Heading);
@@ -159,14 +163,18 @@ void  GoogleEarthView::BtnOpt1Click()
 //---------------------------------------------------------------------------
 void  GoogleEarthView::BtnHeadingClick()
 {
-    if (!BtnHeading->isChecked()) SetHeading(0.0);
+    if(!BtnHeading->isChecked()) {
+        SetHeading(0.0);
+    }
     UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  GoogleEarthView::BtnFixCentClick()
 {
     FixCent=BtnFixCent->isChecked();
-    if (FixCent) SetCent(Lat,Lon);
+    if(FixCent) {
+        SetCent(Lat,Lon);
+    }
 }
 //---------------------------------------------------------------------------
 void  GoogleEarthView::BtnEnaAltClick()
@@ -229,23 +237,34 @@ void GoogleEarthView::BtnOptClick()
     Panel8->setVisible(!Panel8->isVisible());
 }
 //---------------------------------------------------------------------------
-void GoogleEarthView::resizeEvent(QResizeEvent * )
+void GoogleEarthView::resizeEvent(QResizeEvent *)
 {
-    if (FixCent) SetCent(Lat,Lon);
+    if(FixCent) {
+        SetCent(Lat,Lon);
+    }
 }
 //---------------------------------------------------------------------------
 void  GoogleEarthView::Timer2Timer()
 {
-    if (Expand) {
-        if (Expand>0) Range=MIN(MAX_RANGE,Range*1.05);
-        else          Range=MAX(MIN_RANGE,Range/1.05);
+    if(Expand) {
+        if(Expand>0) {
+            Range=MIN(MAX_RANGE,Range*1.05);
+        } else {
+            Range=MAX(MIN_RANGE,Range/1.05);
+        }
         SetRange(Range);
     }
-    if (Rotate) {
-        if (Rotate>0) Heading+=3.0;
-        else          Heading-=3.0;
-        if      (Heading> 180.0) Heading-=360.0;
-        else if (Heading<-180.0) Heading+=360.0;
+    if(Rotate) {
+        if(Rotate>0) {
+            Heading+=3.0;
+        } else {
+            Heading-=3.0;
+        }
+        if(Heading> 180.0) {
+            Heading-=360.0;
+        } else if(Heading<-180.0) {
+            Heading+=360.0;
+        }
         SetHeading(Heading);
     }
 }
@@ -262,9 +281,11 @@ void  GoogleEarthView::Clear(void)
 }
 // --------------------------------------------------------------------------
 void  GoogleEarthView::SetView(double lat, double lon, double range,
-    double heading)
+                               double heading)
 {
-    if (range<=0.0) range=INIT_RANGE;
+    if(range<=0.0) {
+        range=INIT_RANGE;
+    }
     Lat=lat;
     Lon=lon;
     Range=range;
@@ -276,12 +297,16 @@ void  GoogleEarthView::SetCent(double lat, double lon)
 {
     Lat=lat;
     Lon=lon;
-    if (FixCent) ExecFunc(QString("SetCent(%1,%2)").arg(lat,0,'f',9).arg(lon,0,'f',9));
+    if(FixCent) {
+        ExecFunc(QString("SetCent(%1,%2)").arg(lat,0,'f',9).arg(lon,0,'f',9));
+    }
 }
 // --------------------------------------------------------------------------
 void  GoogleEarthView::SetRange(double range)
 {
-    if (range<=0.0) range=INIT_RANGE;
+    if(range<=0.0) {
+        range=INIT_RANGE;
+    }
     Range=range;
     ExecFunc(QString("SetRange(%1)").arg(range,0,'f',3));
 }
@@ -294,7 +319,9 @@ void  GoogleEarthView::SetHeading(double angle)
 // --------------------------------------------------------------------------
 void  GoogleEarthView::SetMark(int index, const double *pos)
 {
-    if (index<1||2<index) return;
+    if(index<1||2<index) {
+        return;
+    }
     MarkPos[index-1][0]=pos[0]*R2D;
     MarkPos[index-1][1]=pos[1]*R2D;
     ExecFunc(QString("SetMark(%1,%2,%3,%4)").arg(index).arg(pos[0]*R2D,0,'f',9)
@@ -303,7 +330,9 @@ void  GoogleEarthView::SetMark(int index, const double *pos)
 // --------------------------------------------------------------------------
 void  GoogleEarthView::ShowMark(int index)
 {
-    if (index<1||2<index) return;
+    if(index<1||2<index) {
+        return;
+    }
     ExecFunc(QString("ShowMark(%1)").arg(index));
     MarkVis[index-1]=1;
     UpdateEnable();
@@ -311,7 +340,9 @@ void  GoogleEarthView::ShowMark(int index)
 // --------------------------------------------------------------------------
 void  GoogleEarthView::HideMark(int index)
 {
-    if (index<1||2<index) return;
+    if(index<1||2<index) {
+        return;
+    }
     ExecFunc(QString("HideMark(%1)").arg(index));
     MarkVis[index-1]=0;
     UpdateEnable();
@@ -319,7 +350,9 @@ void  GoogleEarthView::HideMark(int index)
 // --------------------------------------------------------------------------
 void  GoogleEarthView::ClearTrack(int index)
 {
-    if (index<1||2<index) return;
+    if(index<1||2<index) {
+        return;
+    }
     ExecFunc(QString("ClearTrack(%1)").arg(index));
     TrackVis[index-1]=0;
     UpdateEnable();
@@ -328,21 +361,27 @@ void  GoogleEarthView::ClearTrack(int index)
 int  GoogleEarthView::UpdateTrack(int index, solbuf_t *sol)
 {
     sol_t *data;
-    double prev[3]={0},pos[3];
+    double prev[3]= {0},pos[3];
     int i,intv;
-    
-    if (index<1||2<index||!State||sol->n<=0) return 0;
-    
+
+    if(index<1||2<index||!State||sol->n<=0) {
+        return 0;
+    }
+
     setCursor(Qt::WaitCursor);
-    
+
     ClearTrack(index);
-    
+
     intv=sol->n/MAXTRACKS+1; // interval to reduce points
-    
-    for (i=0;(data=getsol(sol,i))!=NULL;i++) {
-        if (i%intv!=0) continue;
+
+    for(i=0; (data=getsol(sol,i))!=NULL; i++) {
+        if(i%intv!=0) {
+            continue;
+        }
         ecef2pos(data->rr,pos);
-        if (fabs(pos[0]-prev[0])<1E-8&&fabs(pos[1]-prev[1])<1E-8) continue;
+        if(fabs(pos[0]-prev[0])<1E-8&&fabs(pos[1]-prev[1])<1E-8) {
+            continue;
+        }
         prev[0]=pos[0];
         prev[1]=pos[1];
         ExecFunc(QString("AddTrack(%d,%.9f,%.9f)").arg(index).arg(pos[0]*R2D,0,'f',9)
@@ -355,7 +394,9 @@ int  GoogleEarthView::UpdateTrack(int index, solbuf_t *sol)
 // --------------------------------------------------------------------------
 void  GoogleEarthView::ShowTrack(int index)
 {
-    if (index<1||2<index) return;
+    if(index<1||2<index) {
+        return;
+    }
     ExecFunc(QString("ShowTrack(%1)").arg(index));
     TrackVis[index-1]=1;
     UpdateEnable();
@@ -363,7 +404,9 @@ void  GoogleEarthView::ShowTrack(int index)
 // --------------------------------------------------------------------------
 void  GoogleEarthView::HideTrack(int index)
 {
-    if (index<1||2<index) return;
+    if(index<1||2<index) {
+        return;
+    }
     ExecFunc(QString("HideTrack(%1)").arg(index));
     TrackVis[index-1]=0;
     UpdateEnable();
@@ -373,10 +416,10 @@ void  GoogleEarthView::UpdatePoint(void)
 {
     double pos[3];
     int i;
-    
+
     ExecFunc("ClearPoint()");
-    
-    for (i=0;i<plot->NWayPnt;i++) {
+
+    for(i=0; i<plot->NWayPnt; i++) {
         ecef2pos(plot->PntPos[i],pos);
         ExecFunc(QString("AddPoint('%1',%2,%3,%4)").arg(plot->PntName[i])
                  .arg(pos[0]*R2D,0,'f',9).arg(pos[1]*R2D,0,'f',9).arg(pos[2],0,'f',2));
@@ -395,22 +438,22 @@ void  GoogleEarthView::HidePoint(void)
 //---------------------------------------------------------------------------
 void  GoogleEarthView::SetOpts(const int *opts)
 {
-    QToolButton *btn[]={
+    QToolButton *btn[]= {
         BtnOpt1,BtnOpt2,BtnOpt3,BtnOpt4,BtnOpt5,BtnOpt6,BtnOpt7,BtnOpt8,
         BtnOpt9,BtnEnaAlt,BtnHeading
     };
-    for (int i=0;i<11;i++) {
+    for(int i=0; i<11; i++) {
         btn[i]->setChecked(opts[i]);
     }
 }
 //---------------------------------------------------------------------------
 void  GoogleEarthView::GetOpts(int *opts)
 {
-    QToolButton *btn[]={
+    QToolButton *btn[]= {
         BtnOpt1,BtnOpt2,BtnOpt3,BtnOpt4,BtnOpt5,BtnOpt6,BtnOpt7,BtnOpt8,
         BtnOpt9,BtnEnaAlt,BtnHeading
     };
-    for (int i=0;i<11;i++) {
+    for(int i=0; i<11; i++) {
         opts[i]=btn[i]->isChecked();
     }
 }
@@ -419,7 +462,7 @@ void  GoogleEarthView::UpdateOpts(void)
 {
     QString f;
     int opts[12];
-    
+
     GetOpts(opts);
     ExecFunc(QString("SetOpts(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10)").arg(opts[0])
              .arg(opts[1]).arg(opts[2]).arg(opts[3]).arg(opts[4]).arg(opts[5]).arg(opts[6]).arg(opts[7]).arg(opts[8])
@@ -439,60 +482,80 @@ int  GoogleEarthView::GetState(void)
     QWebElement ele1,ele2;
     int state;
 
-    if (!WebBrowser->page()) return 0;
-    if (!WebBrowser->page()->mainFrame()) return 0;
+    if(!WebBrowser->page()) {
+        return 0;
+    }
+    if(!WebBrowser->page()->mainFrame()) {
+        return 0;
+    }
 
     QWebFrame *frame=WebBrowser->page()->mainFrame();
 
     ele1=frame->findFirstElement("state");
     ele2=frame->findFirstElement("view");
 
-    if (ele1.isNull()||ele2.isNull()) return 0;
+    if(ele1.isNull()||ele2.isNull()) {
+        return 0;
+    }
 
-    if (!ele1.hasAttribute("value")||
-         ele2.hasAttribute("value")) return 0;
+    if(!ele1.hasAttribute("value")||
+            ele2.hasAttribute("value")) {
+        return 0;
+    }
 
     QStringList tokens=ele2.attribute("value").split(',');
 
-    if (tokens.size()!=4) return 0;
+    if(tokens.size()!=4) {
+        return 0;
+    }
 
     state=ele1.attribute("value").toInt();
 
 
-    return state;    
+    return state;
 #else
- #ifdef QWEBENGINE
+#ifdef QWEBENGINE
     QStringList tokens=pageState->getView().split(',');
 
-    if (tokens.size()!=4) return 0;
+    if(tokens.size()!=4) {
+        return 0;
+    }
 
     int state=pageState->getText().toInt();
 
     return state;
- #else
+#else
     return 0;
- #endif
+#endif
 #endif
 }
 //---------------------------------------------------------------------------
 void  GoogleEarthView::ExecFunc(const QString &func)
 {
 #ifdef QWEBKIT
-    if (!WebBrowser->page()) return;
-    if (!WebBrowser->page()->mainFrame()) return;
+    if(!WebBrowser->page()) {
+        return;
+    }
+    if(!WebBrowser->page()->mainFrame()) {
+        return;
+    }
     QWebFrame *frame=WebBrowser->page()->mainFrame();
 
     frame->evaluateJavaScript(func);
 #else
 #ifdef QWEBENGINE
-   if (!loaded) return;
+    if(!loaded) {
+        return;
+    }
 
-   QWebEnginePage *page=WebBrowser->page();
-   if (page==NULL) return;
+    QWebEnginePage *page=WebBrowser->page();
+    if(page==NULL) {
+        return;
+    }
 
-   page->runJavaScript(func);
+    page->runJavaScript(func);
 #else
-   Q_UNUSED(func)
+    Q_UNUSED(func)
 #endif
 #endif
 }

@@ -96,7 +96,7 @@ class TIMEPOS
 {
 private:
     int nmax_;
-    TIMEPOS(TIMEPOS &){}
+    TIMEPOS(TIMEPOS &) {}
 public:
     int n;
     gtime_t *t;
@@ -114,102 +114,102 @@ class Plot : public QMainWindow, public Ui::Plot
     Q_OBJECT
 
 protected:
-        void  mouseMoveEvent		(QMouseEvent*);
-        void  mousePressEvent		(QMouseEvent*);
-        void  mouseReleaseEvent		(QMouseEvent*);
-        void  mouseDoubleClickEvent (QMouseEvent*);
-        void  wheelEvent			(QWheelEvent*);
-        void  closeEvent            (QCloseEvent*);
-        void  keyPressEvent			(QKeyEvent *);
-        void  showEvent			    (QShowEvent*);
-        void  resizeEvent			(QResizeEvent *);
-        void  leaveEvent    		(QEvent*);
-        void  dragEnterEvent        (QDragEnterEvent *event);
-        void  dropEvent             (QDropEvent *event);
-        void  paintEvent            (QPaintEvent *event);
+    void  mouseMoveEvent(QMouseEvent*);
+    void  mousePressEvent(QMouseEvent*);
+    void  mouseReleaseEvent(QMouseEvent*);
+    void  mouseDoubleClickEvent(QMouseEvent*);
+    void  wheelEvent(QWheelEvent*);
+    void  closeEvent(QCloseEvent*);
+    void  keyPressEvent(QKeyEvent *);
+    void  showEvent(QShowEvent*);
+    void  resizeEvent(QResizeEvent *);
+    void  leaveEvent(QEvent*);
+    void  dragEnterEvent(QDragEnterEvent *event);
+    void  dropEvent(QDropEvent *event);
+    void  paintEvent(QPaintEvent *event);
 
 public slots:
-        void  MenuOpenSol1Click	();
-        void  MenuOpenSol2Click	();
-        void  MenuOpenMapImageClick();
-        void  MenuOpenShapeClick ();
-        void  MenuOpenObsClick	();
-        void  MenuOpenNavClick	();
-        void  MenuOpenElevMaskClick();
-        void  MenuConnectClick	();
-        void  MenuDisconnectClick ();
-        void  MenuPortClick		();
-        void  MenuReloadClick		();
-        void  MenuClearClick		();
-        void  MenuQuitClick		();
-	
-        void  MenuTimeClick		();
-        void  MenuMapImgClick		();
-        void  MenuWaypointClick	();
-        void  MenuSrcSolClick		();
-        void  MenuSrcObsClick		();
-        void  MenuQcObsClick		();
-        void  MenuCopyClick		();
-        void  MenuOptionsClick	();
-	
-        void  MenuToolBarClick	();
-        void  MenuStatusBarClick	();
-        void  MenuMonitor1Click	();
-        void  MenuMonitor2Click	();
-        void  MenuCenterOriClick	();
-        void  MenuFitHorizClick	();
-        void  MenuFitVertClick	();
-        void  MenuShowTrackClick	();
-        void  MenuFixHorizClick	();
-        void  MenuFixVertClick	();
-        void  MenuShowMapClick	();
-        void  MenuShowImgClick	();
-        void  MenuAnimStartClick	();
-        void  MenuAnimStopClick	();
-        void  MenuAboutClick		();
-	
-        void  BtnConnectClick		();
-        void  BtnSol1Click		();
-        void  BtnSol2Click		();
-        void  BtnSol12Click		();
-        void  BtnSol1DblClick		();
-        void  BtnSol2DblClick		();
-        void  BtnOn1Click			();
-        void  BtnOn2Click			();
-        void  BtnOn3Click			();
-        void  BtnRangeListClick	();
-        void  BtnAnimateClick		();
+    void  MenuOpenSol1Click();
+    void  MenuOpenSol2Click();
+    void  MenuOpenMapImageClick();
+    void  MenuOpenShapeClick();
+    void  MenuOpenObsClick();
+    void  MenuOpenNavClick();
+    void  MenuOpenElevMaskClick();
+    void  MenuConnectClick();
+    void  MenuDisconnectClick();
+    void  MenuPortClick();
+    void  MenuReloadClick();
+    void  MenuClearClick();
+    void  MenuQuitClick();
 
-        void  PlotTypeSChange		();
-        void  QFlagChange			();
-        void  ObsTypeChange		();
-        void  DopTypeChange		();
-        void  SatListChange		();
-        void  TimeScrollChange	();
-        void  RangeListClick		();
+    void  MenuTimeClick();
+    void  MenuMapImgClick();
+    void  MenuWaypointClick();
+    void  MenuSrcSolClick();
+    void  MenuSrcObsClick();
+    void  MenuQcObsClick();
+    void  MenuCopyClick();
+    void  MenuOptionsClick();
 
-        void  TimerTimer			();
-	
-        void  MenuFileSelClick();
-        void  MenuSaveDopClick();
-        void  MenuSaveImageClick();
-        void  MenuGEClick();
-        void  MenuVisAnaClick();
-        void  MenuFixCentClick();
-        void  MenuGMClick();
-        void  MenuSaveSnrMpClick();
-        void  MenuOpenSkyImageClick();
-        void  MenuSkyImgClick();
-        void  MenuShowSkyplotClick();
-        void  MenuPlotGEClick();
-        void  MenuPlotGMClick();
-        void  MenuPlotGEGMClick();
-        void  MenuMaxClick();
-        void  MenuSaveElMaskClick();
-        void  MenuMapLayerClick();
-        void  BtnMessage2Click();
-        void  MenuOpenWaypointClick();
-        void  MenuSaveWaypointClick();
+    void  MenuToolBarClick();
+    void  MenuStatusBarClick();
+    void  MenuMonitor1Click();
+    void  MenuMonitor2Click();
+    void  MenuCenterOriClick();
+    void  MenuFitHorizClick();
+    void  MenuFitVertClick();
+    void  MenuShowTrackClick();
+    void  MenuFixHorizClick();
+    void  MenuFixVertClick();
+    void  MenuShowMapClick();
+    void  MenuShowImgClick();
+    void  MenuAnimStartClick();
+    void  MenuAnimStopClick();
+    void  MenuAboutClick();
+
+    void  BtnConnectClick();
+    void  BtnSol1Click();
+    void  BtnSol2Click();
+    void  BtnSol12Click();
+    void  BtnSol1DblClick();
+    void  BtnSol2DblClick();
+    void  BtnOn1Click();
+    void  BtnOn2Click();
+    void  BtnOn3Click();
+    void  BtnRangeListClick();
+    void  BtnAnimateClick();
+
+    void  PlotTypeSChange();
+    void  QFlagChange();
+    void  ObsTypeChange();
+    void  DopTypeChange();
+    void  SatListChange();
+    void  TimeScrollChange();
+    void  RangeListClick();
+
+    void  TimerTimer();
+
+    void  MenuFileSelClick();
+    void  MenuSaveDopClick();
+    void  MenuSaveImageClick();
+    void  MenuGEClick();
+    void  MenuVisAnaClick();
+    void  MenuFixCentClick();
+    void  MenuGMClick();
+    void  MenuSaveSnrMpClick();
+    void  MenuOpenSkyImageClick();
+    void  MenuSkyImgClick();
+    void  MenuShowSkyplotClick();
+    void  MenuPlotGEClick();
+    void  MenuPlotGMClick();
+    void  MenuPlotGEGMClick();
+    void  MenuMaxClick();
+    void  MenuSaveElMaskClick();
+    void  MenuMapLayerClick();
+    void  BtnMessage2Click();
+    void  MenuOpenWaypointClick();
+    void  MenuSaveWaypointClick();
 
 private:
     QPixmap Buff;
@@ -236,7 +236,7 @@ private:
     double *Az,*El,*Mp[NFREQ+NEXOBS];
     QTimer Timer;
     QTime updateTime;
-    
+
     gtime_t OEpoch;
     int FormWidth,FormHeight;
     int ConnectState,OpenRaw;
@@ -246,124 +246,124 @@ private:
     int NSolF1,NSolF2,NObsF,NNavF;
     int SatMask[MAXSAT],SatSel[MAXSAT];
     int SimObs;
-    
+
     int Drag,Xn,Yn;
     double X0,Y0,Xc,Yc,Xs,Ys,Xcent,Xcent0;
     unsigned int MouseDownTick;
-    
+
     int GEState,GEDataState[2];
     double GEHeading;
-    
-    void  ReadSolStat  (const QStringList &files, int sel);
-    int   ReadObsRnx   (const QStringList &files, obs_t *obs, nav_t *nav, sta_t *sta);
-    void  ReadMapTag   (const QString &file);
+
+    void  ReadSolStat(const QStringList &files, int sel);
+    int   ReadObsRnx(const QStringList &files, obs_t *obs, nav_t *nav, sta_t *sta);
+    void  ReadMapTag(const QString &file);
     void  ReadShapeFile(const QStringList &file);
-    void  GenVisData   (void);
-    void  SaveDop      (const QString &file);
-    void  SaveSnrMp    (const QString &file);
-    void  SaveElMask   (const QString &file);
-    void  Connect      (void);
-    void  Disconnect   (void);
-    void  ConnectPath  (const QString &path, int ch);
-    int   CheckObs     (const QString &file);
-    void  UpdateObs    (int nobs);
-    void  UpdateMp     (void);
-    void  ClearObs     (void);
-    void  ClearSol     (void);
-    void  Clear        (void);
-    void  Refresh      (void);
-    void  Reload       (void);
+    void  GenVisData(void);
+    void  SaveDop(const QString &file);
+    void  SaveSnrMp(const QString &file);
+    void  SaveElMask(const QString &file);
+    void  Connect(void);
+    void  Disconnect(void);
+    void  ConnectPath(const QString &path, int ch);
+    int   CheckObs(const QString &file);
+    void  UpdateObs(int nobs);
+    void  UpdateMp(void);
+    void  ClearObs(void);
+    void  ClearSol(void);
+    void  Clear(void);
+    void  Refresh(void);
+    void  Reload(void);
     void  ReadWaitStart(void);
-    void  ReadWaitEnd  (void);
-    
-    void  UpdateDisp   (void);
-    void  UpdateType   (int type);
+    void  ReadWaitEnd(void);
+
+    void  UpdateDisp(void);
+    void  UpdateType(int type);
     void  UpdatePlotType(void);
     void  UpdateSatList(void);
     void  UpdateObsType(void);
-    void  UpdateSize   (void);
-    void  UpdateColor  (void);
-    void  UpdateTime   (void);
-    void  UpdateOrigin (void);
+    void  UpdateSize(void);
+    void  UpdateColor(void);
+    void  UpdateTime(void);
+    void  UpdateOrigin(void);
     void  UpdateSatMask(void);
-    void  UpdateSatSel (void);
-    void  UpdateInfo   (void);
+    void  UpdateSatSel(void);
+    void  UpdateInfo(void);
     void  UpdateTimeSol(void);
     void  UpdateTimeObs(void);
     void  UpdateInfoSol(void);
     void  UpdateInfoObs(void);
-    void  UpdatePoint  (int x, int y);
-    void  UpdateEnable (void);
-    void  FitTime      (void);
-    void  SetRange     (int all, double range);
-    void  FitRange     (int all);
-    
-    void  SetCentX     (double c);
-    void  SetScaleX    (double s);
-    void  MouseDownTrk (int X, int Y);
-    void  MouseDownSol (int X, int Y);
-    void  MouseDownObs (int X, int Y);
-    void  MouseMoveTrk (int X, int Y, double dx, double dy, double dxs, double dys);
-    void  MouseMoveSol (int X, int Y, double dx, double dy, double dxs, double dys);
-    void  MouseMoveObs (int X, int Y, double dx, double dy, double dxs, double dys);
+    void  UpdatePoint(int x, int y);
+    void  UpdateEnable(void);
+    void  FitTime(void);
+    void  SetRange(int all, double range);
+    void  FitRange(int all);
 
-    void  DrawTrk      (QPainter &g,int level);
-    void  DrawTrkImage (QPainter &g,int level);
-    void  DrawTrkMap   (QPainter &g,int level);
-    void  DrawTrkPath  (QPainter &g,int level);
-    void  DrawTrkPnt   (QPainter &g,const TIMEPOS *pos, int level, int style);
-    void  DrawTrkPos   (QPainter &g,const double *rr, int type, int siz, QColor color, const QString &label);
-    void  DrawTrkStat  (QPainter &g,const TIMEPOS *pos, const QString &header, int p);
-    void  DrawTrkError (QPainter &g,const TIMEPOS *pos, int style);
-    void  DrawTrkArrow (QPainter &g,const TIMEPOS *pos);
-    void  DrawTrkVel   (QPainter &g,const TIMEPOS *vel);
-    void  DrawLabel    (Graph *,QPainter &g, const QPoint &p, const QString &label, int ha, int va);
-    void  DrawMark     (Graph *,QPainter &g, const QPoint &p, int mark, const QColor &color, int size, int rot);
-    void  DrawSol      (QPainter &g,int level, int type);
-    void  DrawSolPnt   (QPainter &g,const TIMEPOS *pos, int level, int style);
-    void  DrawSolStat  (QPainter &g,const TIMEPOS *pos, const QString &unit, int p);
-    void  DrawNsat     (QPainter &g,int level);
-    void  DrawRes      (QPainter &g,int level);
-    void  DrawPolyS    (Graph *,QPainter &c, double *x, double *y, int n,
-                                  const QColor &color, int style);
-    
-    void  DrawObs      (QPainter &g,int level);
-    void  DrawObsSlip  (QPainter &g,double *yp);
-    void  DrawObsEphem (QPainter &g,double *yp);
-    void  DrawSkyImage (QPainter &g,int level);
-    void  DrawSky      (QPainter &g,int level);
-    void  DrawDop      (QPainter &g,int level);
-    void  DrawDopStat  (QPainter &g,double *dop, int *ns, int n);
-    void  DrawSnr      (QPainter &g,int level);
-    void  DrawSnrE     (QPainter &g,int level);
-    void  DrawMpS      (QPainter &g,int level);
-    
-    TIMEPOS *  SolToPos (solbuf_t *sol, int index, int qflag, int type);
+    void  SetCentX(double c);
+    void  SetScaleX(double s);
+    void  MouseDownTrk(int X, int Y);
+    void  MouseDownSol(int X, int Y);
+    void  MouseDownObs(int X, int Y);
+    void  MouseMoveTrk(int X, int Y, double dx, double dy, double dxs, double dys);
+    void  MouseMoveSol(int X, int Y, double dx, double dy, double dxs, double dys);
+    void  MouseMoveObs(int X, int Y, double dx, double dy, double dxs, double dys);
+
+    void  DrawTrk(QPainter &g,int level);
+    void  DrawTrkImage(QPainter &g,int level);
+    void  DrawTrkMap(QPainter &g,int level);
+    void  DrawTrkPath(QPainter &g,int level);
+    void  DrawTrkPnt(QPainter &g,const TIMEPOS *pos, int level, int style);
+    void  DrawTrkPos(QPainter &g,const double *rr, int type, int siz, QColor color, const QString &label);
+    void  DrawTrkStat(QPainter &g,const TIMEPOS *pos, const QString &header, int p);
+    void  DrawTrkError(QPainter &g,const TIMEPOS *pos, int style);
+    void  DrawTrkArrow(QPainter &g,const TIMEPOS *pos);
+    void  DrawTrkVel(QPainter &g,const TIMEPOS *vel);
+    void  DrawLabel(Graph *,QPainter &g, const QPoint &p, const QString &label, int ha, int va);
+    void  DrawMark(Graph *,QPainter &g, const QPoint &p, int mark, const QColor &color, int size, int rot);
+    void  DrawSol(QPainter &g,int level, int type);
+    void  DrawSolPnt(QPainter &g,const TIMEPOS *pos, int level, int style);
+    void  DrawSolStat(QPainter &g,const TIMEPOS *pos, const QString &unit, int p);
+    void  DrawNsat(QPainter &g,int level);
+    void  DrawRes(QPainter &g,int level);
+    void  DrawPolyS(Graph *,QPainter &c, double *x, double *y, int n,
+                    const QColor &color, int style);
+
+    void  DrawObs(QPainter &g,int level);
+    void  DrawObsSlip(QPainter &g,double *yp);
+    void  DrawObsEphem(QPainter &g,double *yp);
+    void  DrawSkyImage(QPainter &g,int level);
+    void  DrawSky(QPainter &g,int level);
+    void  DrawDop(QPainter &g,int level);
+    void  DrawDopStat(QPainter &g,double *dop, int *ns, int n);
+    void  DrawSnr(QPainter &g,int level);
+    void  DrawSnrE(QPainter &g,int level);
+    void  DrawMpS(QPainter &g,int level);
+
+    TIMEPOS *  SolToPos(solbuf_t *sol, int index, int qflag, int type);
     TIMEPOS *  SolToNsat(solbuf_t *sol, int index, int qflag);
-    
-    void  PosToXyz     (gtime_t time, const double *rr, int type, double *xyz);
-    void  CovToXyz     (const double *rr, const float *qr, int type,
-                                  double *xyzs);
-    void  CalcStats    (const double *x, int n, double ref, double &ave,
-                                  double &std, double &rms);
-    int   FitPos       (gtime_t *time, double *opos, double *ovel);
-    
+
+    void  PosToXyz(gtime_t time, const double *rr, int type, double *xyz);
+    void  CovToXyz(const double *rr, const float *qr, int type,
+                   double *xyzs);
+    void  CalcStats(const double *x, int n, double ref, double &ave,
+                    double &std, double &rms);
+    int   FitPos(gtime_t *time, double *opos, double *ovel);
+
     QString  LatLonStr(const double *pos, int ndec);
-    QColor  ObsColor   (const obsd_t *obs, double az, double el);
-    QColor  SysColor   (int sat);
-    QColor  SnrColor   (double snr);
-    QColor  MpColor    (double mp);
-    void  ReadStaPos   (const QString &file, const QString &sta, double *rr);
-    int   SearchPos    (int x, int y);
-    void  TimeSpan     (gtime_t *ts, gtime_t *te, double *tint);
-    double  TimePos    (gtime_t time);
+    QColor  ObsColor(const obsd_t *obs, double az, double el);
+    QColor  SysColor(int sat);
+    QColor  SnrColor(double snr);
+    QColor  MpColor(double mp);
+    void  ReadStaPos(const QString &file, const QString &sta, double *rr);
+    int   SearchPos(int x, int y);
+    void  TimeSpan(gtime_t *ts, gtime_t *te, double *tint);
+    double  TimePos(gtime_t time);
     void  TimeStr(gtime_t time, int n, int tsys, QString &str);
-    int   ExecCmd      (const QString &cmd);
-    void  ShowMsg      (const QString &msg);
-    void  ShowLegend   (QString *msgs);
-    void  LoadOpt      (void);
-    void  SaveOpt      (void);
-    
+    int   ExecCmd(const QString &cmd);
+    void  ShowMsg(const QString &msg);
+    void  ShowLegend(QString *msgs);
+    void  LoadOpt(void);
+    void  SaveOpt(void);
+
     MapAreaDialog *mapAreaDialog;
     GoogleEarthView *googleEarthView;
     GoogleMapView *googleMapView;
@@ -400,25 +400,25 @@ public:
     int RtTimeOutTime;
     int RtReConnTime;
     double ElMaskData[361];
-    
-    // time options 
+
+    // time options
     int TimeEna[3];
     gtime_t TimeStart;
     gtime_t TimeEnd;
     double TimeInt;
-    
-    // map options 
+
+    // map options
     int MapSize[2],MapScaleEq;
     double MapScaleX,MapScaleY;
     double MapLat,MapLon;
     int PointType;
-    
-    // sky image options 
+
+    // sky image options
     int SkySize[2],SkyDestCorr,SkyElMask,SkyRes,SkyFlip,SkyBinarize;
     double SkyCent[2],SkyScale,SkyScaleR,SkyFov[3],SkyDest[10];
     double SkyBinThres1,SkyBinThres2;
-    
-    // plot options 
+
+    // plot options
     int TimeLabel;
     int LatLonFmt;
     int ShowStats;
@@ -454,26 +454,26 @@ public:
     QString QcCmd,QcOpt;
     QString TLEFile;
     QString TLESatFile;
-    
+
     QString Title;
     QString PntName[MAXWAYPNT];
     double PntPos[MAXWAYPNT][3];
     int NWayPnt,SelWayPnt;
     int OPosType;
     double OPos[3],OVel[3];
-    
+
     QString StrHistory [10];
     QString StrMntpHist[10];
-    
-    void  ReadSol     (const QStringList &files, int sel);
-    void  ReadObs     (const QStringList &files);
-    void  ReadNav     (const QStringList &files);
-    void  ReadMapData (const QString &file);
+
+    void  ReadSol(const QStringList &files, int sel);
+    void  ReadObs(const QStringList &files);
+    void  ReadNav(const QStringList &files);
+    void  ReadMapData(const QString &file);
     void  ReadSkyData(const QString &file);
     void  ReadWaypoint(const QString &file);
     void  SaveWaypoint(const QString &file);
-    void  ReadSkyTag  (const QString &file);
-    void  UpdateSky   (void);
+    void  ReadSkyTag(const QString &file);
+    void  UpdateSky(void);
     void  ReadElMaskData(const QString &file);
     int  GetCurrentPos(double *rr);
     int  GetCenterPos(double *rr);

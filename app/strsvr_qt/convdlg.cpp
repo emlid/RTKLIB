@@ -10,10 +10,10 @@ ConvDialog::ConvDialog(QWidget *parent)
 {
     setupUi(this);
 
-	int i;
-	for (i=0;i<=MAXRCVFMT;i++) {
+    int i;
+    for(i=0; i<=MAXRCVFMT; i++) {
         InFormat->addItem(formatstrs[i]);
-	}
+    }
     InFormat->setCurrentIndex(0);
 
     connect(BtnOk,SIGNAL(clicked(bool)),this,SLOT(BtnOkClick()));
@@ -23,7 +23,9 @@ ConvDialog::ConvDialog(QWidget *parent)
 //---------------------------------------------------------------------------
 void ConvDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     Conversion->setChecked(ConvEna);
     InFormat ->setCurrentIndex(ConvInp);
@@ -31,7 +33,7 @@ void ConvDialog::showEvent(QShowEvent *event)
     OutMsgs->setText(ConvMsg);
     Options->setText(ConvOpt);
 
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::BtnOkClick()
@@ -47,7 +49,7 @@ void ConvDialog::BtnOkClick()
 //---------------------------------------------------------------------------
 void ConvDialog::ConversionClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void ConvDialog::UpdateEnable(void)

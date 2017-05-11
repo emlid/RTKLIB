@@ -58,15 +58,15 @@ private:
     void UpdateEnable(void);
 
 public:
-	prcopt_t PrcOpt;
-	solopt_t SolOpt;
+    prcopt_t PrcOpt;
+    solopt_t SolOpt;
     QFont PosFont;
     TextViewer *textViewer;
 
-	int SvrCycle,SvrBuffSize,SolBuffSize,NavSelect,SavedSol;
-	int NmeaReq,NmeaCycle,TimeoutTime,ReconTime,DgpsCorr,SbasCorr;
-	int DebugTraceF,DebugStatusF;
-	int RovPosTypeF,RefPosTypeF,RovAntPcvF,RefAntPcvF,BaselineC;
+    int SvrCycle,SvrBuffSize,SolBuffSize,NavSelect,SavedSol;
+    int NmeaReq,NmeaCycle,TimeoutTime,ReconTime,DgpsCorr,SbasCorr;
+    int DebugTraceF,DebugStatusF;
+    int RovPosTypeF,RefPosTypeF,RovAntPcvF,RefAntPcvF,BaselineC;
     int MoniPort,FileSwapMargin,PanelStack;
 
     QString ExSats,LocalDirectory;
@@ -74,8 +74,8 @@ public:
     QString GeoidDataFileF,DCBFileF,EOPFileF,TLEFileF,TLESatFileF;
     QString ProxyAddr;
 
-	double RovAntDel[3],RefAntDel[3],RovPos[3],RefPos[3];
-	double Baseline[2],NmeaIntv[2];
+    double RovAntDel[3],RefAntDel[3],RovPos[3],RefPos[3];
+    double Baseline[2],NmeaIntv[2];
 
     explicit OptDialog(QWidget* parent);
 };

@@ -19,7 +19,9 @@ KeyDialog::KeyDialog(QWidget* parent)
 //---------------------------------------------------------------------------
 void  KeyDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     Label10->setVisible(Flag!=3);
     Label21->setVisible(Flag!=3);

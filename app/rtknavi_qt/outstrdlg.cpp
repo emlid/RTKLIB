@@ -47,7 +47,9 @@ OutputStrDialog::OutputStrDialog(QWidget* parent)
 //---------------------------------------------------------------------------
 void OutputStrDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     Stream1C ->setChecked(StreamC[0]);
     Stream2C ->setChecked(StreamC[1]);
@@ -57,7 +59,8 @@ void OutputStrDialog::showEvent(QShowEvent *event)
     Format2  ->setCurrentIndex(Format[1]);
     FilePath1->setText(GetFilePath(Paths[0][2]));
     FilePath2->setText(GetFilePath(Paths[1][2]));
-    SwapIntv->insertItem(0,SwapInterval);SwapIntv->setCurrentIndex(0);
+    SwapIntv->insertItem(0,SwapInterval);
+    SwapIntv->setCurrentIndex(0);
     TimeTagC ->setChecked(OutTimeTag);
 
     UpdateEnable();
@@ -91,22 +94,22 @@ void OutputStrDialog::BtnFile2Click()
 //---------------------------------------------------------------------------
 void OutputStrDialog::Stream1Change(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OutputStrDialog::Stream2Change(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OutputStrDialog::Stream1CClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OutputStrDialog::Stream2CClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void OutputStrDialog::BtnKeyClick()
@@ -116,22 +119,38 @@ void OutputStrDialog::BtnKeyClick()
 //---------------------------------------------------------------------------
 void OutputStrDialog::BtnStr1Click()
 {
-    switch (Stream1->currentIndex()) {
-		case 0: SerialOpt(0,0); break;
-		case 1: TcpOpt(0,1); break;
-		case 2: TcpOpt(0,0); break;
-		case 3: TcpOpt(0,2); break;
-	}
+    switch(Stream1->currentIndex()) {
+    case 0:
+        SerialOpt(0,0);
+        break;
+    case 1:
+        TcpOpt(0,1);
+        break;
+    case 2:
+        TcpOpt(0,0);
+        break;
+    case 3:
+        TcpOpt(0,2);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 void OutputStrDialog::BtnStr2Click()
 {
-    switch (Stream2->currentIndex()) {
-		case 0: SerialOpt(1,0); break;
-		case 1: TcpOpt(1,1); break;
-		case 2: TcpOpt(1,0); break;
-		case 3: TcpOpt(1,2); break;
-	}
+    switch(Stream2->currentIndex()) {
+    case 0:
+        SerialOpt(1,0);
+        break;
+    case 1:
+        TcpOpt(1,1);
+        break;
+    case 2:
+        TcpOpt(1,0);
+        break;
+    case 3:
+        TcpOpt(1,2);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 QString OutputStrDialog::GetFilePath(const QString path)
@@ -148,10 +167,12 @@ QString OutputStrDialog::SetFilePath(const QString p)
     QString str;
     bool okay;
 
-    if (TimeTagC->isChecked()) path+="::T";
+    if(TimeTagC->isChecked()) {
+        path+="::T";
+    }
     str=SwapIntv->currentText();
     str.toDouble(&okay);
-    if (okay) {
+    if(okay) {
         path+="::S="+str;
     }
     return path;
@@ -163,7 +184,9 @@ void OutputStrDialog::SerialOpt(int index, int opt)
     serialOptDialog->Opt=opt;
 
     serialOptDialog->exec();
-    if (serialOptDialog->result()!=QDialog::Accepted) return;
+    if(serialOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][0]=serialOptDialog->Path;
 }
@@ -172,19 +195,21 @@ void OutputStrDialog::TcpOpt(int index, int opt)
 {
     tcpOptDialog->Path=Paths[index][1];
     tcpOptDialog->Opt=opt;
-	for (int i=0;i<10;i++) {
+    for(int i=0; i<10; i++) {
         tcpOptDialog->History[i]=History[i];
         tcpOptDialog->MntpHist[i]=MntpHist[i];
-	}
+    }
 
     tcpOptDialog->exec();
-    if (tcpOptDialog->exec()!=QDialog::Accepted) return;
+    if(tcpOptDialog->exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][1]=tcpOptDialog->Path;
-	for (int i=0;i<10;i++) {
+    for(int i=0; i<10; i++) {
         History[i]=tcpOptDialog->History[i];
         MntpHist[i]=tcpOptDialog->MntpHist[i];
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void OutputStrDialog::UpdateEnable(void)

@@ -11,7 +11,8 @@
 #include "viewer.h"
 #include "vieweropt.h"
 //---------------------------------------------------------------------------
-QString ViewerOptDialog::color2String(const QColor &c){
+QString ViewerOptDialog::color2String(const QColor &c)
+{
     return QString("rgb(%1,%2,%3)").arg(c.red()).arg(c.green()).arg(c.blue());
 }
 //---------------------------------------------------------------------------
@@ -29,7 +30,9 @@ ViewerOptDialog::ViewerOptDialog(QWidget* parent)
 //---------------------------------------------------------------------------
 void ViewerOptDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     FontLabel->setFont(Font);
     FontLabel->setText(Font.family()+QString::number(Font.pointSize())+" px");
@@ -47,7 +50,7 @@ void ViewerOptDialog::BtnColor1Click()
 {
     QColorDialog d;
 
-    d.setCurrentColor(Color1);    
+    d.setCurrentColor(Color1);
     d.exec();
     Color1=d.selectedColor();
 

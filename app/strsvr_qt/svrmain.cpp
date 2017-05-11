@@ -51,7 +51,8 @@
 strsvr_t strsvr;
 
 
-QString color2String(const QColor &c){
+QString color2String(const QColor &c)
+{
     return QString("rgb(%1,%2,%3)").arg(c.red()).arg(c.green()).arg(c.blue());
 }
 
@@ -61,9 +62,11 @@ static void num2cnum(int num, char *str)
     char buff[256],*p=buff,*q=str;
     int i,n;
     n=sprintf(buff,"%u",(unsigned int)num);
-    for (i=0;i<n;i++) {
+    for(i=0; i<n; i++) {
         *q++=*p++;
-        if ((n-i-1)%3==0&&i<n-1) *q++=',';
+        if((n-i-1)%3==0&&i<n-1) {
+            *q++=',';
+        }
     }
     *q='\0';
 }
@@ -141,11 +144,11 @@ MainForm::MainForm(QWidget *parent)
 void MainForm::FormCreate()
 {
     int autorun=0,tasktray=0;
-    
+
     strsvrinit(&strsvr,3);
-    
+
     setWindowTitle(QString("%1 ver.%2 %3").arg(PRGNAME).arg(VER_RTKLIB).arg(PATCH_LEVEL));
-    
+
 
     QCommandLineParser parser;
     parser.setApplicationDescription("stream server");
@@ -154,47 +157,53 @@ void MainForm::FormCreate()
     parser.addPositionalArgument("source", QCoreApplication::translate("main", "Source file to copy."));
     parser.addPositionalArgument("destination", QCoreApplication::translate("main", "Destination directory."));
 
-     // A boolean option with a single name (-p)
-     QCommandLineOption showProgressOption("p", QCoreApplication::translate("main", "Show progress during copy"));
-     parser.addOption(showProgressOption);
+    // A boolean option with a single name (-p)
+    QCommandLineOption showProgressOption("p", QCoreApplication::translate("main", "Show progress during copy"));
+    parser.addOption(showProgressOption);
 
     QCommandLineOption trayOption(QStringList() << "tray",
-            QCoreApplication::translate("main", "start as task tray icon."));
+                                  QCoreApplication::translate("main", "start as task tray icon."));
     parser.addOption(trayOption);
 
     QCommandLineOption autoOption(QStringList() << "auto",
-            QCoreApplication::translate("main", "auto start."));
+                                  QCoreApplication::translate("main", "auto start."));
     parser.addOption(autoOption);
 
     QCommandLineOption windowTitleOption(QStringList() << "t",
-            QCoreApplication::translate("main", "window title."),
-            QCoreApplication::translate("main", "title"));
+                                         QCoreApplication::translate("main", "window title."),
+                                         QCoreApplication::translate("main", "title"));
     parser.addOption(windowTitleOption);
 
     QCommandLineOption iniFileOption(QStringList() << "i",
-            QCoreApplication::translate("main", "ini file path."),
-            QCoreApplication::translate("main", "file"));
+                                     QCoreApplication::translate("main", "ini file path."),
+                                     QCoreApplication::translate("main", "file"));
     parser.addOption(iniFileOption);
 
     parser.process(*QApplication::instance());
 
-    if (parser.isSet(iniFileOption))
+    if(parser.isSet(iniFileOption)) {
         IniFile=parser.value(iniFileOption);
+    }
 
     LoadOpt();
-    
-    if (parser.isSet(windowTitleOption))
+
+    if(parser.isSet(windowTitleOption)) {
         setWindowTitle(parser.value(windowTitleOption));
-    if (parser.isSet(autoOption)) autorun=1;
-    if (parser.isSet(trayOption)) tasktray=1;
+    }
+    if(parser.isSet(autoOption)) {
+        autorun=1;
+    }
+    if(parser.isSet(trayOption)) {
+        tasktray=1;
+    }
 
     SetTrayIcon(0);
-    
-    if (tasktray) {
+
+    if(tasktray) {
         setVisible(false);
         TrayIcon->setVisible(true);
     }
-    if (autorun) {
+    if(autorun) {
         SvrStart();
     }
     Timer1.start();
@@ -224,9 +233,15 @@ void MainForm::BtnStopClick()
 void MainForm::BtnOptClick()
 {
 
-    for (int i=0;i<6;i++) svrOptDialog->SvrOpt[i]=SvrOpt[i];
-    for (int i=0;i<3;i++) svrOptDialog->AntPos[i]=AntPos[i];
-    for (int i=0;i<3;i++) svrOptDialog->AntOff[i]=AntOff[i];
+    for(int i=0; i<6; i++) {
+        svrOptDialog->SvrOpt[i]=SvrOpt[i];
+    }
+    for(int i=0; i<3; i++) {
+        svrOptDialog->AntPos[i]=AntPos[i];
+    }
+    for(int i=0; i<3; i++) {
+        svrOptDialog->AntOff[i]=AntOff[i];
+    }
     svrOptDialog->TraceLevel=TraceLevel;
     svrOptDialog->NmeaReq=NmeaReq;
     svrOptDialog->FileSwapMargin=FileSwapMargin;
@@ -238,13 +253,21 @@ void MainForm::BtnOptClick()
     svrOptDialog->StaSel=StaSel;
     svrOptDialog->AntType=AntType;
     svrOptDialog->RcvType=RcvType;
-    
+
     svrOptDialog->exec();
-    if (svrOptDialog->result()!=QDialog::Accepted) return;
-    
-    for (int i=0;i<6;i++) SvrOpt[i]=svrOptDialog->SvrOpt[i];
-    for (int i=0;i<3;i++) AntPos[i]=svrOptDialog->AntPos[i];
-    for (int i=0;i<3;i++) AntOff[i]=svrOptDialog->AntOff[i];
+    if(svrOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
+
+    for(int i=0; i<6; i++) {
+        SvrOpt[i]=svrOptDialog->SvrOpt[i];
+    }
+    for(int i=0; i<3; i++) {
+        AntPos[i]=svrOptDialog->AntPos[i];
+    }
+    for(int i=0; i<3; i++) {
+        AntOff[i]=svrOptDialog->AntOff[i];
+    }
     TraceLevel=svrOptDialog->TraceLevel;
     NmeaReq=svrOptDialog->NmeaReq;
     FileSwapMargin=svrOptDialog->FileSwapMargin;
@@ -260,14 +283,28 @@ void MainForm::BtnOptClick()
 // callback on button-input-opt ---------------------------------------------
 void MainForm::BtnInputClick()
 {
-    switch (Input->currentIndex()) {
-        case 0: SerialOpt(0,0); break;
-        case 1: TcpOpt(0,1); break;
-        case 2: TcpOpt(0,0); break;
-        case 3: TcpOpt(0,3); break;
-        case 4: FileOpt(0,0); break;
-        case 5: FtpOpt(0,0); break;
-        case 6: FtpOpt(0,1); break;
+    switch(Input->currentIndex()) {
+    case 0:
+        SerialOpt(0,0);
+        break;
+    case 1:
+        TcpOpt(0,1);
+        break;
+    case 2:
+        TcpOpt(0,0);
+        break;
+    case 3:
+        TcpOpt(0,3);
+        break;
+    case 4:
+        FileOpt(0,0);
+        break;
+    case 5:
+        FtpOpt(0,0);
+        break;
+    case 6:
+        FtpOpt(0,1);
+        break;
     }
 }
 // callback on button-input-cmd ---------------------------------------------
@@ -275,13 +312,12 @@ void MainForm::BtnCmdClick()
 {
     CmdOptDialog *cmdOptDialog= new CmdOptDialog(this);
 
-    if (Input->currentIndex()==0) {
+    if(Input->currentIndex()==0) {
         cmdOptDialog->Cmds[0]=Cmds[0];
         cmdOptDialog->Cmds[1]=Cmds[1];
         cmdOptDialog->CmdEna[0]=CmdEna[0];
         cmdOptDialog->CmdEna[1]=CmdEna[1];
-    }
-    else {
+    } else {
         cmdOptDialog->Cmds[0]=CmdsTcp[0];
         cmdOptDialog->Cmds[1]=CmdsTcp[1];
         cmdOptDialog->CmdEna[0]=CmdEnaTcp[0];
@@ -290,14 +326,15 @@ void MainForm::BtnCmdClick()
 
     cmdOptDialog->exec();
 
-    if (cmdOptDialog->result()!=QDialog::Accepted) return;
-    if (Input->currentIndex()==0) {
+    if(cmdOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
+    if(Input->currentIndex()==0) {
         Cmds[0]  =cmdOptDialog->Cmds[0];
         Cmds[1]  =cmdOptDialog->Cmds[1];
         CmdEna[0]=cmdOptDialog->CmdEna[0];
         CmdEna[1]=cmdOptDialog->CmdEna[1];
-    }
-    else {
+    } else {
         CmdsTcp[0]  =cmdOptDialog->Cmds[0];
         CmdsTcp[1]  =cmdOptDialog->Cmds[1];
         CmdEnaTcp[0]=cmdOptDialog->CmdEna[0];
@@ -309,34 +346,64 @@ void MainForm::BtnCmdClick()
 // callback on button-output1-opt -------------------------------------------
 void MainForm::BtnOutput1Click()
 {
-    switch (Output1->currentIndex()) {
-        case 1: SerialOpt(1,0); break;
-        case 2: TcpOpt(1,1); break;
-        case 3: TcpOpt(1,0); break;
-        case 4: TcpOpt(1,2); break;
-        case 5: FileOpt(1,1); break;
+    switch(Output1->currentIndex()) {
+    case 1:
+        SerialOpt(1,0);
+        break;
+    case 2:
+        TcpOpt(1,1);
+        break;
+    case 3:
+        TcpOpt(1,0);
+        break;
+    case 4:
+        TcpOpt(1,2);
+        break;
+    case 5:
+        FileOpt(1,1);
+        break;
     }
 }
 // callback on button-output2-opt -------------------------------------------
 void MainForm::BtnOutput2Click()
 {
-    switch (Output2->currentIndex()) {
-        case 1: SerialOpt(2,0); break;
-        case 2: TcpOpt(2,1); break;
-        case 3: TcpOpt(2,0); break;
-        case 4: TcpOpt(2,2); break;
-        case 5: FileOpt(2,1); break;
+    switch(Output2->currentIndex()) {
+    case 1:
+        SerialOpt(2,0);
+        break;
+    case 2:
+        TcpOpt(2,1);
+        break;
+    case 3:
+        TcpOpt(2,0);
+        break;
+    case 4:
+        TcpOpt(2,2);
+        break;
+    case 5:
+        FileOpt(2,1);
+        break;
     }
 }
 // callback on button-output3-opt -------------------------------------------
 void MainForm::BtnOutput3Click()
 {
-    switch (Output3->currentIndex()) {
-        case 1: SerialOpt(3,0); break;
-        case 2: TcpOpt(3,1); break;
-        case 3: TcpOpt(3,0); break;
-        case 4: TcpOpt(3,2); break;
-        case 5: FileOpt(3,1); break; 
+    switch(Output3->currentIndex()) {
+    case 1:
+        SerialOpt(3,0);
+        break;
+    case 2:
+        TcpOpt(3,1);
+        break;
+    case 3:
+        TcpOpt(3,0);
+        break;
+    case 4:
+        TcpOpt(3,2);
+        break;
+    case 5:
+        FileOpt(3,1);
+        break;
     }
 }
 // callback on button-output1-conv ------------------------------------------
@@ -351,7 +418,9 @@ void MainForm::BtnConv1Click()
     convDialog->ConvOpt=ConvOpt[0];
 
     convDialog->exec();
-    if (convDialog->result()!=QDialog::Accepted) return;
+    if(convDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     ConvEna[0]=convDialog->ConvEna;
     ConvInp[0]=convDialog->ConvInp;
@@ -373,7 +442,9 @@ void MainForm::BtnConv2Click()
     convDialog->ConvOpt=ConvOpt[1];
 
     convDialog->exec();
-    if (convDialog->result()!=QDialog::Accepted) return;
+    if(convDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     ConvEna[1]=convDialog->ConvEna;
     ConvInp[1]=convDialog->ConvInp;
@@ -395,7 +466,9 @@ void MainForm::BtnConv3Click()
     convDialog->ConvOpt=ConvOpt[2];
 
     convDialog->exec();
-    if (convDialog->result()!=QDialog::Accepted) return;
+    if(convDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     ConvEna[2]=convDialog->ConvEna;
     ConvInp[2]=convDialog->ConvInp;
@@ -425,7 +498,9 @@ void MainForm::BtnTaskIconClick()
 // callback on task-icon double-click ---------------------------------------
 void MainForm::TrayIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    if (reason!=QSystemTrayIcon::DoubleClick) return;
+    if(reason!=QSystemTrayIcon::DoubleClick) {
+        return;
+    }
 
     setVisible(true);
     TrayIcon->setVisible(false);
@@ -465,7 +540,7 @@ void MainForm::InputChange()
 // callback on output1 type change ------------------------------------------
 void MainForm::Output1Change()
 {
-    UpdateEnable(); 
+    UpdateEnable();
 }
 // callback on output2 type change ------------------------------------------
 void MainForm::Output2Change()
@@ -480,17 +555,17 @@ void MainForm::Output3Change()
 // callback on interval timer -----------------------------------------------
 void MainForm::Timer1Timer()
 {
-    QColor color[]={Qt::red,Qt::gray,CLORANGE,Qt::green,QColor(0x00,0xff,0x00)};
-    QLabel *e0[]={IndInput,IndOutput1,IndOutput2,IndOutput3};
-    QLabel *e1[]={InputByte,Output1Byte,Output2Byte,Output3Byte};
-    QLabel *e2[]={InputBps,Output1Bps,Output2Bps,Output3Bps};
+    QColor color[]= {Qt::red,Qt::gray,CLORANGE,Qt::green,QColor(0x00,0xff,0x00)};
+    QLabel *e0[]= {IndInput,IndOutput1,IndOutput2,IndOutput3};
+    QLabel *e1[]= {InputByte,Output1Byte,Output2Byte,Output3Byte};
+    QLabel *e2[]= {InputBps,Output1Bps,Output2Bps,Output3Bps};
     gtime_t time=utc2gpst(timeget());
-    int stat[4]={0},byte[4]={0},bps[4]={0};
+    int stat[4]= {0},byte[4]= {0},bps[4]= {0};
     char msg[MAXSTRMSG*4]="",s1[256],s2[256];
     double ctime,t[4];
-    
+
     strsvrstat(&strsvr,stat,byte,bps,msg);
-    for (int i=0;i<4;i++) {
+    for(int i=0; i<4; i++) {
         num2cnum(byte[i],s1);
         num2cnum(bps[i],s2);
         e0[i]->setStyleSheet(QString("background-color: %1").arg(color2String(color[stat[i]+1])));
@@ -498,106 +573,134 @@ void MainForm::Timer1Timer()
         e2[i]->setText(s2);
     }
     Progress->setValue(!stat[0]?0:MIN(100,(int)(fmod(byte[0]/500.0,110.0))));
-    
+
     time2str(time,s1,0);
     Time->setText(QString(tr("%1 GPST")).arg(s1));
-    
-    if (Panel1->isEnabled()) {
+
+    if(Panel1->isEnabled()) {
         ctime=timediff(EndTime,StartTime);
-    }
-    else {
+    } else {
         ctime=timediff(time,StartTime);
     }
     ctime=floor(ctime);
-    t[0]=floor(ctime/86400.0); ctime-=t[0]*86400.0;
-    t[1]=floor(ctime/3600.0 ); ctime-=t[1]*3600.0;
-    t[2]=floor(ctime/60.0   ); ctime-=t[2]*60.0;
+    t[0]=floor(ctime/86400.0);
+    ctime-=t[0]*86400.0;
+    t[1]=floor(ctime/3600.0);
+    ctime-=t[1]*3600.0;
+    t[2]=floor(ctime/60.0);
+    ctime-=t[2]*60.0;
     t[3]=ctime;
     ConTime->setText(QString("%1d %2:%3:%4").arg(t[0],0,'f',0).arg(t[1],2,'f',0,QChar('0')).arg(t[2],2,'f',0,QChar('0')).arg(t[3],2,'f',2,QChar('0')));
-    
-    num2cnum(byte[0],s1); num2cnum(bps[0],s2);
+
+    num2cnum(byte[0],s1);
+    num2cnum(bps[0],s2);
     TrayIcon->setToolTip(QString(tr("%1 bytes %2 bps")).arg(s1).arg(s2));
     SetTrayIcon(stat[0]<=0?0:(stat[0]==3?2:1));
-    
+
     Message->setText(msg);
 }
 // start stream server ------------------------------------------------------
 void MainForm::SvrStart(void)
 {
-    strconv_t *conv[3]={0};
+    strconv_t *conv[3]= {0};
     static char str[4][1024];
-    int itype[]={
+    int itype[]= {
         STR_SERIAL,STR_TCPCLI,STR_TCPSVR,STR_NTRIPCLI,STR_FILE,STR_FTP,STR_HTTP
     };
-    int otype[]={
+    int otype[]= {
         STR_NONE,STR_SERIAL,STR_TCPCLI,STR_TCPSVR,STR_NTRIPSVR,STR_FILE
     };
-    int ip[]={0,1,1,1,2,3,3},strs[4]={0},opt[7]={0},n;
+    int ip[]= {0,1,1,1,2,3,3},strs[4]= {0},opt[7]= {0},n;
     char *paths[4],filepath[1024],buff[1024];
     char cmd[1024];
-    char *ant[3]={0},*rcv[3]={0},*p;
+    char *ant[3]= {0},*rcv[3]= {0},*p;
     FILE *fp;
-    
-    if (TraceLevel>0) {
+
+    if(TraceLevel>0) {
         traceopen(TRACEFILE);
         tracelevel(TraceLevel);
     }
-    for (int i=0;i<4;i++) paths[i]=str[i];
-    
+    for(int i=0; i<4; i++) {
+        paths[i]=str[i];
+    }
+
     strs[0]=itype[Input->currentIndex()];
     strs[1]=otype[Output1->currentIndex()];
     strs[2]=otype[Output2->currentIndex()];
     strs[3]=otype[Output3->currentIndex()];
-    
+
     strcpy(paths[0],qPrintable(Paths[0][ip[Input->currentIndex()]]));
     strcpy(paths[1],!Output1->currentIndex()?"":qPrintable(Paths[1][ip[Output1->currentIndex()-1]]));
     strcpy(paths[2],!Output2->currentIndex()?"":qPrintable(Paths[2][ip[Output2->currentIndex()-1]]));
     strcpy(paths[3],!Output3->currentIndex()?"":qPrintable(Paths[3][ip[Output3->currentIndex()-1]]));
-    
-    if (Input->currentIndex()==0) {
-        if (CmdEna[0]) strncpy(cmd,qPrintable(Cmds[0]),1024);
+
+    if(Input->currentIndex()==0) {
+        if(CmdEna[0]) {
+            strncpy(cmd,qPrintable(Cmds[0]),1024);
+        }
+    } else if(Input->currentIndex()==1||Input->currentIndex()==3) {
+        if(CmdEnaTcp[0]) {
+            strncpy(cmd,qPrintable(CmdsTcp[0]),1024);
+        }
     }
-    else if (Input->currentIndex()==1||Input->currentIndex()==3) {
-        if (CmdEnaTcp[0]) strncpy(cmd,qPrintable(CmdsTcp[0]),1024);
-    }
-    for (int i=0;i<5;i++) {
+    for(int i=0; i<5; i++) {
         opt[i]=SvrOpt[i];
     }
     opt[5]=NmeaReq?SvrOpt[5]:0;
     opt[6]=FileSwapMargin;
-    
-    for (int i=1;i<4;i++) {
-        if (strs[i]!=STR_FILE) continue;
+
+    for(int i=1; i<4; i++) {
+        if(strs[i]!=STR_FILE) {
+            continue;
+        }
         strcpy(filepath,paths[i]);
-        if (strstr(filepath,"::A")) continue;
-        if ((p=strstr(filepath,"::"))) *p='\0';
-        if (!(fp=fopen(filepath,"r"))) continue;
+        if(strstr(filepath,"::A")) {
+            continue;
+        }
+        if((p=strstr(filepath,"::"))) {
+            *p='\0';
+        }
+        if(!(fp=fopen(filepath,"r"))) {
+            continue;
+        }
         fclose(fp);
-        if (QMessageBox::question(this,tr("Overwrite"),tr("File %1 exists. \nDo you want to overwrite?").arg(filepath))!=QMessageBox::Yes) return;
+        if(QMessageBox::question(this,tr("Overwrite"),tr("File %1 exists. \nDo you want to overwrite?").arg(filepath))!=QMessageBox::Yes) {
+            return;
+        }
     }
     strsetdir(qPrintable(LocalDirectory));
     strsetproxy(qPrintable(ProxyAddress));
-    
-    for (int i=0;i<3;i++) {
-        if (!ConvEna[i]) continue;
-        if (!(conv[i]=strconvnew(ConvInp[i],ConvOut[i],qPrintable(ConvMsg[i]),
-                                 StaId,StaSel,qPrintable(ConvOpt[i])))) continue;
+
+    for(int i=0; i<3; i++) {
+        if(!ConvEna[i]) {
+            continue;
+        }
+        if(!(conv[i]=strconvnew(ConvInp[i],ConvOut[i],qPrintable(ConvMsg[i]),
+                                StaId,StaSel,qPrintable(ConvOpt[i])))) {
+            continue;
+        }
         strcpy(buff,qPrintable(AntType));
-        for (p=strtok(buff,","),n=0;p&&n<3;p=strtok(NULL,",")) ant[n++]=p;
+        for(p=strtok(buff,","),n=0; p&&n<3; p=strtok(NULL,",")) {
+            ant[n++]=p;
+        }
         strcpy(conv[i]->out.sta.antdes,ant[0]);
         strcpy(conv[i]->out.sta.antsno,ant[1]);
         conv[i]->out.sta.antsetup=atoi(ant[2]);
         strcpy(buff,qPrintable(RcvType));
-        for (p=strtok(buff,","),n=0;p&&n<3;p=strtok(NULL,",")) rcv[n++]=p;
+        for(p=strtok(buff,","),n=0; p&&n<3; p=strtok(NULL,",")) {
+            rcv[n++]=p;
+        }
         strcpy(conv[i]->out.sta.rectype,rcv[0]);
-        strcpy(conv[i]->out.sta.recver ,rcv[1]);
-        strcpy(conv[i]->out.sta.recsno ,rcv[2]);
+        strcpy(conv[i]->out.sta.recver,rcv[1]);
+        strcpy(conv[i]->out.sta.recsno,rcv[2]);
         matcpy(conv[i]->out.sta.pos,AntPos,3,1);
         matcpy(conv[i]->out.sta.del,AntOff,3,1);
     }
     // stream server start
-    if (!strsvrstart(&strsvr,opt,strs,paths,conv,cmd,AntPos)) return;
-    
+    if(!strsvrstart(&strsvr,opt,strs,paths,conv,cmd,AntPos)) {
+        return;
+    }
+
     StartTime=utc2gpst(timeget());
     Panel1    ->setEnabled(false);
     BtnStart  ->setVisible(false);
@@ -613,15 +716,18 @@ void MainForm::SvrStart(void)
 void MainForm::SvrStop(void)
 {
     char cmd[1024];
-    
-    if (Input->currentIndex()==0) {
-        if (CmdEna[1]) strncpy(cmd,qPrintable(Cmds[1]),1024);
-    }
-    else if (Input->currentIndex()==1||Input->currentIndex()==3) {
-        if (CmdEnaTcp[1]) strncpy(cmd,qPrintable(CmdsTcp[1]),1024);
+
+    if(Input->currentIndex()==0) {
+        if(CmdEna[1]) {
+            strncpy(cmd,qPrintable(Cmds[1]),1024);
+        }
+    } else if(Input->currentIndex()==1||Input->currentIndex()==3) {
+        if(CmdEnaTcp[1]) {
+            strncpy(cmd,qPrintable(CmdsTcp[1]),1024);
+        }
     }
     strsvrstop(&strsvr,cmd);
-    
+
     EndTime=utc2gpst(timeget());
     Panel1    ->setEnabled(true);
     BtnStart  ->setVisible(true);
@@ -632,31 +738,37 @@ void MainForm::SvrStop(void)
     MenuStop  ->setEnabled(false);
     MenuExit  ->setEnabled(true);
     SetTrayIcon(0);
-    
-    for (int i=0;i<3;i++) {
-        if (ConvEna[i]) strconvfree(strsvr.conv[i]);
+
+    for(int i=0; i<3; i++) {
+        if(ConvEna[i]) {
+            strconvfree(strsvr.conv[i]);
+        }
     }
-    if (TraceLevel>0) traceclose();
+    if(TraceLevel>0) {
+        traceclose();
+    }
 }
 // callback on interval timer for stream monitor ----------------------------
 void MainForm::Timer2Timer()
 {
     unsigned char *msg=0;
     int len;
-    
+
     lock(&strsvr.lock);
-    
+
     len=strsvr.npb;
-    if (len>0&&(msg=(unsigned char *)malloc(len))) {
+    if(len>0&&(msg=(unsigned char *)malloc(len))) {
         memcpy(msg,strsvr.pbuf,len);
         strsvr.npb=0;
     }
     unlock(&strsvr.lock);
-    
-    if (len<=0||!msg) return;
-    
+
+    if(len<=0||!msg) {
+        return;
+    }
+
     console->AddMsg(msg,len);
-    
+
     free(msg);
 }
 // set serial options -------------------------------------------------------
@@ -666,7 +778,9 @@ void MainForm::SerialOpt(int index, int opt)
     serialOptDialog->Opt=opt;
 
     serialOptDialog->exec();
-    if (serialOptDialog->result()!=QDialog::Accepted) return;
+    if(serialOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
     Paths[index][0]=serialOptDialog->Path;
 }
 // set tcp/ip options -------------------------------------------------------
@@ -674,15 +788,25 @@ void MainForm::TcpOpt(int index, int opt)
 {
     tcpOptDialog->Path=Paths[index][1];
     tcpOptDialog->Opt=opt;
-    for (int i=0;i<MAXHIST;i++) tcpOptDialog->History[i]=TcpHistory[i];
-    for (int i=0;i<MAXHIST;i++) tcpOptDialog->MntpHist[i]=TcpMntpHist[i];
+    for(int i=0; i<MAXHIST; i++) {
+        tcpOptDialog->History[i]=TcpHistory[i];
+    }
+    for(int i=0; i<MAXHIST; i++) {
+        tcpOptDialog->MntpHist[i]=TcpMntpHist[i];
+    }
 
     tcpOptDialog->exec();
-    if (tcpOptDialog->result()!=QDialog::Accepted) return;
+    if(tcpOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][1]=tcpOptDialog->Path;
-    for (int i=0;i<MAXHIST;i++) TcpHistory[i]=tcpOptDialog->History[i];
-    for (int i=0;i<MAXHIST;i++) TcpMntpHist[i]=tcpOptDialog->MntpHist[i];
+    for(int i=0; i<MAXHIST; i++) {
+        TcpHistory[i]=tcpOptDialog->History[i];
+    }
+    for(int i=0; i<MAXHIST; i++) {
+        TcpMntpHist[i]=tcpOptDialog->MntpHist[i];
+    }
 
 }
 // set file options ---------------------------------------------------------
@@ -692,7 +816,9 @@ void MainForm::FileOpt(int index, int opt)
     fileOptDialog->Opt=opt;
 
     fileOptDialog->exec();
-    if (fileOptDialog->result()!=QDialog::Accepted) return;
+    if(fileOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
     Paths[index][2]=fileOptDialog->Path;
 }
 // set ftp/http options -----------------------------------------------------
@@ -702,7 +828,9 @@ void MainForm::FtpOpt(int index, int opt)
     ftpOptDialog->Opt=opt;
 
     ftpOptDialog->exec();
-    if (ftpOptDialog->result()!=QDialog::Accepted) return;
+    if(ftpOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][3]=ftpOptDialog->Path;
 
@@ -730,15 +858,15 @@ void MainForm::UpdateEnable(void)
 // set task-tray icon -------------------------------------------------------
 void MainForm::SetTrayIcon(int index)
 {
-    QString icon[]={":/icons/tray0.bmp",":/icons/tray1.bmp",":/icons/tray2.bmp"};
+    QString icon[]= {":/icons/tray0.bmp",":/icons/tray1.bmp",":/icons/tray2.bmp"};
     TrayIcon->setIcon(QIcon(icon[index]));
 }
 // load options -------------------------------------------------------------
 void MainForm::LoadOpt(void)
 {
     QSettings settings(IniFile,QSettings::IniFormat);
-    int optdef[]={10000,10000,1000,32768,10,0};
-    
+    int optdef[]= {10000,10000,1000,32768,10,0};
+
     Input  ->setCurrentIndex(settings.value("set/input",       0).toInt());
     Output1->setCurrentIndex(settings.value("set/output1",     0).toInt());
     Output2->setCurrentIndex(settings.value("set/output2",     0).toInt());
@@ -746,58 +874,58 @@ void MainForm::LoadOpt(void)
     TraceLevel        =settings.value("set/tracelevel",  0).toInt();
     NmeaReq           =settings.value("set/nmeareq",     0).toInt();
     FileSwapMargin    =settings.value("set/fswapmargin",30).toInt();
-    StaId             =settings.value("set/staid"       ,0).toInt();
-    StaSel            =settings.value("set/stasel"      ,0).toInt();
+    StaId             =settings.value("set/staid",0).toInt();
+    StaSel            =settings.value("set/stasel",0).toInt();
     AntType           =settings.value("set/anttype",    "").toString();
     RcvType           =settings.value("set/rcvtype",    "").toString();
-    
-    for (int i=0;i<6;i++) {
+
+    for(int i=0; i<6; i++) {
         SvrOpt[i]=settings.value(QString("set/svropt_%1").arg(i),optdef[i]).toInt();
     }
-    for (int i=0;i<3;i++) {
+    for(int i=0; i<3; i++) {
         AntPos[i]=settings.value(QString("set/antpos_%1").arg(i),0.0).toDouble();
         AntOff[i]=settings.value(QString("set/antoff_%1").arg(i),0.0).toDouble();
     }
-    for (int i=0;i<3;i++) {
+    for(int i=0; i<3; i++) {
         ConvEna[i]=settings.value(QString("conv/ena_%1").arg(i), 0).toInt();
         ConvInp[i]=settings.value(QString("conv/inp_%1").arg(i), 0).toInt();
         ConvOut[i]=settings.value(QString("conv/out_%1").arg(i), 0).toInt();
-        ConvMsg[i]=settings.value (QString("conv/msg_%1").arg(i),"").toString();
-        ConvOpt[i]=settings.value (QString("conv/opt_%1").arg(i),"").toString();
+        ConvMsg[i]=settings.value(QString("conv/msg_%1").arg(i),"").toString();
+        ConvOpt[i]=settings.value(QString("conv/opt_%1").arg(i),"").toString();
     }
-    for (int i=0;i<2;i++) {
+    for(int i=0; i<2; i++) {
         CmdEna   [i]=settings.value(QString("serial/cmdena_%1").arg(i),1).toInt();
         CmdEnaTcp[i]=settings.value(QString("tcpip/cmdena_%1").arg(i),1).toInt();
     }
-    for (int i=0;i<4;i++) for (int j=0;j<4;j++) {
-        Paths[i][j]=settings.value(QString("path/path_%1_%2").arg(i).arg(j),"").toString();
-    }
-    for (int i=0;i<2;i++) {
+    for(int i=0; i<4; i++) for(int j=0; j<4; j++) {
+            Paths[i][j]=settings.value(QString("path/path_%1_%2").arg(i).arg(j),"").toString();
+        }
+    for(int i=0; i<2; i++) {
         Cmds[i]=settings.value(QString("serial/cmd_%1").arg(i),"").toString();
         Cmds[i]=Cmds[i].replace("@@","\n");
     }
-    for (int i=0;i<2;i++) {
+    for(int i=0; i<2; i++) {
         CmdsTcp[i]=settings.value(QString("tcpip/cmd_%1").arg(i),"").toString();
         CmdsTcp[i]=CmdsTcp[i].replace("@@","\n");
     }
-    for (int i=0;i<MAXHIST;i++) {
+    for(int i=0; i<MAXHIST; i++) {
         TcpHistory[i]=settings.value(QString("tcpopt/history%1").arg(i),"").toString();
     }
-    for (int i=0;i<MAXHIST;i++) {
+    for(int i=0; i<MAXHIST; i++) {
         TcpMntpHist[i]=settings.value(QString("tcpopt/mntphist%1").arg(i),"").toString();
     }
     StaPosFile    =settings.value("stapos/staposfile",    "").toString();
     ExeDirectory  =settings.value("dirs/exedirectory",  "").toString();
     LocalDirectory=settings.value("dirs/localdirectory","").toString();
     ProxyAddress  =settings.value("dirs/proxyaddress",  "").toString();
-    
+
     UpdateEnable();
 }
 // save options--------------------------------------------------------------
 void MainForm::SaveOpt(void)
 {
     QSettings settings(IniFile,QSettings::IniFormat);
-    
+
     settings.setValue("set/input",      Input  ->currentIndex());
     settings.setValue("set/output1",    Output1->currentIndex());
     settings.setValue("set/output2",    Output2->currentIndex());
@@ -809,45 +937,45 @@ void MainForm::SaveOpt(void)
     settings.setValue("set/stasel",     StaSel);
     settings.setValue("set/anttype",    AntType);
     settings.setValue("set/rcvtype",    RcvType);
-    
-    for (int i=0;i<6;i++) {
+
+    for(int i=0; i<6; i++) {
         settings.setValue(QString("set/svropt_%1").arg(i),SvrOpt[i]);
     }
-    for (int i=0;i<3;i++) {
+    for(int i=0; i<3; i++) {
         settings.setValue(QString("set/antpos_%1").arg(i),AntPos[i]);
         settings.setValue(QString("set/antoff_%1").arg(i),AntOff[i]);
     }
-    for (int i=0;i<3;i++) {
+    for(int i=0; i<3; i++) {
         settings.setValue(QString("conv/ena_%1").arg(i),ConvEna[i]);
         settings.setValue(QString("conv/inp_%1").arg(i),ConvInp[i]);
         settings.setValue(QString("conv/out_%1").arg(i),ConvOut[i]);
         settings.setValue(QString("conv/msg_%1").arg(i),ConvMsg[i]);
         settings.setValue(QString("conv/opt_%1").arg(i),ConvOpt[i]);
     }
-    for (int i=0;i<2;i++) {
+    for(int i=0; i<2; i++) {
         settings.setValue(QString("serial/cmdena_%1").arg(i),CmdEna   [i]);
         settings.setValue(QString("tcpip/cmdena_%1").arg(i),CmdEnaTcp[i]);
     }
-    for (int i=0;i<4;i++) for (int j=0;j<4;j++) {
-        settings.setValue(QString("path/path_%1_%2").arg(i).arg(j),Paths[i][j]);
-    }
-    for (int i=0;i<2;i++) {
+    for(int i=0; i<4; i++) for(int j=0; j<4; j++) {
+            settings.setValue(QString("path/path_%1_%2").arg(i).arg(j),Paths[i][j]);
+        }
+    for(int i=0; i<2; i++) {
         Cmds[i]=Cmds[i].replace("\n","@@");
         settings.setValue(QString("serial/cmd_%1").arg(i),Cmds[i]);
     }
-    for (int i=0;i<2;i++) {
+    for(int i=0; i<2; i++) {
         CmdsTcp[i]=CmdsTcp[i].replace("\n","@@");
         settings.setValue(QString("tcpip/cmd_%1").arg(i),CmdsTcp[i]);
     }
-    for (int i=0;i<MAXHIST;i++) {
+    for(int i=0; i<MAXHIST; i++) {
         settings.setValue(QString("tcpopt/history%1").arg(i),tcpOptDialog->History[i]);
     }
-    for (int i=0;i<MAXHIST;i++) {
+    for(int i=0; i<MAXHIST; i++) {
         settings.setValue(QString("tcpopt/mntphist%1").arg(i),tcpOptDialog->MntpHist[i]);
     }
-    settings.setValue("stapos/staposfile"    ,StaPosFile    );
-    settings.setValue("dirs/exedirectory"  ,ExeDirectory  );
+    settings.setValue("stapos/staposfile",StaPosFile);
+    settings.setValue("dirs/exedirectory",ExeDirectory);
     settings.setValue("dirs/localdirectory",LocalDirectory);
-    settings.setValue("dirs/proxyaddress"  ,ProxyAddress  );
+    settings.setValue("dirs/proxyaddress",ProxyAddress);
 }
 //---------------------------------------------------------------------------

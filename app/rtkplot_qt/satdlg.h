@@ -23,7 +23,7 @@ protected:
     void showEvent(QShowEvent*);
 
 public:
-	int ValidSat[36];
+    int ValidSat[36];
     explicit SatDialog(QWidget * parent=NULL);
 };
 //---------------------------------------------------------------------------

@@ -26,10 +26,12 @@ MapAreaDialog::MapAreaDialog(QWidget *parent)
 //---------------------------------------------------------------------------
 void MapAreaDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-	UpdateField();
-	UpdateEnable();
+    UpdateField();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void MapAreaDialog::BtnSaveClick()
@@ -38,14 +40,20 @@ void MapAreaDialog::BtnSaveClick()
     QString data;
     QString file=plot->MapImageFile;
 
-	if (file=="") return;
+    if(file=="") {
+        return;
+    }
 
-	file=file+".tag";
+    file=file+".tag";
 
-    if (QFile::exists(file)) {
-        if (QMessageBox::question(this,file,tr("File exists. Overwrite it?"))!=QMessageBox::Yes) return;
-	}
-    if (!(fp.open(QIODevice::WriteOnly))) return;
+    if(QFile::exists(file)) {
+        if(QMessageBox::question(this,file,tr("File exists. Overwrite it?"))!=QMessageBox::Yes) {
+            return;
+        }
+    }
+    if(!(fp.open(QIODevice::WriteOnly))) {
+        return;
+    }
 
     data=QString("%% map image tag file: rtkplot %1 %2\n\n").arg(VER_RTKLIB).arg(PATCH_LEVEL);
     data+=QString("scalex  = %1\n").arg(plot->MapScaleX,0,'g',6);
@@ -59,20 +67,22 @@ void MapAreaDialog::BtnSaveClick()
 //---------------------------------------------------------------------------
 void MapAreaDialog::BtnCenterClick()
 {
-	double rr[3],pos[3];
+    double rr[3],pos[3];
 
-    if (!plot->GetCenterPos(rr)) return;
+    if(!plot->GetCenterPos(rr)) {
+        return;
+    }
 
-	ecef2pos(rr,pos);
+    ecef2pos(rr,pos);
     Lat->setValue(pos[0]*R2D);
     Lon->setValue(pos[1]*R2D);
 
-	UpdateMap();
+    UpdateMap();
 }
 //---------------------------------------------------------------------------
 void MapAreaDialog::BtnUpdateClick()
 {
-	UpdateMap();
+    UpdateMap();
 }
 //---------------------------------------------------------------------------
 void MapAreaDialog::BtnCloseClick()
@@ -82,8 +92,8 @@ void MapAreaDialog::BtnCloseClick()
 //---------------------------------------------------------------------------
 void MapAreaDialog::ScaleEqClick()
 {
-	UpdateMap();
-	UpdateEnable();
+    UpdateMap();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void MapAreaDialog::UpdateField(void)

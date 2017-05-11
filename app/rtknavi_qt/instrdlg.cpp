@@ -30,14 +30,14 @@ InputStrDialog::InputStrDialog(QWidget* parent)
     Format1->clear();
     Format2->clear();
 
-	NRcv=0;
+    NRcv=0;
 
-	for (i=0;i<=MAXRCVFMT;i++) {
+    for(i=0; i<=MAXRCVFMT; i++) {
         Format1->addItem(formatstrs[i]);
         Format2->addItem(formatstrs[i]);
         Format3->addItem(formatstrs[i]);
-		NRcv++;
-	}
+        NRcv++;
+    }
     Format3->addItem("SP3");
 
     cmdOptDialog = new CmdOptDialog(this);
@@ -85,7 +85,9 @@ InputStrDialog::InputStrDialog(QWidget* parent)
 //---------------------------------------------------------------------------
 void InputStrDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
     StreamC1  ->setChecked(StreamC[0]);
     StreamC2  ->setChecked(StreamC[1]);
@@ -106,7 +108,7 @@ void InputStrDialog::showEvent(QShowEvent *event)
     NmeaPos1  ->setText(QString::number(NmeaPos[0],'f',9));
     NmeaPos2  ->setText(QString::number(NmeaPos[1],'f',9));
 
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void InputStrDialog::BtnOkClick()
@@ -137,12 +139,12 @@ void InputStrDialog::BtnOkClick()
 //---------------------------------------------------------------------------
 void InputStrDialog::StreamC1Click()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::StreamC2Click()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::StreamC3Click()
@@ -151,27 +153,27 @@ void  InputStrDialog::StreamC3Click()
 }//---------------------------------------------------------------------------
 void  InputStrDialog::Stream1Change(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::Stream2Change(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::Stream3Change(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::TimeTagCClick()
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::NmeaReqLChange(int)
 {
-	UpdateEnable();
+    UpdateEnable();
 }
 //---------------------------------------------------------------------------
 QString  InputStrDialog::GetFilePath(const QString &path)
@@ -185,140 +187,176 @@ QString  InputStrDialog::GetFilePath(const QString &path)
 QString  InputStrDialog::SetFilePath(const QString &p)
 {
     QString path=p;
-    if (TimeTagC->isChecked()     ) path+="::T";
-    if (TimeStartE->text()!="0" ) path+="::+"+TimeStartE->text();
+    if(TimeTagC->isChecked()) {
+        path+="::T";
+    }
+    if(TimeStartE->text()!="0") {
+        path+="::+"+TimeStartE->text();
+    }
     path+="::"+TimeSpeedL->currentText();
-	return path;
+    return path;
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::BtnStr1Click()
 {
-    switch (Stream1->currentIndex()) {
-		case 0: SerialOpt(0,0); break;
-		case 1: TcpOpt(0,1); break;
-		case 2: TcpOpt(0,0); break;
-		case 3: TcpOpt(0,3); break;
-	}
+    switch(Stream1->currentIndex()) {
+    case 0:
+        SerialOpt(0,0);
+        break;
+    case 1:
+        TcpOpt(0,1);
+        break;
+    case 2:
+        TcpOpt(0,0);
+        break;
+    case 3:
+        TcpOpt(0,3);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::BtnStr2Click()
 {
-    switch (Stream2->currentIndex()) {
-		case 0: SerialOpt(1,0); break;
-		case 1: TcpOpt(1,1); break;
-		case 2: TcpOpt(1,0); break;
-		case 3: TcpOpt(1,3); break;
-		case 5: FtpOpt(1,0); break;
-		case 6: FtpOpt(1,1); break;
-	}
+    switch(Stream2->currentIndex()) {
+    case 0:
+        SerialOpt(1,0);
+        break;
+    case 1:
+        TcpOpt(1,1);
+        break;
+    case 2:
+        TcpOpt(1,0);
+        break;
+    case 3:
+        TcpOpt(1,3);
+        break;
+    case 5:
+        FtpOpt(1,0);
+        break;
+    case 6:
+        FtpOpt(1,1);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::BtnStr3Click()
 {
-    switch (Stream3->currentIndex()) {
-		case 0: SerialOpt(2,0); break;
-		case 1: TcpOpt(2,1); break;
-		case 2: TcpOpt(2,0); break;
-		case 3: TcpOpt(2,3); break;
-		case 5: FtpOpt(2,0); break;
-		case 6: FtpOpt(2,1); break;
-	}
+    switch(Stream3->currentIndex()) {
+    case 0:
+        SerialOpt(2,0);
+        break;
+    case 1:
+        TcpOpt(2,1);
+        break;
+    case 2:
+        TcpOpt(2,0);
+        break;
+    case 3:
+        TcpOpt(2,3);
+        break;
+    case 5:
+        FtpOpt(2,0);
+        break;
+    case 6:
+        FtpOpt(2,1);
+        break;
+    }
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::BtnCmd1Click()
 {
-    if (Stream1->currentIndex()==0) {
+    if(Stream1->currentIndex()==0) {
         cmdOptDialog->Cmds  [0]=Cmds  [0][0];
         cmdOptDialog->Cmds  [1]=Cmds  [0][1];
         cmdOptDialog->CmdEna[0]=CmdEna[0][0];
         cmdOptDialog->CmdEna[1]=CmdEna[0][1];
-	}
-	else {
+    } else {
         cmdOptDialog->Cmds  [0]=CmdsTcp  [0][0];
         cmdOptDialog->Cmds  [1]=CmdsTcp  [0][1];
         cmdOptDialog->CmdEna[0]=CmdEnaTcp[0][0];
         cmdOptDialog->CmdEna[1]=CmdEnaTcp[0][1];
-	}
+    }
 
     cmdOptDialog->exec();
-    if (cmdOptDialog->result()!=QDialog::Accepted) return;
+    if(cmdOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
-    if (Stream1->currentIndex()==0) {
+    if(Stream1->currentIndex()==0) {
         Cmds  [0][0]=cmdOptDialog->Cmds  [0];
         Cmds  [0][1]=cmdOptDialog->Cmds  [1];
         CmdEna[0][0]=cmdOptDialog->CmdEna[0];
         CmdEna[0][1]=cmdOptDialog->CmdEna[1];
-	}
-	else {
+    } else {
         CmdsTcp  [0][0]=cmdOptDialog->Cmds  [0];
         CmdsTcp  [0][1]=cmdOptDialog->Cmds  [1];
         CmdEnaTcp[0][0]=cmdOptDialog->CmdEna[0];
         CmdEnaTcp[0][1]=cmdOptDialog->CmdEna[1];
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::BtnCmd2Click()
 {
-    if (Stream2->currentIndex()==0) {
+    if(Stream2->currentIndex()==0) {
         cmdOptDialog->Cmds  [0]=Cmds  [1][0];
         cmdOptDialog->Cmds  [1]=Cmds  [1][1];
         cmdOptDialog->CmdEna[0]=CmdEna[1][0];
         cmdOptDialog->CmdEna[1]=CmdEna[1][1];
-	}
-	else {
+    } else {
         cmdOptDialog->Cmds  [0]=CmdsTcp  [1][0];
         cmdOptDialog->Cmds  [1]=CmdsTcp  [1][1];
         cmdOptDialog->CmdEna[0]=CmdEnaTcp[1][0];
         cmdOptDialog->CmdEna[1]=CmdEnaTcp[1][1];
-	}
+    }
 
     cmdOptDialog->exec();
-    if (cmdOptDialog->result()!=QDialog::Accepted) return;
+    if(cmdOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
-    if (Stream2->currentIndex()==0) {
+    if(Stream2->currentIndex()==0) {
         Cmds  [1][0]=cmdOptDialog->Cmds  [0];
         Cmds  [1][1]=cmdOptDialog->Cmds  [1];
         CmdEna[1][0]=cmdOptDialog->CmdEna[0];
         CmdEna[1][1]=cmdOptDialog->CmdEna[1];
-	}
-	else {
+    } else {
         CmdsTcp  [1][0]=cmdOptDialog->Cmds  [0];
         CmdsTcp  [1][1]=cmdOptDialog->Cmds  [1];
         CmdEnaTcp[1][0]=cmdOptDialog->CmdEna[0];
         CmdEnaTcp[1][1]=cmdOptDialog->CmdEna[1];
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::BtnCmd3Click()
 {
-    if (Stream3->currentIndex()==0) {
+    if(Stream3->currentIndex()==0) {
         cmdOptDialog->Cmds  [0]=Cmds  [2][0];
         cmdOptDialog->Cmds  [1]=Cmds  [2][1];
         cmdOptDialog->CmdEna[0]=CmdEna[2][0];
         cmdOptDialog->CmdEna[1]=CmdEna[2][1];
-	}
-	else {
+    } else {
         cmdOptDialog->Cmds  [0]=CmdsTcp  [2][0];
         cmdOptDialog->Cmds  [1]=CmdsTcp  [2][1];
         cmdOptDialog->CmdEna[0]=CmdEnaTcp[2][0];
         cmdOptDialog->CmdEna[1]=CmdEnaTcp[2][1];
-	}
+    }
 
     cmdOptDialog->exec();
-    if (cmdOptDialog->result()!=QDialog::Accepted) return;
+    if(cmdOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
-    if (Stream3->currentIndex()==0) {
+    if(Stream3->currentIndex()==0) {
         Cmds  [2][0]=cmdOptDialog->Cmds  [0];
         Cmds  [2][1]=cmdOptDialog->Cmds  [1];
         CmdEna[2][0]=cmdOptDialog->CmdEna[0];
         CmdEna[2][1]=cmdOptDialog->CmdEna[1];
-	}
-	else {
+    } else {
         CmdsTcp  [2][0]=cmdOptDialog->Cmds  [0];
         CmdsTcp  [2][1]=cmdOptDialog->Cmds  [1];
         CmdEnaTcp[2][0]=cmdOptDialog->CmdEna[0];
         CmdEnaTcp[2][1]=cmdOptDialog->CmdEna[1];
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::BtnRcvOpt1Click()
@@ -326,7 +364,9 @@ void  InputStrDialog::BtnRcvOpt1Click()
     rcvOptDialog->Option=RcvOpt[0];
 
     rcvOptDialog->exec();
-    if (rcvOptDialog->result()!=QDialog::Accepted) return;
+    if(rcvOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     RcvOpt[0]=rcvOptDialog->Option;
 }
@@ -336,7 +376,9 @@ void  InputStrDialog::BtnRcvOpt2Click()
     rcvOptDialog->Option=RcvOpt[1];
 
     rcvOptDialog->exec();
-    if (rcvOptDialog->result()!=QDialog::Accepted) return;
+    if(rcvOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     RcvOpt[1]=rcvOptDialog->Option;
 }
@@ -346,7 +388,9 @@ void  InputStrDialog::BtnRcvOpt3Click()
     rcvOptDialog->Option=RcvOpt[2];
 
     rcvOptDialog->exec();
-    if (rcvOptDialog->result()!=QDialog::Accepted) return;
+    if(rcvOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
     RcvOpt[2]=rcvOptDialog->Option;
 
 }
@@ -360,7 +404,9 @@ void  InputStrDialog::BtnPosClick()
     refDialog->StaPosFile=mainForm->StaPosFileF;
 
     refDialog->exec();
-    if (refDialog->result()!=QDialog::Accepted) return;
+    if(refDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     NmeaPos1->setText(QString::number(refDialog->Pos[0],'f',9));
     NmeaPos2->setText(QString::number(refDialog->Pos[1],'f',9));
@@ -372,7 +418,9 @@ void  InputStrDialog::SerialOpt(int index, int opt)
     serialOptDialog->Opt=opt;
 
     serialOptDialog->exec();
-    if (serialOptDialog->result()!=QDialog::Accepted) return;
+    if(serialOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][0]=serialOptDialog->Path;
 }
@@ -396,19 +444,21 @@ void  InputStrDialog::TcpOpt(int index, int opt)
 {
     tcpOptDialog->Path=Paths[index][1];
     tcpOptDialog->Opt=opt;
-	for (int i=0;i<10;i++) {
+    for(int i=0; i<10; i++) {
         tcpOptDialog->History[i]=History[i];
         tcpOptDialog->MntpHist[i]=MntpHist[i];
-	}
+    }
 
     tcpOptDialog->exec();
-    if (tcpOptDialog->result()!=QDialog::Accepted) return;
+    if(tcpOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][1]=tcpOptDialog->Path;
-	for (int i=0;i<10;i++) {
+    for(int i=0; i<10; i++) {
         History[i]=tcpOptDialog->History[i];
         MntpHist[i]=tcpOptDialog->MntpHist[i];
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void  InputStrDialog::FtpOpt(int index, int opt)
@@ -417,7 +467,9 @@ void  InputStrDialog::FtpOpt(int index, int opt)
     ftpOptDialog->Opt=opt;
 
     ftpOptDialog->exec();
-    if (ftpOptDialog->result()!=QDialog::Accepted) return;
+    if(ftpOptDialog->result()!=QDialog::Accepted) {
+        return;
+    }
 
     Paths[index][3]=ftpOptDialog->Path;
 }
@@ -428,7 +480,7 @@ void  InputStrDialog::UpdateEnable(void)
              (StreamC2->isChecked()&&(Stream2->currentIndex()==4))||
              (StreamC3->isChecked()&&(Stream3->currentIndex()==4));
     int ena2=StreamC2->isChecked()&&(Stream2->currentIndex()<=3);
-	
+
     Stream1   ->setEnabled(StreamC1->isChecked());
     Stream2   ->setEnabled(StreamC2->isChecked());
     Stream3   ->setEnabled(StreamC3->isChecked());
@@ -444,13 +496,13 @@ void  InputStrDialog::UpdateEnable(void)
     BtnRcvOpt1->setEnabled(StreamC1->isChecked());
     BtnRcvOpt2->setEnabled(StreamC2->isChecked());
     BtnRcvOpt3->setEnabled(StreamC3->isChecked());
-	
+
     LabelNmea ->setEnabled(ena2);
     NmeaReqL  ->setEnabled(ena2);
     NmeaPos1  ->setEnabled(ena2&&NmeaReqL->currentIndex()==1);
     NmeaPos2  ->setEnabled(ena2&&NmeaReqL->currentIndex()==1);
     BtnPos    ->setEnabled(ena2&&NmeaReqL->currentIndex()==1);
-	
+
     LabelF1   ->setEnabled(ena1);
     FilePath1 ->setEnabled(StreamC1->isChecked()&&Stream1->currentIndex()==4);
     FilePath2 ->setEnabled(StreamC2->isChecked()&&Stream2->currentIndex()==4);

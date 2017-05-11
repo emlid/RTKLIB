@@ -22,7 +22,7 @@ private:
 
     ConvOptDialog* convOptDialog;
 public:
-	int NavSys,FreqType;
+    int NavSys,FreqType;
     CodeOptDialog(QWidget *parent, ConvOptDialog *);
 };
 //----------------------------------------------------------------------

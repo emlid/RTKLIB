@@ -61,10 +61,10 @@ private:
     QString StaPosFile,ExeDirectory,LocalDirectory,SwapInterval;
     QString ProxyAddress;
     QString ConvMsg[3],ConvOpt[3],AntType,RcvType;
-	int ConvEna[3],ConvInp[3],ConvOut[3],StaId,StaSel;
-	int TraceLevel,SvrOpt[6],CmdEna[2],CmdEnaTcp[2],NmeaReq,FileSwapMargin;
-	double AntPos[3],AntOff[3];
-	gtime_t StartTime,EndTime;
+    int ConvEna[3],ConvInp[3],ConvOut[3],StaId,StaSel;
+    int TraceLevel,SvrOpt[6],CmdEna[2],CmdEnaTcp[2],NmeaReq,FileSwapMargin;
+    double AntPos[3],AntOff[3];
+    gtime_t StartTime,EndTime;
     QSystemTrayIcon *TrayIcon;
     SvrOptDialog *svrOptDialog;
     Console *console;

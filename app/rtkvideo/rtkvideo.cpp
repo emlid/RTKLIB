@@ -12,28 +12,20 @@ USEFORM("videoopt.cpp", VideoOptDlg);
 //---------------------------------------------------------------------------
 extern "C" int FMXmain()
 {
-	try
-	{
-		Application->Initialize();
-		Application->CreateForm(__classid(TMainForm), &MainForm);
-		Application->CreateForm(__classid(TVideoOptDlg), &VideoOptDlg);
-		Application->Run();
-	}
-	catch (Exception &exception)
-	{
-		Application->ShowException(&exception);
-	}
-	catch (...)
-	{
-		try
-		{
-			throw Exception("");
-		}
-		catch (Exception &exception)
-		{
-			Application->ShowException(&exception);
-		}
-	}
-	return 0;
+    try {
+        Application->Initialize();
+        Application->CreateForm(__classid(TMainForm), &MainForm);
+        Application->CreateForm(__classid(TVideoOptDlg), &VideoOptDlg);
+        Application->Run();
+    } catch(Exception &exception) {
+        Application->ShowException(&exception);
+    } catch(...) {
+        try {
+            throw Exception("");
+        } catch(Exception &exception) {
+            Application->ShowException(&exception);
+        }
+    }
+    return 0;
 }
 //---------------------------------------------------------------------------

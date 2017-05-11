@@ -27,7 +27,7 @@ private:
     void UpdateEnable(void);
 
 public:
-	int Opt;
+    int Opt;
     QString Path;
     explicit FileOptDialog(QWidget* parent);
 };

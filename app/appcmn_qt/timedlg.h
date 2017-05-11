@@ -19,7 +19,7 @@ protected:
     void showEvent(QShowEvent *);
 
 public:
-	gtime_t Time;
+    gtime_t Time;
 
     explicit TimeDialog(QWidget *parent);
 };

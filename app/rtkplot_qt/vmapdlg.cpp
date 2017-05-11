@@ -66,7 +66,9 @@ void VecMapDialog::BtnColor1Click()
 
     dialog.setCurrentColor(Colors[0]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color1->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[0]=dialog.currentColor();
@@ -78,7 +80,9 @@ void VecMapDialog::BtnColor2Click()
 
     dialog.setCurrentColor(Colors[1]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color2->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[1]=dialog.currentColor();
@@ -90,7 +94,9 @@ void VecMapDialog::BtnColor3Click()
 
     dialog.setCurrentColor(Colors[2]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color3->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[2]=dialog.currentColor();
@@ -102,7 +108,9 @@ void VecMapDialog::BtnColor4Click()
 
     dialog.setCurrentColor(Colors[3]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color4->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[3]=dialog.currentColor();
@@ -114,7 +122,9 @@ void VecMapDialog::BtnColor5Click()
 
     dialog.setCurrentColor(Colors[4]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color5->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[4]=dialog.currentColor();
@@ -126,7 +136,9 @@ void VecMapDialog::BtnColor6Click()
 
     dialog.setCurrentColor(Colors[5]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color6->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[5]=dialog.currentColor();
@@ -138,7 +150,9 @@ void VecMapDialog::BtnColor7Click()
 
     dialog.setCurrentColor(Colors[6]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color7->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[6]=dialog.currentColor();
@@ -150,7 +164,9 @@ void VecMapDialog::BtnColor8Click()
 
     dialog.setCurrentColor(Colors[7]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color8->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[7]=dialog.currentColor();
@@ -162,7 +178,9 @@ void VecMapDialog::BtnColor9Click()
 
     dialog.setCurrentColor(Colors[8]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color9->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[8]=dialog.currentColor();
@@ -174,7 +192,9 @@ void VecMapDialog::BtnColor10Click()
 
     dialog.setCurrentColor(Colors[9]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color10->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[9]=dialog.currentColor();
@@ -186,7 +206,9 @@ void VecMapDialog::BtnColor11Click()
 
     dialog.setCurrentColor(Colors[10]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color11->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[10]=dialog.currentColor();
@@ -198,7 +220,9 @@ void VecMapDialog::BtnColor12Click()
 
     dialog.setCurrentColor(Colors[11]);
 
-    if (dialog.exec()!=QDialog::Accepted) return;
+    if(dialog.exec()!=QDialog::Accepted) {
+        return;
+    }
 
     Color12->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(dialog.currentColor())));
     Colors[11]=dialog.currentColor();
@@ -206,122 +230,134 @@ void VecMapDialog::BtnColor12Click()
 //---------------------------------------------------------------------------
 void VecMapDialog::LayerClick()
 {
-    QRadioButton *layer[]={
-		Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
-		Layer10,Layer11,Layer12
-	};
-	for (int i=0;i<MAXMAPLAYER;i++) {
+    QRadioButton *layer[]= {
+        Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
+        Layer10,Layer11,Layer12
+    };
+    for(int i=0; i<MAXMAPLAYER; i++) {
         layer[i]->setChecked((layer[i]==(QRadioButton *)sender()));
-	}
+    }
 }
 //---------------------------------------------------------------------------
 void VecMapDialog::BtnUpClick()
 {
-    QRadioButton *layer[]={
-		Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
-		Layer10,Layer11,Layer12
-	};
-    QFrame *color[]={
-		Color1,Color2,Color3,Color4,Color5,Color6,Color7,Color8,Color9,
-		Color10,Color11,Color12
-	};
+    QRadioButton *layer[]= {
+        Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
+        Layer10,Layer11,Layer12
+    };
+    QFrame *color[]= {
+        Color1,Color2,Color3,Color4,Color5,Color6,Color7,Color8,Color9,
+        Color10,Color11,Color12
+    };
     QColor col;
-	gisd_t *data;
-	char name[256];
-	int i,flag;
-	
-	for (i=0;i<MAXMAPLAYER;i++) {
-        if (layer[i]->isChecked()) break;
-	}
-	if (i==0||i>=MAXMAPLAYER) return;
-	strcpy(name,Gis.name[i-1]);
-	strcpy(Gis.name[i-1],Gis.name[i]);
-	strcpy(Gis.name[i],name);
-	flag=Gis.flag[i-1];
-	Gis.flag[i-1]=Gis.flag[i];
-	Gis.flag[i]=flag;
-	data=Gis.data[i-1];
-	Gis.data[i-1]=Gis.data[i];
-	Gis.data[i]=data;
-	//col=color[i-1]->Color;
-	//color[i-1]->Color=color[i]->Color;
-	//color[i]->Color=col;
+    gisd_t *data;
+    char name[256];
+    int i,flag;
+
+    for(i=0; i<MAXMAPLAYER; i++) {
+        if(layer[i]->isChecked()) {
+            break;
+        }
+    }
+    if(i==0||i>=MAXMAPLAYER) {
+        return;
+    }
+    strcpy(name,Gis.name[i-1]);
+    strcpy(Gis.name[i-1],Gis.name[i]);
+    strcpy(Gis.name[i],name);
+    flag=Gis.flag[i-1];
+    Gis.flag[i-1]=Gis.flag[i];
+    Gis.flag[i]=flag;
+    data=Gis.data[i-1];
+    Gis.data[i-1]=Gis.data[i];
+    Gis.data[i]=data;
+    //col=color[i-1]->Color;
+    //color[i-1]->Color=color[i]->Color;
+    //color[i]->Color=col;
     layer[i-1]->setChecked(true);
     layer[i]->setChecked(false);
-	UpdateLayer();
+    UpdateLayer();
 }
 //---------------------------------------------------------------------------
 void VecMapDialog::BtnDownClick()
 {
-    QRadioButton *layer[]={
-		Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
-		Layer10,Layer11,Layer12
-	};
-    QFrame *color[]={
-		Color1,Color2,Color3,Color4,Color5,Color6,Color7,Color8,Color9,
-		Color10,Color11,Color12
-	};
+    QRadioButton *layer[]= {
+        Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
+        Layer10,Layer11,Layer12
+    };
+    QFrame *color[]= {
+        Color1,Color2,Color3,Color4,Color5,Color6,Color7,Color8,Color9,
+        Color10,Color11,Color12
+    };
     QColor col;
-	gisd_t *data;
-	char name[256];
-	int i,flag;
-	
-	for (i=0;i<MAXMAPLAYER;i++) {
-        if (layer[i]->isChecked()) break;
-	}
-	if (i==MAXMAPLAYER-1||i>=MAXMAPLAYER) return;
-	strcpy(name,Gis.name[i+1]);
-	strcpy(Gis.name[i+1],Gis.name[i]);
-	strcpy(Gis.name[i],name);
-	flag=Gis.flag[i+1];
-	Gis.flag[i+1]=Gis.flag[i];
-	Gis.flag[i]=flag;
-	data=Gis.data[i+1];
-	Gis.data[i+1]=Gis.data[i];
-	Gis.data[i]=data;
-	//col=color[i+1]->Color;
-	//color[i+1]->Color=color[i]->Color;
-	//color[i]->Color=col;
+    gisd_t *data;
+    char name[256];
+    int i,flag;
+
+    for(i=0; i<MAXMAPLAYER; i++) {
+        if(layer[i]->isChecked()) {
+            break;
+        }
+    }
+    if(i==MAXMAPLAYER-1||i>=MAXMAPLAYER) {
+        return;
+    }
+    strcpy(name,Gis.name[i+1]);
+    strcpy(Gis.name[i+1],Gis.name[i]);
+    strcpy(Gis.name[i],name);
+    flag=Gis.flag[i+1];
+    Gis.flag[i+1]=Gis.flag[i];
+    Gis.flag[i]=flag;
+    data=Gis.data[i+1];
+    Gis.data[i+1]=Gis.data[i];
+    Gis.data[i]=data;
+    //col=color[i+1]->Color;
+    //color[i+1]->Color=color[i]->Color;
+    //color[i]->Color=col;
     layer[i+1]->setChecked(true);
     layer[i]->setChecked(false);
-	UpdateLayer();
+    UpdateLayer();
 }
 //---------------------------------------------------------------------------
 void VecMapDialog::VisClick()
 {
-    QCheckBox *vis[]={
-		Vis1,Vis2,Vis3,Vis4,Vis5,Vis6,Vis7,Vis8,Vis9,Vis10,Vis11,Vis12
-	};
-	for (int i=0;i<MAXMAPLAYER;i++) {
-        if ((QCheckBox *)sender()==vis[i]) Gis.flag[i]=vis[i]->isChecked()?1:0;
-	}
+    QCheckBox *vis[]= {
+        Vis1,Vis2,Vis3,Vis4,Vis5,Vis6,Vis7,Vis8,Vis9,Vis10,Vis11,Vis12
+    };
+    for(int i=0; i<MAXMAPLAYER; i++) {
+        if((QCheckBox *)sender()==vis[i]) {
+            Gis.flag[i]=vis[i]->isChecked()?1:0;
+        }
+    }
 }
 //---------------------------------------------------------------------------
-void VecMapDialog::showEvent (QShowEvent *event)
+void VecMapDialog::showEvent(QShowEvent *event)
 {
-    if (event->spontaneous()) return;
+    if(event->spontaneous()) {
+        return;
+    }
 
-    QRadioButton *layer[]={
-		Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
-		Layer10,Layer11,Layer12
-	};
-    QFrame *color[]={
-		Color1,Color2,Color3,Color4,Color5,Color6,Color7,Color8,Color9,
-		Color10,Color11,Color12
-	};
+    QRadioButton *layer[]= {
+        Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
+        Layer10,Layer11,Layer12
+    };
+    QFrame *color[]= {
+        Color1,Color2,Color3,Color4,Color5,Color6,Color7,Color8,Color9,
+        Color10,Color11,Color12
+    };
     Gis=plot->Gis;
-	for (int i=0;i<MAXMAPLAYER;i++) {
+    for(int i=0; i<MAXMAPLAYER; i++) {
         layer[i]->setChecked(false);
         color[i]->setStyleSheet(QString("QFrame {background-color: %1;}").arg(color2String(plot->MapColor[i])));
-	}
-	UpdateLayer();
+    }
+    UpdateLayer();
 }
 //---------------------------------------------------------------------------
 void VecMapDialog::BtnOkClick()
 {
-	for (int i=0;i<MAXMAPLAYER;i++) {
+    for(int i=0; i<MAXMAPLAYER; i++) {
         plot->MapColor[i]=Colors[i];
-	}
+    }
 
     plot->Gis=Gis;
 
@@ -330,17 +366,17 @@ void VecMapDialog::BtnOkClick()
 //---------------------------------------------------------------------------
 void VecMapDialog::UpdateLayer(void)
 {
-    QRadioButton *layer[]={
-		Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
-		Layer10,Layer11,Layer12
-	};
-    QCheckBox *vis[]={
-		Vis1,Vis2,Vis3,Vis4,Vis5,Vis6,Vis7,Vis8,Vis9,Vis10,Vis11,Vis12
-	};
-	for (int i=0;i<MAXMAPLAYER;i++) {
+    QRadioButton *layer[]= {
+        Layer1,Layer2,Layer3,Layer4,Layer5,Layer6,Layer7,Layer8,Layer9,
+        Layer10,Layer11,Layer12
+    };
+    QCheckBox *vis[]= {
+        Vis1,Vis2,Vis3,Vis4,Vis5,Vis6,Vis7,Vis8,Vis9,Vis10,Vis11,Vis12
+    };
+    for(int i=0; i<MAXMAPLAYER; i++) {
         layer[i]->setText(Gis.name[i]);
         vis[i]->setChecked(Gis.flag[i]);
-	}
+    }
 }
 //---------------------------------------------------------------------------
 
