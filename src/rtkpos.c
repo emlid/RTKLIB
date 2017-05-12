@@ -1814,8 +1814,9 @@ static int relpos(rtk_t *rtk, const obsd_t *obs, int nu, int nr,
 
     /* init satellite status arrays */
     for (i=0;i<MAXSAT;i++) {
-        rtk->ssat[i].sys=satsys(i+1,NULL);                                  /* gps system */
-        for (j=0;j<NFREQ;j++) rtk->ssat[i].vsat[j]=rtk->ssat[i].snr[j]=0;   /* valid satellite */
+        rtk->ssat[i].sys=satsys(i+1,NULL);
+        for (j=0;j<NFREQ;j++) rtk->ssat[i].vsat[j]=0;
+        for (j=1;j<NFREQ;j++) rtk->ssat[i].snr [j]=0;
     }
     /* compute satellite positions, velocities and clocks */
     satposs(time,obs,n,nav,opt->sateph,rs,dts,var,svh);

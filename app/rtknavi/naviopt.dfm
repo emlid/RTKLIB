@@ -403,7 +403,6 @@ object OptDialog: TOptDialog
     object TabSheet2: TTabSheet
       Caption = 'Setting&2'
       ImageIndex = 1
-      ExplicitTop = 28
       object Label25: TLabel
         Left = 24
         Top = 7
