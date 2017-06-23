@@ -2158,7 +2158,7 @@ extern int set_base_position(rtk_t *rtk, double pos[3],
             is_base_pos_set = 0;
         }
         
-        if ( !is_base_pos_set ) {
+        if ( (!is_base_pos_set) || is_base_jumped ) {
             for (i = 0; i < 3; i++) 
                 rtk->rb[i] = pos[i];
         }
