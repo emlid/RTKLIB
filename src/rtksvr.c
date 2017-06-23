@@ -143,6 +143,7 @@ static void updatesvr(rtksvr_t *svr, int ret, obs_t *obs, nav_t *nav, int sat,
     gtime_t tof;
     double pos[3],del[3]={0},dr[3];
     int i,n=0,prn,sbssat=svr->rtk.opt.sbassatsel,sys,iode;
+    double base_pos[3];
 
     tracet(4,"updatesvr: ret=%d sat=%2d index=%d\n",ret,sat,index);
 
@@ -220,43 +221,45 @@ static void updatesvr(rtksvr_t *svr, int ret, obs_t *obs, nav_t *nav, int sat,
     else if (ret==5) { /* antenna postion parameters */
         if (svr->rtk.opt.refpos==POSOPT_RTCM&&index==1) {
             for (i=0;i<3;i++) {
-                svr->rtk.rb[i]=svr->rtcm[1].sta.pos[i];
+                base_pos[i]=svr->rtcm[1].sta.pos[i];
             }
             /* antenna delta */
-            ecef2pos(svr->rtk.rb,pos);
+            ecef2pos(base_pos,pos);
             if (svr->rtcm[1].sta.deltype) { /* xyz */
                 del[2]=svr->rtcm[1].sta.hgt;
                 enu2ecef(pos,del,dr);
                 for (i=0;i<3;i++) {
-                    svr->rtk.rb[i]+=svr->rtcm[1].sta.del[i]+dr[i];
+                    base_pos[i]+=svr->rtcm[1].sta.del[i]+dr[i];
                 }
             }
             else { /* enu */
                 enu2ecef(pos,svr->rtcm[1].sta.del,dr);
                 for (i=0;i<3;i++) {
-                    svr->rtk.rb[i]+=dr[i];
+                    base_pos[i]+=dr[i];
                 }
             }
+            set_base_position(&svr->rtk, base_pos, 1, 0);
         }
         else if (svr->rtk.opt.refpos==POSOPT_RAW&&index==1) {
             for (i=0;i<3;i++) {
-                svr->rtk.rb[i]=svr->raw[1].sta.pos[i];
+                base_pos[i]=svr->raw[1].sta.pos[i];
             }
             /* antenna delta */
-            ecef2pos(svr->rtk.rb,pos);
+            ecef2pos(base_pos,pos);
             if (svr->raw[1].sta.deltype) { /* xyz */
                 del[2]=svr->raw[1].sta.hgt;
                 enu2ecef(pos,del,dr);
                 for (i=0;i<3;i++) {
-                    svr->rtk.rb[i]+=svr->raw[1].sta.del[i]+dr[i];
+                    base_pos[i]+=svr->raw[1].sta.del[i]+dr[i];
                 }
             }
             else { /* enu */
                 enu2ecef(pos,svr->raw[1].sta.del,dr);
                 for (i=0;i<3;i++) {
-                    svr->rtk.rb[i]+=dr[i];
+                    base_pos[i]+=dr[i];
                 }
             }
+            set_base_position(&svr->rtk, base_pos, 1, 0);
         }
         svr->nmsg[index][4]++;
     }
@@ -814,10 +817,8 @@ extern int rtksvrstart(rtksvr_t *svr, int cycle, int buffsize, int *strs,
         svr->solopt[i]=solopt[i];
     }
     /* set base station position */
-    if (prcopt->refpos!=POSOPT_SINGLE) {
-        for (i=0;i<6;i++) {
-            svr->rtk.rb[i]=i<3?prcopt->rb[i]:0.0;
-        }
+    if (prcopt->refpos != POSOPT_SINGLE) {
+        set_base_position(&svr->rtk, prcopt->rb, 1, 0);
     }
     /* update navigation data */
     for (i=0;i<MAXSAT *2;i++) svr->nav.eph [i].ttr=time0;

@@ -68,6 +68,8 @@ static const char rcsid[]="$Id:$";
 
 #define TTOL_MOVEB  (1.0+2*DTTOL)
                              /* time sync tolerance for moving-baseline (s) */
+                             
+#define RESET_BASE_TRESH 0.05 /* threshold of base station position jump for filter states reset (m) */
 
 /* number of parameters (pos,ionos,tropos,hw-bias,phase-bias,real,estimated) */
 #define NF(opt)     ((opt)->ionoopt==IONOOPT_IFLC?1:(opt)->nf)
@@ -2119,6 +2121,51 @@ extern void rtkfree(rtk_t *rtk)
     free(rtk->xa); rtk->xa=NULL;
     free(rtk->Pa); rtk->Pa=NULL;
 }
+/* set base position in rtk structure -----------------------------------------*/
+extern int set_base_position(rtk_t *rtk, double pos[3], 
+                             int is_reset_on_change, int is_forced)
+{
+    if ( !rtk ) return 0;
+    
+    int i;
+    int is_base_pos_set    = norm(rtk->rb, 3) > 0.0;
+    int is_base_pos_income = norm(pos, 3)     > 0.0;
+    
+    double delta_pos[3];
+    for (i = 0; i < 3; i++) 
+        delta_pos[i] = pos[i] - rtk->rb[i];
+    
+    int is_base_shifted    = norm(delta_pos, 3) > 0.0;
+    int is_base_jumped     = norm(delta_pos, 3) > RESET_BASE_TRESH;
+    
+    /* forced mode */
+    if ( is_forced ) {
+        
+        if ( is_reset_on_change && is_base_shifted ) {
+            rtkinit(rtk, &rtk->opt);
+            is_base_pos_set = 0;
+        }
+        
+        for (i = 0; i < 3; i++) 
+            rtk->rb[i] = pos[i];
+    }
+    
+    /* normal mode */
+    if ( (!is_forced) && is_base_pos_income ) {
+        
+        if ( is_base_pos_set && is_reset_on_change && is_base_jumped ) {
+            rtkinit(rtk, &rtk->opt);
+            is_base_pos_set = 0;
+        }
+        
+        if ( !is_base_pos_set ) {
+            for (i = 0; i < 3; i++) 
+                rtk->rb[i] = pos[i];
+        }
+    }
+    
+    return 1;
+}
 /* precise positioning ---------------------------------------------------------
 * input observation data and navigation message, compute rover position by 
 * precise positioning
@@ -2189,10 +2236,10 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
     trace(4,"obs=\n"); traceobs(4,obs,n);
     /*trace(5,"nav=\n"); tracenav(5,nav);*/
     
-    /* set base staion position */
+    /* set base station position */
     if (opt->refpos<=POSOPT_RINEX&&opt->mode!=PMODE_SINGLE&&
         opt->mode!=PMODE_MOVEB) {
-        for (i=0;i<6;i++) rtk->rb[i]=i<3?opt->rb[i]:0.0;
+        set_base_position(rtk, opt->rb, 1, 0);
     }
     /* count rover/base station observations */
     for (nu=0;nu   <n&&obs[nu   ].rcv==1;nu++) ;
