@@ -18,13 +18,13 @@
 #define ID_SVI            0x06 /* message id ERB-SVI */
 #define LENGTH_VER           7 /* length of payload ERB-VER message */
 #define LENGTH_POS          44 /* length of payload ERB-POS message */
-#define LENGTH_STAT          9 /* length of payload ERB-STAT message */
+#define LENGTH_STAT         37 /* length of payload ERB-STAT message */
 #define LENGTH_DOPS         12 /* length of payload ERB-DOPS message */
 #define LENGTH_VEL          28 /* length of payload ERB-VEL message */
 #define LENGTH_SVI_HEAD      5 /* length of head of payload ERB-SVI message */
 #define LENGTH_SVI_SV       20 /* length of 1 SV information in ERB-SVI message */
 #define VERSION_HIGH         0 /* High level of version */
-#define VERSION_MEDIUM       1 /* Medium level of version */
+#define VERSION_MEDIUM       2 /* Medium level of version */
 #define VERSION_LOW          0 /* Low level of version */
 
 /* structures for ERB protocol -----------------------------------------------*/
@@ -56,6 +56,17 @@ struct erb_stat {
 	uint8_t fixType;
 	uint8_t fixStatus;
 	uint8_t numSV;
+	/* Introduced in ERB version 0.2.0 */
+	uint8_t base_num_sats;       /* Current number of satellites used for RTK calculation */
+	uint16_t age_cs;             /* Age of the corrections in centiseconds (0 when no corrections, 0xFFFF indicates overflow) */
+	int32_t baseline_N_mm;       /* distance between base and rover along the north axis in millimeters */
+	int32_t baseline_E_mm;       /* distance between base and rover along the east axis in millimeters */
+	int32_t baseline_D_mm;       /* distance between base and rover along the down axis in millimeters */
+	uint16_t ar_ratio;           /* AR ratio multiplied by 10 */
+	uint16_t base_week_number;   /* GPS Week Number of last baseline */
+	uint32_t base_time_week_ms;  /* GPS Time of Week of last baseline in milliseconds */
+	int32_t iar_num_hypotheses;  /* Current number of integer ambiguity hypotheses */
+	int8_t num_leap_seconds;     /* GPS leap seconds (0x7F indicates invalid) */
 };
 #pragma pack(pop)
 
@@ -148,9 +159,15 @@ static void buildpos(char *payload, struct erb_pos position, const uint32_t time
 }
 /* build ERB-STAT message ----------------------------------------------------*/
 static void buildstat(char *payload, struct erb_stat status, const uint32_t time,
-                      const uint16_t week, const sol_t *sol)
+                      const uint16_t week, const sol_t *sol, const double *rb)
 {
+    double pos[3];           /* Lat/Lon/Hgt of base station */
+    double baseline_ecef[3]; /* ECEF vector between base position and rover position in meters */
+    double baseline_enu[3];  /* ENU  vector between base position and rover position in meters */
+    int i;
     uint8_t fixStatus,fixType;
+    uint32_t rtcm_tow_ms = 0;
+    int rtcm_week_nr = 0;
 
     if (sol->stat == SOLQ_SINGLE) {
         fixStatus = 0x01;
@@ -171,6 +188,30 @@ static void buildstat(char *payload, struct erb_stat status, const uint32_t time
     status.fixType = fixType;
     status.fixStatus = fixStatus;
     status.numSV = sol->ns;
+
+    /* Introduced in ERB version 0.2.0 */
+    if (sol->type == 0) { /* xyz-ecef */
+        ecef2pos(rb, pos);                 /* transform the base ecef position to a geodetic position */
+        for (i=0;i<3;i++) baseline_ecef[i] = sol->rr[i] - rb[i];
+        ecef2enu(pos, baseline_ecef, baseline_enu);
+    } else {              /* enu-baseline */
+        for (i=0;i<3;i++) baseline_enu[i] = sol->rr[i];
+    }
+    status.base_num_sats = 0;    /* TODO Current number of satellites used for RTK calculation */
+    /*
+    TODO access rtcm_t->time
+    rtcm_tow_ms = time2gpst(rtcm_t->time, &rtcm_week_nr) * 1000;
+    */
+    status.base_week_number = rtcm_week_nr;  /* GPS Week Number of last baseline */
+    status.base_time_week_ms = rtcm_tow_ms;  /* GPS Time of Week of last baseline in milliseconds */
+    status.iar_num_hypotheses = 0;  /* TODO Current number of integer ambiguity hypotheses */
+    status.num_leap_seconds = 0x7F; /* TODO access rtcm->nav->leaps instead; GPS leap seconds (0x7F indicates invalid) */
+
+    status.baseline_N_mm =  1000 * baseline_enu[1]; /* North distance between base and rover -> convert (double) meters into (int32_t) millimeters */
+    status.baseline_E_mm =  1000 * baseline_enu[0]; /* East  distance between base and rover -> convert (double) meters into (int32_t) millimeters */
+    status.baseline_D_mm = -1000 * baseline_enu[2]; /* Down  distance between base and rover -> convert (double) meters into (int32_t) millimeters */
+    status.age_cs        = 100 * sol->age;  /* Age of the corrections in centiseconds (0 when no corrections, 0xFFFF indicates overflow) */
+    status.ar_ratio      = 10 * sol->ratio; /* AR ratio multiplied by 10 */
     memcpy(payload, &status, LENGTH_STAT);
 }
 /* build ERB-DOPS message ----------------------------------------------------*/
@@ -239,7 +280,7 @@ static void appendmessage(char **p, const char mesID, const char *payload, const
     *p += sprintf(*p, "%c%c", cka, ckb);
 }
 /* output solution in the form of ERB protocol -------------------------------*/
-extern int outerb(unsigned char *buff, const sol_t *sol)
+extern int outerb(unsigned char *buff, const sol_t *sol, const double *rb)
 {
     gtime_t time;
     char *p=(char *)buff;
@@ -268,7 +309,7 @@ extern int outerb(unsigned char *buff, const sol_t *sol)
     buildpos(payload, position, gpst, sol);
     appendmessage(&p, ID_POS, payload, LENGTH_POS);
     /*------------ ERB-STAT ----------------------*/
-    buildstat(payload, status, gpst, week, sol);
+    buildstat(payload, status, gpst, week, sol, rb);
     appendmessage(&p, ID_STAT, payload, LENGTH_STAT);
     /*------------ ERB-DOPS ------------------------*/
     builddops(payload, dops, gpst, sol);
