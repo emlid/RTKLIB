@@ -2,7 +2,7 @@
 # make all cui applications by gcc
 #
 
-BINDIR = /usr/local/bin
+BINDIR = /usr/bin/RTKLIB/app
 DIRS   = ../lib/iers pos2kml str2str rnx2rtkp convbin rtkrcv
 
 all:
@@ -10,7 +10,7 @@ all:
 
 install:
 	@echo installing...
-	@for i in $(DIRS); do cp $$i/gcc/$$i $(BINDIR); done
+	@for i in $(DIRS); do cp $$i/gcc/$$i $(BINDIR)/$$i/gcc/$$i; done
 
 clean:
 	@echo cleaning up...
