@@ -238,7 +238,7 @@ static void updatesvr(rtksvr_t *svr, int ret, obs_t *obs, nav_t *nav, int sat,
                     base_pos[i]+=dr[i];
                 }
             }
-            set_base_position(&svr->rtk, base_pos, 1, 0);
+            rtk_set_base_position(&svr->rtk, base_pos);
         }
         else if (svr->rtk.opt.refpos==POSOPT_RAW&&index==1) {
             for (i=0;i<3;i++) {
@@ -259,7 +259,7 @@ static void updatesvr(rtksvr_t *svr, int ret, obs_t *obs, nav_t *nav, int sat,
                     base_pos[i]+=dr[i];
                 }
             }
-            set_base_position(&svr->rtk, base_pos, 1, 0);
+            rtk_set_base_position(&svr->rtk, base_pos);
         }
         svr->nmsg[index][4]++;
     }
@@ -818,7 +818,7 @@ extern int rtksvrstart(rtksvr_t *svr, int cycle, int buffsize, int *strs,
     }
     /* set base station position */
     if (prcopt->refpos != POSOPT_SINGLE) {
-        set_base_position(&svr->rtk, prcopt->rb, 1, 0);
+        rtk_set_base_position(&svr->rtk, prcopt->rb);
     }
     /* update navigation data */
     for (i=0;i<MAXSAT *2;i++) svr->nav.eph [i].ttr=time0;
