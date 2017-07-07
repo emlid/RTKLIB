@@ -2122,15 +2122,27 @@ extern void rtkfree(rtk_t *rtk)
 
 #define RESET_BASE_TRESH 0.05 /* threshold of base station position jump for filter states reset (m) */
 
-/* set base position in rtk structure -----------------------------------------*/
-extern int rtk_set_base_position(rtk_t *rtk, double pos[3])
+/* reset rtk structure --------------------------------------------------------*/
+static int rtk_reset(rtk_t *rtk)
 {
+    if ( !rtk ) return 0;
+    
+    prcopt_t *opt = &rtk->opt;
+    
+    rtkfree(rtk);
+    rtkinit(rtk, opt);
+    
+    return 1;
+}
+/* set base position in rtk structure -----------------------------------------*/
+extern int rtk_set_base_position(rtk_t *rtk, double pos[3]) {
+
     if ( !rtk ) return 0;
     
     int i;
     int is_base_pos_been_set = norm(rtk->rb, 3) > 0.0;
     int is_base_pos_incoming = norm(pos, 3)     > 0.0;
-    
+
     double delta_pos[3];
     for (i = 0; i < 3; i++) 
         delta_pos[i] = pos[i] - rtk->rb[i];
@@ -2140,13 +2152,16 @@ extern int rtk_set_base_position(rtk_t *rtk, double pos[3])
     if ( is_base_pos_incoming ) {
         
         if ( is_base_pos_been_set && is_base_jumped ) {
-            rtkinit(rtk, &rtk->opt);
+            if ( !rtk_reset(rtk) ) return 0;
             is_base_pos_been_set = 0;
         }
         
         if ( (!is_base_pos_been_set) || is_base_jumped ) {
-            for (i = 0; i < 3; i++) 
+            
+            for (i = 0; i < 3; i++) { 
                 rtk->rb[i] = pos[i];
+                is_base_pos_been_set = 1;
+            }
         }
     }
     
