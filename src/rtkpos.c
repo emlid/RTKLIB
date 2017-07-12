@@ -2177,6 +2177,54 @@ extern void rtkfree(rtk_t *rtk)
     free(rtk->xa); rtk->xa=NULL;
     free(rtk->Pa); rtk->Pa=NULL;
 }
+
+#define RESET_BASE_TRESH 0.05 /* threshold of base station position jump for filter states reset (m) */
+
+/* reset rtk structure --------------------------------------------------------*/
+static int rtk_reset(rtk_t *rtk)
+{
+    if ( !rtk ) return 0;
+    
+    prcopt_t *opt = &rtk->opt;
+    
+    rtkfree(rtk);
+    rtkinit(rtk, opt);
+    
+    return 1;
+}
+/* set base position in rtk structure -----------------------------------------*/
+extern int rtk_set_base_position(rtk_t *rtk, double pos[3]) {
+
+    if ( !rtk ) return 0;
+    
+    int i;
+    int is_base_pos_been_set = norm(rtk->rb, 3) > 0.0;
+    int is_base_pos_incoming = norm(pos, 3)     > 0.0;
+
+    double delta_pos[3];
+    for (i = 0; i < 3; i++) 
+        delta_pos[i] = pos[i] - rtk->rb[i];
+    
+    int is_base_jumped       = norm(delta_pos, 3) > RESET_BASE_TRESH;
+    
+    if ( is_base_pos_incoming ) {
+        
+        if ( is_base_pos_been_set && is_base_jumped ) {
+            if ( !rtk_reset(rtk) ) return 0;
+            is_base_pos_been_set = 0;
+        }
+        
+        if ( (!is_base_pos_been_set) || is_base_jumped ) {
+            
+            for (i = 0; i < 3; i++) { 
+                rtk->rb[i] = pos[i];
+                is_base_pos_been_set = 1;
+            }
+        }
+    }
+    
+    return 1;
+}
 /* precise positioning ---------------------------------------------------------
 * input observation data and navigation message, compute rover position by 
 * precise positioning
@@ -2250,7 +2298,7 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
     /* set base station position */
     if (opt->refpos<=POSOPT_RINEX&&opt->mode!=PMODE_SINGLE&&
         opt->mode!=PMODE_MOVEB) {
-        for (i=0;i<6;i++) rtk->rb[i]=i<3?opt->rb[i]:0.0;
+        rtk_set_base_position(rtk, opt->rb);
     }
     /* count rover/base station observations */
     for (nu=0;nu   <n&&obs[nu   ].rcv==1;nu++) ;
