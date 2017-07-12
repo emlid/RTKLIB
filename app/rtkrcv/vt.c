@@ -368,10 +368,11 @@ extern int vt_putc(vt_t *vt, char c) {
 *-----------------------------------------------------------------------------*/
 extern int vt_puts(vt_t *vt, const char *buff)
 {
-    const char *begin, *end, *length;
+    const char *begin, *end;
+    int length;
 
     for (begin = buff; (end = strchr(begin, '\n')); begin = end + 1) {
-        length = end - begin;
+        length = (int)(end - begin);
         if (vt_putchar(vt, begin, length))
             if (vt_putchar(vt, "\r\n", 2))
                 continue;
