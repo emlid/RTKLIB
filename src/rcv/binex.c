@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------
 * binex.c : binex dependent functions
 *
-*          Copyright (C) 2013-2016 by T.TAKASU, All rights reserved.
+*          Copyright (C) 2013-2017 by T.TAKASU, All rights reserved.
 *
 * reference :
 *     [1] UNAVCO, BINEX: Binary exchange format
@@ -14,6 +14,8 @@
 *           2014/04/27 1.3 fix bug on decoding iode for message 0x01-02
 *           2015/12/05 1.4 fix bug on decoding tgd for message 0x01-05
 *           2016/07/29 1.5 crc16() -> rtk_crc16()
+*           2017/04/11 1.6 (char *) -> (signed char *)
+*                          fix bug on unchange-test of beidou ephemeris
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
@@ -38,7 +40,7 @@ static const double ura_eph[]={
 };
 /* get fields (big-endian) ---------------------------------------------------*/
 #define U1(p) (*((unsigned char *)(p)))
-#define I1(p) (*((char *)(p)))
+#define I1(p) (*((signed char *)(p)))
 
 static unsigned short U2(unsigned char *p)
 {
@@ -119,13 +121,6 @@ static gtime_t adjday(gtime_t time, double tod)
     else if (tod>tod_p+43200.0) tod-=86400.0;
     ep[3]=ep[4]=ep[5]=0.0;
     return timeadd(epoch2time(ep),tod);
-}
-/* ura value (m) to ura index ------------------------------------------------*/
-static int uraindex(double value)
-{
-    int i;
-    for (i=0;i<15;i++) if (ura_eph[i]>=value) break;
-    return i;
 }
 /* decode binex mesaage 0x00-00: comment -------------------------------------*/
 static int decode_bnx_00_00(raw_t *raw, unsigned char *buff, int len)
@@ -463,7 +458,14 @@ static int decode_bnx_01_01(raw_t *raw, unsigned char *buff, int len)
     eph.fit=flag&0xFF;
     eph.flag=(flag>>8)&0x01;
     eph.code=(flag>>9)&0x03;
-    eph.sva=uraindex(ura);
+    eph.sva=uraindex(ura,SYS_GPS);
+{
+char s1[32],s2[32],s3[32];
+time2str(raw->time,s1,0);
+time2str(eph.ttr,s2,0);
+time2str(eph.toe,s3,0);
+trace(1,"binex 0x01-01: sat=%02d time=%s ttr=%s toe=%s iod=%d %d\n",eph.sat,s1,s2,s3,eph.iode,eph.iodc);
+}
     
     if (!strstr(raw->opt,"-EPHALL")) {
         if (raw->nav.eph[eph.sat-1].iode==eph.iode&&
@@ -588,7 +590,7 @@ static int decode_bnx_01_04(raw_t *raw, unsigned char *buff, int len)
     
     if (len>=127) {
         prn       =U1(p)+1;      p+=1;
-        eph.week  =U2(p);        p+=2;
+        eph.week  =U2(p);        p+=2; /* gal-week = gps-week */
         tow       =I4(p);        p+=4;
         eph.toes  =I4(p);        p+=4;
         eph.tgd[0]=R4(p);        p+=4; /* BGD E5a/E1 */
@@ -629,7 +631,7 @@ static int decode_bnx_01_04(raw_t *raw, unsigned char *buff, int len)
     eph.toe=gpst2time(eph.week,eph.toes);
     eph.toc=gpst2time(eph.week,eph.toes);
     eph.ttr=adjweek(eph.toe,tow);
-    eph.sva=uraindex(ura);
+    eph.sva=uraindex(ura,SYS_GAL);
     
     if (!strstr(raw->opt,"-EPHALL")) {
         if (raw->nav.eph[eph.sat-1].iode==eph.iode&&
@@ -705,7 +707,8 @@ static int decode_bnx_01_05(raw_t *raw, unsigned char *buff, int len)
         /* message source (0:unknown,1:B1I,2:B1Q,3:B2I,4:B2Q,5:B3I,6:B3Q)*/
     
     if (!strstr(raw->opt,"-EPHALL")) {
-        if (raw->nav.eph[eph.sat-1].iode==eph.iode&&
+        if (timediff(raw->nav.eph[eph.sat-1].toe,eph.toe)==0.0&&
+            raw->nav.eph[eph.sat-1].iode==eph.iode&&
             raw->nav.eph[eph.sat-1].iodc==eph.iodc) return 0; /* unchanged */
     }
     raw->nav.eph[eph.sat-1]=eph;
@@ -765,7 +768,7 @@ static int decode_bnx_01_06(raw_t *raw, unsigned char *buff, int len)
     eph.toc=gpst2time(eph.week,eph.toes);
     eph.ttr=adjweek(eph.toe,tow);
     eph.fit=(flag&0x01)?0.0:2.0; /* 0:2hr,1:>2hr */
-    eph.sva=uraindex(ura);
+    eph.sva=uraindex(ura,SYS_QZS);
     eph.code=2; /* codes on L2 channel */
     
     if (!strstr(raw->opt,"-EPHALL")) {

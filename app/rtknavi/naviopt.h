@@ -236,6 +236,12 @@ __published:
     TComboBox *ARFilter;
     TEdit *ARThres1;
     TLabel *Label50;
+    TComboBox *RcvStds;
+    TEdit *MinDropSats;
+    TEdit *VarHoldAmb;
+    TEdit *GainHoldAmb;
+    TLabel *Label51;
+    TLabel *Label52;
 	void __fastcall BtnOkClick(TObject *Sender);
 	void __fastcall RovAntPcvClick(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);

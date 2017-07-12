@@ -4,7 +4,7 @@ object OptDialog: TOptDialog
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Options'
-  ClientHeight = 344
+  ClientHeight = 384
   ClientWidth = 413
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -26,7 +26,7 @@ object OptDialog: TOptDialog
   end
   object BtnCancel: TButton
     Left = 310
-    Top = 318
+    Top = 353
     Width = 99
     Height = 29
     Caption = '&Cancel'
@@ -34,8 +34,8 @@ object OptDialog: TOptDialog
     TabOrder = 1
   end
   object BtnOk: TButton
-    Left = 211
-    Top = 318
+    Left = 205
+    Top = 353
     Width = 99
     Height = 29
     Caption = '&OK'
@@ -44,10 +44,10 @@ object OptDialog: TOptDialog
     OnClick = BtnOkClick
   end
   object BtnSave: TButton
-    Left = 100
-    Top = 318
+    Left = 102
+    Top = 353
     Width = 99
-    Height = 29
+    Height = 30
     Caption = '&Save'
     TabOrder = 3
     OnClick = BtnSaveClick
@@ -56,12 +56,13 @@ object OptDialog: TOptDialog
     Left = 0
     Top = 0
     Width = 413
-    Height = 312
+    Height = 353
     ActivePage = TabSheet2
     Align = alTop
     TabOrder = 4
     object TabSheet1: TTabSheet
       Caption = 'Setting&1'
+      ExplicitHeight = 284
       object Label3: TLabel
         Left = 24
         Top = 73
@@ -403,7 +404,7 @@ object OptDialog: TOptDialog
     object TabSheet2: TTabSheet
       Caption = 'Setting&2'
       ImageIndex = 1
-      ExplicitTop = 28
+      ExplicitTop = 22
       object Label25: TLabel
         Left = 24
         Top = 7
@@ -476,10 +477,24 @@ object OptDialog: TOptDialog
       end
       object Label50: TLabel
         Left = 24
-        Top = 258
+        Top = 278
         Width = 147
         Height = 13
         Caption = 'Max Pos Var for AR  / AR Filter'
+      end
+      object Label51: TLabel
+        Left = 26
+        Top = 258
+        Width = 161
+        Height = 13
+        Caption = 'Min Drop Sats  / Use Rcv StdDevs'
+      end
+      object Label52: TLabel
+        Left = 24
+        Top = 300
+        Width = 143
+        Height = 13
+        Caption = 'Hold Amb Var / Hold Amb Gain'
       end
       object AmbRes: TComboBox
         Left = 248
@@ -687,7 +702,7 @@ object OptDialog: TOptDialog
         Text = '3'
       end
       object MinHoldSats: TEdit
-        Left = 325
+        Left = 326
         Top = 232
         Width = 75
         Height = 21
@@ -696,7 +711,7 @@ object OptDialog: TOptDialog
       end
       object ARFilter: TComboBox
         Left = 325
-        Top = 255
+        Top = 278
         Width = 75
         Height = 21
         Style = csDropDownList
@@ -709,17 +724,56 @@ object OptDialog: TOptDialog
           'ON')
       end
       object ARThres1: TEdit
-        Left = 248
-        Top = 255
+        Left = 247
+        Top = 278
         Width = 75
         Height = 21
         TabOrder = 24
         Text = '0.999'
       end
+      object RcvStds: TComboBox
+        Left = 325
+        Top = 255
+        Width = 75
+        Height = 21
+        Style = csDropDownList
+        ItemIndex = 0
+        TabOrder = 25
+        Text = 'OFF'
+        OnChange = AmbResChange
+        Items.Strings = (
+          'OFF'
+          'ON')
+      end
+      object MinDropSats: TEdit
+        Left = 248
+        Top = 255
+        Width = 75
+        Height = 21
+        TabOrder = 26
+        Text = '20'
+      end
+      object VarHoldAmb: TEdit
+        Left = 247
+        Top = 301
+        Width = 75
+        Height = 21
+        TabOrder = 27
+        Text = '0.001'
+      end
+      object GainHoldAmb: TEdit
+        Left = 326
+        Top = 301
+        Width = 75
+        Height = 21
+        TabOrder = 28
+        Text = '0.01'
+      end
     end
     object TabSheet3: TTabSheet
       Caption = 'O&utput'
       ImageIndex = 2
+      ExplicitHeight = 284
       object LabelSolFormat: TLabel
         Left = 24
         Top = 7
@@ -1006,6 +1060,7 @@ object OptDialog: TOptDialog
     object TabSheet4: TTabSheet
       Caption = 'S&tatistics'
       ImageIndex = 3
+      ExplicitHeight = 284
       object Label29: TLabel
         Left = 34
         Top = 213
@@ -1185,6 +1240,7 @@ object OptDialog: TOptDialog
     object TabSheet5: TTabSheet
       Caption = '&Positions'
       ImageIndex = 4
+      ExplicitHeight = 284
       object Label4: TLabel
         Left = 12
         Top = 12
@@ -1501,6 +1557,7 @@ object OptDialog: TOptDialog
     object TabSheet7: TTabSheet
       Caption = '&Files'
       ImageIndex = 6
+      ExplicitHeight = 284
       object Label1: TLabel
         Left = 6
         Top = 93
@@ -1839,6 +1896,7 @@ object OptDialog: TOptDialog
     object TabSheet8: TTabSheet
       Caption = '&Misc'
       ImageIndex = 6
+      ExplicitHeight = 284
       object Label19: TLabel
         Left = 32
         Top = 7
@@ -2107,8 +2165,8 @@ object OptDialog: TOptDialog
     end
   end
   object BtnLoad: TButton
-    Left = -5
-    Top = 318
+    Left = 0
+    Top = 353
     Width = 99
     Height = 29
     Caption = '&Load'
@@ -2127,8 +2185,8 @@ object OptDialog: TOptDialog
   object SaveDialog: TSaveDialog
     Filter = 'All (*.*)|*.*|Options File (*.conf)|*.conf'
     Title = 'Save File'
-    Left = 194
-    Top = 274
+    Left = 210
+    Top = 162
   end
   object FontDialog: TFontDialog
     Font.Charset = DEFAULT_CHARSET

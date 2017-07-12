@@ -599,7 +599,7 @@ void __fastcall TMainForm::TimeUnitFClick(TObject *Sender)
 }
 // callback on time-ymd-1 updown --------------------------------------------
 void __fastcall TMainForm::TimeY1UDChangingEx(TObject *Sender,
-      bool &AllowChange, short NewValue, TUpDownDirection Direction)
+      bool &AllowChange, int NewValue, TUpDownDirection Direction)
 {
     AnsiString TimeY1_Text=TimeY1->Text,s;
     double ep[]={2000,1,1,0,0,0};
@@ -618,7 +618,7 @@ void __fastcall TMainForm::TimeY1UDChangingEx(TObject *Sender,
 }
 // callback on time-hms-1 updown --------------------------------------------
 void __fastcall TMainForm::TimeH1UDChangingEx(TObject *Sender,
-      bool &AllowChange, short NewValue, TUpDownDirection Direction)
+      bool &AllowChange, int NewValue, TUpDownDirection Direction)
 {
     AnsiString TimeH1_Text=TimeH1->Text,s;
     int hms[3]={0},sec,p=TimeH1->SelStart,ud=Direction==updUp?1:-1;
@@ -632,7 +632,7 @@ void __fastcall TMainForm::TimeH1UDChangingEx(TObject *Sender,
 }
 // callback on time-ymd-2 updown --------------------------------------------
 void __fastcall TMainForm::TimeY2UDChangingEx(TObject *Sender,
-      bool &AllowChange, short NewValue, TUpDownDirection Direction)
+      bool &AllowChange, int NewValue, TUpDownDirection Direction)
 {
     AnsiString TimeY2_Text=TimeY2->Text,s;
     double ep[]={2000,1,1,0,0,0};
@@ -651,7 +651,7 @@ void __fastcall TMainForm::TimeY2UDChangingEx(TObject *Sender,
 }
 // callback on time-hms-2 updown --------------------------------------------
 void __fastcall TMainForm::TimeH2UDChangingEx(TObject *Sender,
-      bool &AllowChange, short NewValue, TUpDownDirection Direction)
+      bool &AllowChange, int NewValue, TUpDownDirection Direction)
 {
     AnsiString TimeH2_Text=TimeH2->Text,s;
     int hms[3]={0},sec,p=TimeH2->SelStart,ud=Direction==updUp?1:-1;
@@ -874,7 +874,9 @@ int __fastcall TMainForm::GetOption(prcopt_t &prcopt, solopt_t &solopt,
     prcopt.niter    =NumIter;
     prcopt.minfixsats=MinFixSats;
     prcopt.minholdsats=MinHoldSats;
+    prcopt.mindropsats=MinDropSats;
     prcopt.arfilter=ARFilter;
+    prcopt.rcvstds=RcvStds;
     prcopt.intpref  =IntpRefObs;
     prcopt.sbassatsel=SbasSat;
     prcopt.eratio[0]=MeasErrR1;
@@ -901,6 +903,8 @@ int __fastcall TMainForm::GetOption(prcopt_t &prcopt, solopt_t &solopt,
     prcopt.maxtdiff =MaxAgeDiff;
     prcopt.maxgdop  =RejectGdop;
     prcopt.maxinno  =RejectThres;
+    prcopt.varholdamb=VarHoldAmb;
+    prcopt.gainholdamb=GainHoldAmb;
     prcopt.outsingle=OutputSingle;
     if (BaseLineConst) {
         prcopt.baseline[0]=BaseLine[0];
@@ -1250,13 +1254,17 @@ void __fastcall TMainForm::LoadOpt(void)
     SlipThres          =ini->ReadFloat  ("opt","slipthres",   0.05);
     MaxAgeDiff         =ini->ReadFloat  ("opt","maxagediff",  30.0);
     RejectThres        =ini->ReadFloat  ("opt","rejectthres", 30.0);
+    VarHoldAmb         =ini->ReadFloat  ("opt","varholdamb", 0.001);
+    GainHoldAmb        =ini->ReadFloat  ("opt","gainholdamb", 0.01);
     RejectGdop         =ini->ReadFloat  ("opt","rejectgdop",  30.0);
     ARIter             =ini->ReadInteger("opt","ariter",         1);
     NumIter            =ini->ReadInteger("opt","numiter",        1);
     MinFixSats         =ini->ReadInteger("opt","minfixsats",     2);
     MinHoldSats        =ini->ReadInteger("opt","minholdsats",    2);
+    MinDropSats        =ini->ReadInteger("opt","mindropsats",   20);
     MaxPosVarAR        =ini->ReadFloat  ("opt","maxposvarar", 0.99);
     ARFilter           =ini->ReadInteger("opt","arfilter",       0);
+    RcvStds            =ini->ReadInteger("opt","rcvstds",       0);
     CodeSmooth         =ini->ReadInteger("opt","codesmooth",     0);
     BaseLine[0]        =ini->ReadFloat  ("opt","baselinelen",  0.0);
     BaseLine[1]        =ini->ReadFloat  ("opt","baselinesig",  0.0);
@@ -1466,12 +1474,16 @@ void __fastcall TMainForm::SaveOpt(void)
     ini->WriteFloat  ("opt","maxagediff",  MaxAgeDiff  );
     ini->WriteFloat  ("opt","rejectgdop",  RejectGdop  );
     ini->WriteFloat  ("opt","rejectthres", RejectThres );
+    ini->WriteFloat  ("opt","varholdamb",  VarHoldAmb  );
+    ini->WriteFloat  ("opt","gainholdamb", GainHoldAmb );
     ini->WriteInteger("opt","ariter",      ARIter      );
     ini->WriteInteger("opt","numiter",     NumIter     );
     ini->WriteInteger("opt","minfixsats",  MinFixSats  );
     ini->WriteInteger("opt","minholdsats", MinHoldSats );
+    ini->WriteInteger("opt","mindropsats", MinDropSats );
     ini->WriteFloat  ("opt","maxposvarar", MaxPosVarAR );
     ini->WriteInteger("opt","arfilter",    ARFilter    );
+    ini->WriteInteger("opt","rcvstds",     RcvStds     );
     ini->WriteInteger("opt","codesmooth",  CodeSmooth  );
     ini->WriteFloat  ("opt","baselinelen", BaseLine[0] );
     ini->WriteFloat  ("opt","baselinesig", BaseLine[1] );

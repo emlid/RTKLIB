@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------
 * notvatel.c : NovAtel OEM6/OEM5/OEM4/OEM3 receiver functions
 *
-*          Copyright (C) 2007-2014 by T.TAKASU, All rights reserved.
+*          Copyright (C) 2007-2017 by T.TAKASU, All rights reserved.
 *
 * reference :
 *     [1] NovAtel, OM-20000094 Rev6 OEMV Family Firmware Reference Manual, 2008
@@ -47,6 +47,8 @@
 *           2016/01/28 1.12 precede I/NAV for galileo ephemeris
 *                           add option -GALINAV and -GALFNAV
 *           2016/07/31 1.13 add week number check to decode oem4 messages
+*           2017/04/11 1.14 (char *) -> (signed char *)
+*                           improve unchange-test of beidou ephemeris
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
@@ -103,7 +105,7 @@ static const char rcsid[]="$Id: novatel.c,v 1.2 2008/07/14 00:05:05 TTAKA Exp $"
 
 /* get fields (little-endian) ------------------------------------------------*/
 #define U1(p) (*((unsigned char *)(p)))
-#define I1(p) (*((char *)(p)))
+#define I1(p) (*((signed char *)(p)))
 static unsigned short U2(unsigned char *p) {unsigned short u; memcpy(&u,p,2); return u;}
 static unsigned int   U4(unsigned char *p) {unsigned int   u; memcpy(&u,p,4); return u;}
 static int            I4(unsigned char *p) {int            i; memcpy(&i,p,4); return i;}
@@ -151,17 +153,6 @@ static int obsindex(obs_t *obs, gtime_t time, int sat)
         obs->data[i].code[j]=CODE_NONE;
     }
     obs->n++;
-    return i;
-}
-/* ura value (m) to ura index ------------------------------------------------*/
-static int uraindex(double value)
-{
-    static const double ura_eph[]={
-        2.4,3.4,4.85,6.85,9.65,13.65,24.0,48.0,96.0,192.0,384.0,768.0,1536.0,
-        3072.0,6144.0,0.0
-    };
-    int i;
-    for (i=0;i<15;i++) if (ura_eph[i]>=value) break;
     return i;
 }
 /* decode oem4 tracking status -------------------------------------------------
@@ -793,7 +784,7 @@ static int decode_galephemerisb(raw_t *raw)
         return -1;
     }
     tow=time2gpst(raw->time,&week);
-    eph.week=week; /* gps week */
+    eph.week=week; /* gps-week = gal-week */
     eph.toe=gpst2time(eph.week,eph.toes);
     
     /* for week-handover problem */
@@ -1045,7 +1036,7 @@ static int decode_bdsephemerisb(raw_t *raw)
     eph.cic   =R8(p);   p+=8;
     eph.cis   =R8(p);
     eph.A     =sqrtA*sqrtA;
-    eph.sva   =uraindex(ura);
+    eph.sva   =uraindex(ura,SYS_CMP);
     
     if (raw->outtype) {
         msg=raw->msgtype+strlen(raw->msgtype);
@@ -1060,7 +1051,9 @@ static int decode_bdsephemerisb(raw_t *raw)
     eph.ttr=raw->time;
     
     if (!strstr(raw->opt,"-EPHALL")) {
-        if (timediff(raw->nav.eph[eph.sat-1].toe,eph.toe)==0.0) return 0; /* unchanged */
+        if (timediff(raw->nav.eph[eph.sat-1].toe,eph.toe)==0.0&&
+            raw->nav.eph[eph.sat-1].iode==eph.iode&&
+            raw->nav.eph[eph.sat-1].iodc==eph.iodc) return 0; /* unchanged */
     }
     raw->nav.eph[eph.sat-1]=eph;
     raw->ephsat=eph.sat;

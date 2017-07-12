@@ -4,7 +4,7 @@ object OptDialog: TOptDialog
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Options'
-  ClientHeight = 341
+  ClientHeight = 405
   ClientWidth = 411
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -52,9 +52,16 @@ object OptDialog: TOptDialog
     Height = 13
     Caption = 'a'
   end
+  object Label24: TLabel
+    Left = 27
+    Top = 283
+    Width = 144
+    Height = 13
+    Caption = 'Max Pos Var for AR / AR Filter'
+  end
   object BtnCancel: TButton
     Left = 310
-    Top = 315
+    Top = 377
     Width = 99
     Height = 29
     Caption = '&Cancel'
@@ -63,7 +70,7 @@ object OptDialog: TOptDialog
   end
   object BtnOk: TButton
     Left = 211
-    Top = 315
+    Top = 377
     Width = 99
     Height = 29
     Caption = '&OK'
@@ -73,7 +80,7 @@ object OptDialog: TOptDialog
   end
   object BtnSave: TButton
     Left = 100
-    Top = 315
+    Top = 377
     Width = 99
     Height = 29
     Caption = '&Save...'
@@ -82,7 +89,7 @@ object OptDialog: TOptDialog
   end
   object BtnLoad: TButton
     Left = 1
-    Top = 315
+    Top = 377
     Width = 99
     Height = 29
     Caption = '&Load...'
@@ -91,10 +98,10 @@ object OptDialog: TOptDialog
   end
   object Misc: TPageControl
     Left = 0
-    Top = 0
+    Top = 1
     Width = 411
-    Height = 314
-    ActivePage = TabSheet1
+    Height = 377
+    ActivePage = TabSheet2
     TabOrder = 4
     object TabSheet1: TTabSheet
       Caption = 'Setting&1'
@@ -451,6 +458,8 @@ object OptDialog: TOptDialog
     object TabSheet2: TTabSheet
       Caption = 'Setting&2'
       ImageIndex = 1
+      ExplicitLeft = 6
+      ExplicitTop = 21
       object Label25: TLabel
         Left = 24
         Top = 7
@@ -523,10 +532,24 @@ object OptDialog: TOptDialog
       end
       object Label50: TLabel
         Left = 24
-        Top = 257
+        Top = 284
         Width = 144
         Height = 13
         Caption = 'Max Pos Var for AR / AR Filter'
+      end
+      object Label33: TLabel
+        Left = 24
+        Top = 260
+        Width = 158
+        Height = 13
+        Caption = 'Min Drop Sats / Use Rcv StdDevs'
+      end
+      object Label47: TLabel
+        Left = 25
+        Top = 305
+        Width = 143
+        Height = 13
+        Caption = 'Hold Amb Var / Hold Amb Gain'
       end
       object AmbRes: TComboBox
         Left = 248
@@ -746,7 +769,7 @@ object OptDialog: TOptDialog
       end
       object MaxPosVarAR: TEdit
         Left = 248
-        Top = 255
+        Top = 279
         Width = 75
         Height = 21
         TabOrder = 23
@@ -754,7 +777,7 @@ object OptDialog: TOptDialog
       end
       object ARFilter: TComboBox
         Left = 325
-        Top = 255
+        Top = 279
         Width = 75
         Height = 21
         Style = csDropDownList
@@ -765,6 +788,44 @@ object OptDialog: TOptDialog
         Items.Strings = (
           'OFF'
           'ON')
+      end
+      object VarHoldAmb: TEdit
+        Left = 248
+        Top = 302
+        Width = 75
+        Height = 21
+        TabOrder = 25
+        Text = '0.001'
+      end
+      object GainHoldAmb: TEdit
+        Left = 325
+        Top = 302
+        Width = 75
+        Height = 21
+        TabOrder = 26
+        Text = '0.01'
+      end
+      object RcvStds: TComboBox
+        Left = 325
+        Top = 256
+        Width = 75
+        Height = 21
+        Style = csDropDownList
+        ItemIndex = 0
+        TabOrder = 27
+        Text = 'OFF'
+        OnChange = AmbResChange
+        Items.Strings = (
+          'OFF'
+          'ON')
+      end
+      object MinDropSats: TEdit
+        Left = 248
+        Top = 256
+        Width = 75
+        Height = 21
+        TabOrder = 28
+        Text = '20'
       end
     end
     object TabSheet3: TTabSheet
@@ -2071,7 +2132,7 @@ object OptDialog: TOptDialog
   end
   object BtnExtOpt: TButton
     Left = 1
-    Top = 315
+    Top = 377
     Width = 69
     Height = 29
     Caption = 'Ext Opt...'
@@ -2088,14 +2149,14 @@ object OptDialog: TOptDialog
       '(*.blq)|*.blq|Ionosphere Data File (*.*i,*stec)|*.*i;*.stec'
     Options = [ofHideReadOnly, ofNoChangeDir, ofEnableSizing]
     Title = 'Load File'
-    Left = 81
-    Top = 253
+    Left = 201
+    Top = 157
   end
   object SaveDialog: TSaveDialog
     Filter = 'All (*.*)|*.*|Options File (*.conf)|*.conf'
     Options = [ofHideReadOnly, ofNoChangeDir, ofEnableSizing]
     Title = 'Save File'
-    Left = 51
-    Top = 253
+    Left = 203
+    Top = 109
   end
 end

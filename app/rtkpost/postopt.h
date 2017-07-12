@@ -231,6 +231,13 @@ __published:
     TEdit *MinHoldSats;
     TEdit *MaxPosVarAR;
     TComboBox *ARFilter;
+    TLabel *Label24;
+    TLabel *Label33;
+    TLabel *Label47;
+    TEdit *VarHoldAmb;
+    TEdit *GainHoldAmb;
+    TComboBox *RcvStds;
+    TEdit *MinDropSats;
 	void __fastcall BtnOkClick(TObject *Sender);
 	void __fastcall RovAntPcvClick(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);

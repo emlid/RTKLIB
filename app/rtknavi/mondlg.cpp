@@ -250,7 +250,7 @@ void __fastcall TMonitorDialog::Timer2Timer(TObject *Sender)
 			}
 	    }
 	}
-	else if (ConFmt<17) {
+	else if (ConFmt<18) {
 		for (i=0;i<len;i++) {
 			input_raw(&raw,ConFmt-2,msg[i]);
 			if (raw.msgtype[0]) {
@@ -365,7 +365,7 @@ void __fastcall TMonitorDialog::ShowRtk(void)
 	AnsiString s,exsats,navsys="";
 	AnsiString svrstate[]={"Stop","Run"};
 	AnsiString sol[]={"-","Fix","Float","SBAS","DGPS","Single","PPP",""};
-	AnsiString mode[]={"Single","DGPS","Kinematic","Static","Moving-Base",
+	AnsiString mode[]={"Single","DGPS","Kinematic","Static","Static-Start","Moving-Base",
 					   "Fixed","PPP-Kinematic","PPP-Static",""};
 	AnsiString freq[]={"-","L1","L1+L2","L1+L2+L5","L1+L2+L5+L6","L1+L2+L5+L6+L7","L1+L2+L5+L6+L7+L8",""};
 	double *del,*off1,*off2,runtime,rt[3]={0},dop[4]={0};
