@@ -53,6 +53,7 @@
 *                           test max number of iteration for Kepler
 *           2015/08/26 1.11 update RTOL_ELPLER 1E-14 -> 1E-13
 *                           set MAX_ITER_KEPLER for alm2pos()
+*           2017/04/11 1.12 fix bug on max number of obs data in satposs()
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
@@ -90,13 +91,11 @@ static const char rcsid[]="$Id:$";
 #define MAX_ITER_KEPLER 30        /* max number of iteration of Kelpler */
 
 /* variance by ura ephemeris (ref [1] 20.3.3.3.1.1) --------------------------*/
-static double var_uraeph(int ura)
-{
-    const double ura_value[]={   
-        2.4,3.4,4.85,6.85,9.65,13.65,24.0,48.0,96.0,192.0,384.0,768.0,1536.0,
-        3072.0,6144.0
-    };
-    return ura<0||15<ura?SQR(6144.0):SQR(ura_value[ura]);
+static double var_uraeph(int ura, int sys)
+{   if (sys==SYS_GAL) 
+        return SQR(uravalue(ura,sys));
+    else
+        return ura<0||14<ura?SQR(6144.0):SQR(ura_value[ura]);
 }
 /* variance by ura ssr (ref [4]) ---------------------------------------------*/
 static double var_urassr(int ura)
@@ -253,7 +252,7 @@ extern void eph2pos(gtime_t time, const eph_t *eph, double *rs, double *dts,
     *dts-=2.0*sqrt(mu*eph->A)*eph->e*sinE/SQR(CLIGHT);
     
     /* position and clock error variance */
-    *var=var_uraeph(eph->sva);
+    *var=var_uraeph(eph->sva,sys);
 }
 /* glonass orbit differential equations --------------------------------------*/
 static void deq(const double *x, double *xdot, const double *acc)
@@ -386,7 +385,7 @@ extern void seph2pos(gtime_t time, const seph_t *seph, double *rs, double *dts,
     }
     *dts=seph->af0+seph->af1*t;
     
-    *var=var_uraeph(seph->sva);
+    *var=var_uraeph(seph->sva,SYS_SBS);
 }
 /* select ephememeris --------------------------------------------------------*/
 static eph_t *seleph(gtime_t time, int sat, int iode, const nav_t *nav)
@@ -725,13 +724,13 @@ extern int satpos(gtime_t time, gtime_t teph, int sat, int ephopt,
 extern void satposs(gtime_t teph, const obsd_t *obs, int n, const nav_t *nav,
                     int ephopt, double *rs, double *dts, double *var, int *svh)
 {
-    gtime_t time[MAXOBS]={{0}};
+    gtime_t time[2*MAXOBS]={{0}};
     double dt,pr;
     int i,j;
     
     trace(3,"satposs : teph=%s n=%d ephopt=%d\n",time_str(teph,3),n,ephopt);
     
-    for (i=0;i<n&&i<MAXOBS;i++) {
+    for (i=0;i<n&&i<2*MAXOBS;i++) {
         for (j=0;j<6;j++) rs [j+i*6]=0.0;
         for (j=0;j<2;j++) dts[j+i*2]=0.0;
         var[i]=0.0; svh[i]=0;
@@ -766,7 +765,7 @@ extern void satposs(gtime_t teph, const obsd_t *obs, int n, const nav_t *nav,
             *var=SQR(STD_BRDCCLK);
         }
     }
-    for (i=0;i<n&&i<MAXOBS;i++) {
+    for (i=0;i<n&&i<2*MAXOBS;i++) {
         trace(4,"%s sat=%2d rs=%13.3f %13.3f %13.3f dts=%12.3f var=%7.3f svh=%02X\n",
               time_str(time[i],6),obs[i].sat,rs[i*6],rs[1+i*6],rs[2+i*6],
               dts[i*2]*1E9,var[i],svh[i]);

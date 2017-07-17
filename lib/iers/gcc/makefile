@@ -40,7 +40,7 @@ vmf1_ht.o  : $(SRC)/vmf1_ht.f
 	$(F77) -c $(F77FLAGS) $(SRC)/vmf1_ht.f
 zero_vec8.o: $(SRC)/zero_vec8.f
 	$(F77) -c $(F77FLAGS) $(SRC)/zero_vec8.f
-	
+
 clean :
 	rm -f *.o *.a
 

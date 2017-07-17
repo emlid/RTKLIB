@@ -3,6 +3,14 @@
 # make all cui applications by gcc
 #
 
+echo; echo % ../lib/iers/gcc
+cd ../lib/iers/gcc
+make $1
+if [ $? -ne 0 ]; then
+    exit 3
+fi
+cd ../../../app/
+
 echo; echo % pos2kml/gcc
 cd pos2kml/gcc
 make $1

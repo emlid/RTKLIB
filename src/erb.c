@@ -127,22 +127,22 @@ static void buildver(char *payload, struct erb_ver version, const uint32_t time,
 static void buildpos(char *payload, struct erb_pos position, const uint32_t time,
                      const sol_t *sol)
 {
-    float stdX,stdY,stdZ;
+    float stdX2,stdY2,stdZ2;
     double pos[3];
 
     ecef2pos(sol->rr, pos);
-    /* if fix or float, then get std X/Y/Z */
-    stdX = (sol->stat == SOLQ_FIX || sol->stat == SOLQ_FLOAT) ? SQRT(sol->qr[0]) : 0;
-    stdY = (sol->stat == SOLQ_FIX || sol->stat == SOLQ_FLOAT) ? SQRT(sol->qr[1]) : 0;
-    stdZ = (sol->stat == SOLQ_FIX || sol->stat == SOLQ_FLOAT) ? SQRT(sol->qr[2]) : 0;
+    /* if position available, then get std^2 X/Y/Z */
+    stdX2 = (sol->stat != SOLQ_NONE && sol->stat != SOLQ_DR && sol->qr[0] > 0) ? sol->qr[0] : 0;
+    stdY2 = (sol->stat != SOLQ_NONE && sol->stat != SOLQ_DR && sol->qr[1] > 0) ? sol->qr[1] : 0;
+    stdZ2 = (sol->stat != SOLQ_NONE && sol->stat != SOLQ_DR && sol->qr[2] > 0) ? sol->qr[2] : 0;
 
     position.timeGPS = time;
     position.lng = pos[1] * R2D;
     position.lat = pos[0] * R2D;
     position.altEl = pos[2];
     position.altMsl = pos[2] - geoidh(pos);
-    position.accHor = 1000 * SQRT(stdX * stdX + stdY * stdY);
-    position.accVer = 1000 * stdZ;
+    position.accHor = 1000 * SQRT(stdX2 + stdY2);  /* convert float [m] to int32 [mm] */
+    position.accVer = 1000 * SQRT(stdZ2);          /* convert float [m] to int32 [mm] */
 
     memcpy(payload, &position, LENGTH_POS);
 }
@@ -198,7 +198,7 @@ static void buildvel(char *payload, struct erb_vel velocity, const uint32_t time
     velocity.velE = 100 * vel[0];
     velocity.velD = 100 * -vel[2];
     velocity.speed = 100 * SQRT(vel[0] * vel[0] + vel[1] * vel[1]);
-    velocity.heading = atan2(vel[1],vel[0]) * R2D * 1e5;
+    velocity.heading = atan2(vel[0],vel[1]) * R2D * 1e5; /* North = 0deg */
     velocity.accS = 0x00;
     memcpy(payload, &velocity, LENGTH_VEL);
 }

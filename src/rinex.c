@@ -85,6 +85,7 @@
 *                           support IRNSS
 *           2016/09/17 1.26 fix bug on fit interval in QZSS RINEX nav
 *                           URA output value complient to RINEX 3.03
+*           2016/10/10 1.27 add api outrnxinavh()
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
@@ -110,14 +111,6 @@ static const char obscodes[]="CLDS";    /* obs type codes */
 
 static const char frqcodes[]="1256789"; /* frequency codes */
 
-static const double ura_eph[]={         /* ura values (ref [3] 20.3.3.3.1.1) */
-    2.4,3.4,4.85,6.85,9.65,13.65,24.0,48.0,96.0,192.0,384.0,768.0,1536.0,
-    3072.0,6144.0,0.0
-};
-static const double ura_nominal[]={     /* ura nominal values */
-    2.0,2.8,4.0,5.7,8.0,11.3,16.0,32.0,64.0,128.0,256.0,512.0,1024.0,
-    2048.0,4096.0,8192.0
-};
 /* type definition -----------------------------------------------------------*/
 typedef struct {                        /* signal index type */
     int n;                              /* number of index */
@@ -180,18 +173,6 @@ static int sat2code(int sat, char *code)
         default: return 0;
     }
     return 1;
-}
-/* ura index to ura nominal value (m) ----------------------------------------*/
-static double uravalue(int sva)
-{
-    return 0<=sva&&sva<15?ura_nominal[sva]:8192.0;
-}
-/* ura value (m) to ura index ------------------------------------------------*/
-static int uraindex(double value)
-{
-    int i;
-    for (i=0;i<15;i++) if (ura_eph[i]>=value) break;
-    return i;
 }
 /* initialize station parameter ----------------------------------------------*/
 static void init_sta(sta_t *sta)
@@ -816,11 +797,11 @@ static int decode_obsdata(FILE *fp, char *buff, double ver, int mask,
         switch (ind->type[i]) {
             case 0: obs->P[p[i]]=val[i];
                     obs->code[p[i]]=ind->code[i];
-                    obs->qualP[p[i]]=qual[i];
+                    obs->qualP[p[i]]=qual[i]>0?qual[i]:1;
                     break;
             case 1: obs->L[p[i]]=val[i];
                     obs->LLI[p[i]]=lli[i];
-                    obs->qualL[p[i]]=qual[i];
+                    obs->qualL[p[i]]=qual[i]>0?qual[i]:1;
                     break;
             case 2: obs->D[p[i]]=(float)val[i];                        break;
             case 3: obs->SNR[p[i]]=(unsigned char)(val[i]*4.0+0.5);    break;
@@ -1104,7 +1085,7 @@ static int decode_eph(double ver, int sat, gtime_t toc, const double *data,
         
         eph->code=(int)data[20];      /* GPS: codes on L2 ch */
         eph->svh =(int)data[24];      /* sv health */
-        eph->sva=uraindex(data[23]);  /* ura (m->index) */
+        eph->sva=uraindex(data[23],sys);  /* ura (m->index) */
         eph->flag=(int)data[22];      /* GPS: L2 P data flag */
         
         eph->tgd[0]=   data[25];      /* TGD */
@@ -1135,7 +1116,7 @@ static int decode_eph(double ver, int sat, gtime_t toc, const double *data,
                                       /* bit   4-5: E5a HS */
                                       /* bit     6: E5b DVS */
                                       /* bit   7-8: E5b HS */
-        eph->sva =uraindex(data[23]); /* ura (m->index) */
+        eph->sva =uraindex(data[23],sys); /* ura (m->index) */
         
         eph->tgd[0]=   data[25];      /* BGD E5a/E1 */
         eph->tgd[1]=   data[26];      /* BGD E5b/E1 */
@@ -1152,7 +1133,7 @@ static int decode_eph(double ver, int sat, gtime_t toc, const double *data,
         eph->ttr=adjweek(eph->ttr,toc);
         
         eph->svh =(int)data[24];      /* satH1 */
-        eph->sva=uraindex(data[23]);  /* ura (m->index) */
+        eph->sva=uraindex(data[23],sys);  /* ura (m->index) */
         
         eph->tgd[0]=   data[25];      /* TGD1 B1/B3 */
         eph->tgd[1]=   data[26];      /* TGD2 B2/B3 */
@@ -1164,7 +1145,7 @@ static int decode_eph(double ver, int sat, gtime_t toc, const double *data,
         eph->toe=adjweek(gpst2time(eph->week,data[11]),toc);
         eph->ttr=adjweek(gpst2time(eph->week,data[27]),toc);
         eph->svh =(int)data[24];      /* sv health */
-        eph->sva=uraindex(data[23]);  /* ura (m->index) */
+        eph->sva=uraindex(data[23],sys);  /* ura (m->index) */
         eph->tgd[0]=   data[25];      /* TGD */
     }
     if (eph->iode<0||1023<eph->iode) {
@@ -1258,7 +1239,7 @@ static int decode_seph(double ver, int sat, gtime_t toc, double *data,
     seph->acc[0]=data[5]*1E3; seph->acc[1]=data[9]*1E3; seph->acc[2]=data[13]*1E3;
     
     seph->svh=(int)data[6];
-    seph->sva=uraindex(data[10]);
+    seph->sva=uraindex(data[10],SYS_SBS);
     
     return 1;
 }
@@ -2406,7 +2387,7 @@ extern int outrnxnavb(FILE *fp, const rnxopt_t *opt, const eph_t *eph)
     outnavf(fp,eph->flag   );
     fprintf(fp,"\n%s",sep  );
     
-    outnavf(fp,uravalue(eph->sva));
+    outnavf(fp,uravalue(eph->sva,sys));
     outnavf(fp,eph->svh    );
     outnavf(fp,eph->tgd[0] ); /* GPS/QZS:TGD, GAL:BGD E5a/E1, BDS: TGD1 B1/B3 */
     if (sys==SYS_GAL||sys==SYS_CMP) {
@@ -2608,7 +2589,7 @@ extern int outrnxhnavb(FILE *fp, const rnxopt_t *opt, const seph_t *seph)
     outnavf(fp,seph->pos[1]/1E3   );
     outnavf(fp,seph->vel[1]/1E3   );
     outnavf(fp,seph->acc[1]/1E3   );
-    outnavf(fp,uravalue(seph->sva));
+    outnavf(fp,uravalue(seph->sva,SYS_SBS));
     fprintf(fp,"\n%s",sep         );
     
     outnavf(fp,seph->pos[2]/1E3   );
@@ -2692,6 +2673,34 @@ extern int outrnxcnavh(FILE *fp, const rnxopt_t *opt, const nav_t *nav)
     
     fprintf(fp,"%9.2f           %-20s%-20s%-20s\n",opt->rnxver,
             "N: GNSS NAV DATA","C: BeiDou","RINEX VERSION / TYPE");
+    
+    fprintf(fp,"%-20.20s%-20.20s%-20.20s%-20s\n",opt->prog,opt->runby,date,
+            "PGM / RUN BY / DATE");
+    
+    for (i=0;i<MAXCOMMENT;i++) {
+        if (!*opt->comment[i]) continue;
+        fprintf(fp,"%-60.60s%-20s\n",opt->comment[i],"COMMENT");
+    }
+    return fprintf(fp,"%60s%-20s\n","","END OF HEADER")!=EOF;
+}
+/* output rinex irnss nav header -----------------------------------------------
+* output rinex irnss nav file header (2.12 extention and 3.02)
+* args   : FILE   *fp       I   output file pointer
+*          rnxopt_t *opt    I   rinex options
+*          nav_t  nav       I   navigation data (NULL: no input)
+* return : status (1:ok, 0:output error)
+*-----------------------------------------------------------------------------*/
+extern int outrnxinavh(FILE *fp, const rnxopt_t *opt, const nav_t *nav)
+{
+    int i;
+    char date[64];
+    
+    trace(3,"outrnxinavh:\n");
+    
+    timestr_rnx(date);
+    
+    fprintf(fp,"%9.2f           %-20s%-20s%-20s\n",opt->rnxver,
+            "N: GNSS NAV DATA","I: IRNSS","RINEX VERSION / TYPE");
     
     fprintf(fp,"%-20.20s%-20.20s%-20.20s%-20s\n",opt->prog,opt->runby,date,
             "PGM / RUN BY / DATE");

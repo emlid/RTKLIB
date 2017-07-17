@@ -7,14 +7,14 @@ SRC    = ../../../src
 #CTARGET= -mfpu=neon -mfloat-abi=softfp -ffast-math
 CTARGET= -DENAGLO -DENAQZS -DENACMP -DENAGAL -DENAIRN -DNFREQ=3 -DSVR_REUSEADDR
 
-CFLAGS = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) -I.. -DTRACE $(CTARGET) -g
+CFLAGS = -Wall -O3 -fno-strict-overflow -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) -I.. -DTRACE $(CTARGET) -g
 LDLIBS  = -lm -lrt -lpthread
 
 all        : rtkrcv
 rtkrcv     : rtkrcv.o vt.o rtkcmn.o rtksvr.o rtkpos.o geoid.o erb.o solution.o lambda.o
 rtkrcv     : sbas.o stream.o rcvraw.o rtcm.o preceph.o options.o pntpos.o ppp.o ppp_ar.o
 rtkrcv     : novatel.o ublox.o ss2.o crescent.o skytraq.o gw10.o javad.o nvs.o binex.o
-rtkrcv     : rt17.o ephemeris.o rinex.o ionex.o rtcm2.o rtcm3.o rtcm3e.o qzslex.o
+rtkrcv     : rt17.o tersus.o ephemeris.o rinex.o ionex.o rtcm2.o rtcm3.o rtcm3e.o qzslex.o
 rtkrcv     : ppp_corr.o tides.o septentrio.o cmr.o
 
 rtkrcv.o   : ../rtkrcv.c
@@ -79,6 +79,8 @@ binex.o    : $(SRC)/rcv/binex.c
 	$(CC) -c $(CFLAGS) $(SRC)/rcv/binex.c
 rt17.o     : $(SRC)/rcv/rt17.c
 	$(CC) -c $(CFLAGS) $(SRC)/rcv/rt17.c
+tersus.o   : $(SRC)/rcv/tersus.c
+	$(CC) -c $(CFLAGS) $(SRC)/rcv/tersus.c
 ephemeris.o: $(SRC)/ephemeris.c
 	$(CC) -c $(CFLAGS) $(SRC)/ephemeris.c
 rinex.o    : $(SRC)/rinex.c
@@ -124,6 +126,7 @@ javad.o    : $(SRC)/rtklib.h
 nvs.o      : $(SRC)/rtklib.h
 binex.o    : $(SRC)/rtklib.h
 rt17.o     : $(SRC)/rtklib.h
+tersus.o     : $(SRC)/rtklib.h
 septentrio.o: $(SRC)/rtklib.h
 cmr.o      : $(SRC)/rtklib.h
 ephemeris.o: $(SRC)/rtklib.h

@@ -14,8 +14,8 @@ LDLIBS  = -lm -lrt -lpthread
 all        : str2str
 str2str    : str2str.o stream.o rtkcmn.o erb.o solution.o sbas.o geoid.o
 str2str    : rcvraw.o novatel.o ublox.o ss2.o crescent.o skytraq.o gw10.o javad.o
-str2str    : nvs.o binex.o rt17.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o preceph.o streamsvr.o
-str2str    : septentrio.o cmr.o
+str2str    : nvs.o binex.o rt17.o tersus.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o preceph.o
+str2str    : streamsvr.o septentrio.o cmr.o
 
 str2str.o  : ../str2str.c
 	$(CC) -c $(CFLAGS) ../str2str.c
@@ -55,6 +55,8 @@ binex.o    : $(SRC)/rcv/binex.c
 	$(CC) -c $(CFLAGS) $(SRC)/rcv/binex.c
 rt17.o     : $(SRC)/rcv/rt17.c
 	$(CC) -c $(CFLAGS) $(SRC)/rcv/rt17.c
+tersus.o   : $(SRC)/rcv/tersus.c
+	$(CC) -c $(CFLAGS) $(SRC)/rcv/tersus.c
 rtcm.o     : $(SRC)/rtcm.c
 	$(CC) -c $(CFLAGS) $(SRC)/rtcm.c
 rtcm2.o    : $(SRC)/rtcm2.c
@@ -89,6 +91,7 @@ javad.o    : $(SRC)/rtklib.h
 nvs.o      : $(SRC)/rtklib.h
 binex.o    : $(SRC)/rtklib.h
 rt17.o     : $(SRC)/rtklib.h
+tersus.o   : $(SRC)/rtklib.h
 rtcm.o     : $(SRC)/rtklib.h
 rtcm2.o    : $(SRC)/rtklib.h
 rtcm3.o    : $(SRC)/rtklib.h

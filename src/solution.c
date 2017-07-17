@@ -840,14 +840,18 @@ extern sol_t *getsol(solbuf_t *solbuf, int index)
 *-----------------------------------------------------------------------------*/
 extern void initsolbuf(solbuf_t *solbuf, int cyclic, int nmax)
 {
+#if 0
     gtime_t time0={0};
+#endif
     int i;
     
     trace(3,"initsolbuf: cyclic=%d nmax=%d\n",cyclic,nmax);
     
     solbuf->n=solbuf->nmax=solbuf->start=solbuf->end=solbuf->nb=0;
     solbuf->cyclic=cyclic;
+#if 0
     solbuf->time=time0;
+#endif
     solbuf->data=NULL;
     for (i=0;i<3;i++) {
         solbuf->rb[i]=0.0;
@@ -1350,6 +1354,93 @@ extern int outnmea_gsv(unsigned char *buff, const sol_t *sol,
     }
     return p-(char *)buff;
 }
+/* output solution in the form of nmea VTG sentence --------------------------*/
+extern int outnmea_vtg(unsigned char *buff, const sol_t *sol) {
+    static double dirp = 0.0;
+    double pos[3], enuv[3], vel, dir, amag = 0.0;
+    char *p = (char *) buff, *q, sum, *emag = "E";
+    char posmode;
+    trace(3, "outnmea_vtg:\n");
+    if (sol->stat <= SOLQ_NONE) {
+        p += sprintf(p, "$GPVTG,,,,,,,");
+        for (q = (char *) buff + 1, sum = 0; *q; q++) sum ^= *q;
+        p += sprintf(p, "*%02X%c%c", sum, 0x0D, 0x0A);
+        return p - (char *) buff;
+    }
+    ecef2pos(sol->rr, pos);
+    ecef2enu(pos, sol->rr + 3, enuv);
+    vel = norm(enuv, 3);
+    if (vel >= 1.0) {
+        dir = atan2(enuv[0], enuv[1]) * R2D;
+        if (dir < 0.0) dir += 360.0;
+        dirp = dir;
+    } else dir = dirp;
+    switch (sol->stat) {
+        case SOLQ_DR:
+            posmode = 'E';
+            break;
+        case SOLQ_FIX || SOLQ_FLOAT || SOLQ_DGPS:
+            posmode = 'D';
+            break;
+        default:
+            posmode = 'A';
+            break;
+    }
+    p += sprintf(p, "$GPVTG,%4.2f,T,%4.2f,M,%4.2f,N,%4.2f,K,%c", dir, dir + (*emag == 'E' ? 1 : -1) * amag, vel / KNOT2M,
+                 +vel, posmode);
+    for (q = (char *) buff + 1, sum = 0; *q; q++) sum ^= *q; /* check-sum */
+    p += sprintf(p, "*%02X%c%c", sum, 0x0D, 0x0A);
+    return p - (char *) buff;
+}
+/* output solution in the form of nmea GST sentence */
+extern int outnmea_gst(unsigned char *buff, const sol_t *sol, const ssat_t *ssat) {
+    double pos[3], Q[9] = {0}, P[9] = {0}, ep[6], sum_rms = 0, range_rms = 0;
+    char *p = (char *) buff, *q, sum;
+    gtime_t time;
+    int sat, count_rms = 0;
+
+    if (sol->type == 0) {
+        ecef2pos(sol->rr, pos);
+        soltocov(sol, P);
+        covenu(pos, P, Q);
+    }
+    else {
+        soltocov(sol, Q);
+    }
+
+    time = gpst2utc(sol->time);
+    if (time.sec >= 0.995) {
+        time.time++;
+        time.sec = 0.0;
+    }
+    time2epoch(time, ep);
+    if (sol->stat <= SOLQ_NONE) {
+        p += sprintf(p, "$GPGST,,,,,,,,,");
+        for (q = (char *) buff + 1, sum = 0; *q; q++) sum ^= *q;
+        p += sprintf(p, "*%02X%c%c", sum, 0x0D, 0x0A);
+        return p - (char *) buff;
+    }
+    for (sat = 1; sat <= MAXSAT; sat++) {
+        if (!ssat[sat - 1].vs) {
+            continue;
+        }
+        if (ssat[sat - 1].resc[0] != 0) {
+            sum_rms += SQR(ssat[sat - 1].resc[0]);
+            count_rms++;
+        }
+        if (ssat[sat - 1].resp[0] != 0) {
+            sum_rms = SQR(ssat[sat - 1].resp[0]);
+            count_rms++;
+        }
+    }
+    range_rms = SQRT(sum_rms) / count_rms;
+    p += sprintf(p, "$GPGST,%02.0f%02.0f%05.2f,%5.3f,,,,%5.3f,%5.3f,%5.3f",
+                 +ep[3], ep[4], ep[5], range_rms, SQRT(Q[0]), SQRT(Q[4]), SQRT(Q[8]));
+
+    for (q = (char *) buff + 1, sum = 0; *q; q++) sum ^= *q; /* check-sum */
+    p += sprintf(p, "*%02X%c%c", sum, 0x0D, 0x0A);
+    return p - (char *) buff;
+}
 /* output processing options ---------------------------------------------------
 * output processing options to buffer
 * args   : unsigned char *buff IO output buffer
@@ -1358,7 +1449,7 @@ extern int outnmea_gsv(unsigned char *buff, const sol_t *sol,
 *-----------------------------------------------------------------------------*/
 extern int outprcopts(unsigned char *buff, const prcopt_t *opt)
 {
-    const int sys[]={SYS_GPS,SYS_GLO,SYS_GAL,SYS_QZS,SYS_SBS,0};
+    const int sys[]={SYS_GPS,SYS_GLO,SYS_GAL,SYS_QZS,SYS_CMP,SYS_IRN,SYS_SBS,0};
     const char *s1[]={"single","dgps","kinematic","static","static-start","moving-base","fixed",
                  "ppp-kinematic","ppp-static","ppp-fixed",""};
     const char *s2[]={"L1","L1+L2","L1+L2+L5","L1+L2+L5+L6","L1+L2+L5+L6+L7",
@@ -1369,7 +1460,7 @@ extern int outprcopts(unsigned char *buff, const prcopt_t *opt)
     const char *s5[]={"off","saastamoinen","sbas","est ztd","est ztd+grad",""};
     const char *s6[]={"broadcast","precise","broadcast+sbas","broadcast+ssr apc",
                       "broadcast+ssr com","qzss lex",""};
-    const char *s7[]={"gps","glonass","galileo","qzss","sbas",""};
+    const char *s7[]={"gps","glonass","galileo","qzss","beidou","irnss","sbas",""};
     const char *s8[]={"off","continuous","instantaneous","fix and hold",""};
     const char *s9[]={"off","on","auto calib","fix and hold","external calib",""};
     int i;
@@ -1573,6 +1664,8 @@ extern int outsolexs(unsigned char *buff, const sol_t *sol, const ssat_t *ssat,
     if (opt->posf==SOLF_NMEA) {
         p+=outnmea_gsa(p,sol,ssat);
         p+=outnmea_gsv(p,sol,ssat);
+        p+=outnmea_gst(p,sol,ssat);
+        p+=outnmea_vtg(p,sol);
     }
     return p-buff;
 }

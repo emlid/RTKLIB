@@ -7,6 +7,7 @@
 #pragma hdrstop
 #include <System.StartUpCopy.hpp>
 //---------------------------------------------------------------------------
+USEFORM("vpoptdlg.cpp", VideoPlayerOptDialog);
 USEFORM("vplayermain.cpp", MainForm);
 //---------------------------------------------------------------------------
 extern "C" int FMXmain()
@@ -15,6 +16,7 @@ extern "C" int FMXmain()
 	{
 		Application->Initialize();
 		Application->CreateForm(__classid(TMainForm), &MainForm);
+		Application->CreateForm(__classid(TVideoPlayerOptDialog), &VideoPlayerOptDialog);
 		Application->Run();
 	}
 	catch (Exception &exception)

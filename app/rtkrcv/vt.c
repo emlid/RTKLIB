@@ -335,12 +335,17 @@ extern int vt_gets(vt_t *vt, char *buff, int n)
     }
     return 0;
 }
+
 /* put character to console --------------------------------------------------*/
-static int vt_putchar(vt_t *vt, char c)
+static int vt_putchar(vt_t *vt, const char *buff, int n)
 {
-    if (!vt||!vt->state) return 0;
-    if (vt->logfp) fwrite(&c,1,1,vt->logfp);
-    return write(vt->out,&c,1)==1;
+    if (!vt || !vt->state)
+        return 0;
+
+    if (vt->logfp)
+        fwrite(buff, 1, n, vt->logfp);
+
+    return write(vt->out, buff, n) == n;
 }
 /* put character to console ----------------------------------------------------
 * put a character to virtual console
@@ -348,10 +353,12 @@ static int vt_putchar(vt_t *vt, char c)
 *          char   c         I   character
 * return : status (1:ok,0:error)
 *-----------------------------------------------------------------------------*/
-extern int vt_putc(vt_t *vt, char c)
-{
-    if (c=='\n'&&!vt_putchar(vt,'\r')) return 0;
-    return vt_putchar(vt,c);
+extern int vt_putc(vt_t *vt, char c) {
+
+    if (c == '\n' && !vt_putchar(vt, "\r", 1))
+        return 0;
+
+    return vt_putchar(vt, &c, 1);
 }
 /* put strings to console ------------------------------------------------------
 * put strings to virtual console
@@ -361,9 +368,20 @@ extern int vt_putc(vt_t *vt, char c)
 *-----------------------------------------------------------------------------*/
 extern int vt_puts(vt_t *vt, const char *buff)
 {
-    const char *p;
-    for (p=buff;*p;p++) if (!vt_putc(vt,*p)) return 0;
-    return 1;
+    const char *begin, *end, *length;
+
+    for (begin = buff; (end = strchr(begin, '\n')); begin = end + 1) {
+        length = end - begin;
+        if (vt_putchar(vt, begin, length))
+            if (vt_putchar(vt, "\r\n", 2))
+                continue;
+            else
+                return 0;
+        else
+            return 0;
+    }
+
+    return vt_putchar(vt, begin, strlen(begin));
 }
 /* print to console with formatting --------------------------------------------
 * print to virtual console with formatting
@@ -375,11 +393,13 @@ extern int vt_puts(vt_t *vt, const char *buff)
 extern int vt_printf(vt_t *vt, const char *format, ...)
 {
     va_list ap;
-    char buff[MAXBUFF+1];
-    va_start(ap,format);
-    vsprintf(buff,format,ap);
+    char buff[MAXBUFF + 1];
+
+    va_start(ap, format);
+    vsprintf(buff, format, ap);
     va_end(ap);
-    return vt_puts(vt,buff);
+
+    return vt_puts(vt, buff);
 }
 /* check break on console ------------------------------------------------------
 * check break on virtual console

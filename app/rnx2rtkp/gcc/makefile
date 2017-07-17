@@ -3,12 +3,14 @@
 BINDIR  = /usr/local/bin
 SRC     = ../../../src
 
-OPTS    = -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DENAIRN -DNFREQ=3
+#OPTS    = -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DENAIRN -DNFREQ=3
+OPTS    = -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DENAIRN -DNFREQ=3 -DIERS_MODEL
 #OPTS    = -DENAGLO -DENAQZS -DENAGAL -DENACMP -DNFREQ=2
 
 # for no lapack
-CFLAGS  = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) $(OPTS) -g
-LDLIBS  = -lm -lrt -lpthread
+CFLAGS  = -Wall -O3 -fno-strict-overflow -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) $(OPTS) -g
+#LDLIBS  = -lm -lrt -lpthread
+LDLIBS  = ../../../lib/iers/gcc/iers.a -lgfortran -lm -lrt -lpthread
 
 #CFLAGS  = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) -DLAPACK $(OPTS)
 #LDLIBS  = -lm -lrt -llapack -lblas
@@ -26,7 +28,7 @@ LDLIBS  = -lm -lrt -lpthread
 all        : rnx2rtkp
 rnx2rtkp   : rnx2rtkp.o rtkcmn.o rinex.o rtkpos.o postpos.o erb.o solution.o
 rnx2rtkp   : stream.o rcvraw.o novatel.o ss2.o ublox.o crescent.o skytraq.o gw10.o
-rnx2rtkp   : javad.o nvs.o binex.o rt17.o septentrio.o cmr.o
+rnx2rtkp   : javad.o nvs.o binex.o rt17.o tersus.o septentrio.o cmr.o
 rnx2rtkp   : lambda.o geoid.o sbas.o preceph.o pntpos.o ephemeris.o options.o
 rnx2rtkp   : ppp.o ppp_ar.o ppp_corr.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o ionex.o tides.o qzslex.o
 
@@ -66,6 +68,8 @@ binex.o    : $(SRC)/rcv/binex.c
 	$(CC) -c $(CFLAGS) $(SRC)/rcv/binex.c
 rt17.o     : $(SRC)/rcv/rt17.c
 	$(CC) -c $(CFLAGS) $(SRC)/rcv/rt17.c
+tersus.o     : $(SRC)/rcv/tersus.c
+	$(CC) -c $(CFLAGS) $(SRC)/rcv/tersus.c
 septentrio.o: $(SRC)/rcv/septentrio.c
 	$(CC) -c $(CFLAGS) $(SRC)/rcv/septentrio.c
 cmr.o      : $(SRC)/rcv/cmr.c
