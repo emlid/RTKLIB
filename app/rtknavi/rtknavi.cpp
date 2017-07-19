@@ -44,10 +44,10 @@ USEFORM("..\appcmn\aboutdlg.cpp", AboutDialog);
 USEFORM("..\appcmn\ftpoptdlg.cpp", FtpOptDialog);
 USEFORM("..\appcmn\maskoptdlg.cpp", MaskOptDialog);
 USEFORM("..\appcmn\keydlg.cpp", KeyDialog);
-USEFORM("naviopt.cpp", OptDialog);
-USEFORM("navimain.cpp", MainForm);
 USEFORM("mondlg.cpp", MonitorDialog);
 USEFORM("outstrdlg.cpp", OutputStrDialog);
+USEFORM("naviopt.cpp", OptDialog);
+USEFORM("navimain.cpp", MainForm);
 USEFORM("rcvoptdlg.cpp", RcvOptDialog);
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)

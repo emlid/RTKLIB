@@ -772,7 +772,7 @@ static int syncfile(FILE **ofp, const rnxopt_t *opt, nav_t *nav)
 
     trace(3,"syncfile:\n");
 
-    for (i=0;i<NOUTFILE;i++) {
+	for (i=0;i<NOUTFILE;i++) {
 
         if (!ofp[i]) continue;
 
@@ -797,9 +797,11 @@ static int syncfile(FILE **ofp, const rnxopt_t *opt, nav_t *nav)
             showmsg("file seek to the end error");
             return 0;
         }
-
-        fflush(ofp[i]);
-        fsync(fileno(ofp[i]));
+#ifdef WIN32
+		fflush(ofp[i]);
+#else
+		fsync(fileno(ofp[i]));
+#endif
     }
 
     return 1;

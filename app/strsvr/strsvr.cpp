@@ -14,11 +14,11 @@ USEFORM("..\appcmn\aboutdlg.cpp", AboutDialog);
 USEFORM("..\appcmn\confdlg.cpp", ConfDialog);
 USEFORM("..\appcmn\ftpoptdlg.cpp", FtpOptDialog);
 USEFORM("..\appcmn\fileoptdlg.cpp", FileOptDialog);
-USEFORM("svroptdlg.cpp", SvrOptDialog);
-USEFORM("svrmain.cpp", MainForm);
-USEFORM("convdlg.cpp", ConvDialog);
 USEFORM("..\appcmn\vieweropt.cpp", ViewerOptDialog);
+USEFORM("svroptdlg.cpp", SvrOptDialog);
 USEFORM("mondlg.cpp", StrMonDialog);
+USEFORM("convdlg.cpp", ConvDialog);
+USEFORM("svrmain.cpp", MainForm);
 //---------------------------------------------------------------------------
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

@@ -40,7 +40,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <math.h>
 #include <time.h>
 #include <ctype.h>
@@ -49,6 +50,7 @@
 #include <windows.h>
 #else
 #include <pthread.h>
+#include <unistd.h>
 #endif
 #ifdef __cplusplus
 extern "C" {
@@ -251,10 +253,17 @@ extern "C" {
 #define MAXCOMMENT  10                  /* max number of RINEX comments */
 #define MAXSTRPATH  1024                /* max length of stream path */
 #define MAXSTRMSG   1024                /* max length of stream message */
+
+#ifdef WIN32
+#define MAXSTRRTK   8                   /* max number of stream in RTK server */
+#define MAXSOLRTK   2                   /* max number of solution streams in RTK server */
+#else
 #define MAXSTRRTK   10                  /* max number of stream in RTK server */
+#define MAXSOLRTK   4                   /* max number of solution streams in RTK server */
+#endif
+
 #define MAXSBSMSG   32                  /* max number of SBAS msg in RTK server */
 #define MAXSOLMSG   8191                /* max length of solution message */
-#define MAXSOLRTK   4                   /* max number of solution streams in RTK server */
 #define MAXRAWLEN   4096                /* max length of receiver raw message */
 #define MAXERRMSG   4096                /* max length of error/warning message */
 #define MAXANT      64                  /* max length of station name/antenna type */

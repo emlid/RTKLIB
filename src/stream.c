@@ -63,7 +63,6 @@
 #include "rtklib.h"
 #ifndef WIN32
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/time.h>
 #define __USE_MISC
 #ifndef CRTSCTS
@@ -540,7 +539,7 @@ static int checkfd(stream_t *stream)
         case STR_SERIAL : serial=(serial_t *)stream->port;break;
         default         : return 1;
     }
-    fstat(serial->dev, &sb);
+    fstat((int)serial->dev, &sb);
     if (sb.st_nlink == 0) {
         /* no hard links */
         closeserial(serial);

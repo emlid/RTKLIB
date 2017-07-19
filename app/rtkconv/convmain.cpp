@@ -791,7 +791,8 @@ void __fastcall TMainWindow::ConvertFile(void)
 	char buff[256],tstr[32];
 	double RNXVER[]={2.10,2.11,2.12,3.00,3.01,3.02,3.03};
 	FILE *fp;
-	
+	stream_t stream;
+
 	for (i=0;i<9;i++) ofile[i]=ofile_[i];
 	
 	// recognize input file format
@@ -931,8 +932,10 @@ void __fastcall TMainWindow::ConvertFile(void)
 		traceopen(TRACEFILE);
 		tracelevel(TraceLevel);
 	}
+
+	strinit(&stream);
 	// convert to rinex
-	(void)convrnx(format,&rnxopt,file,ofile);
+	(void)convrnx(format,&rnxopt,file,ofile, &abortf, &stream);
 	
 	if (TraceLevel>0) {
 		traceclose();
