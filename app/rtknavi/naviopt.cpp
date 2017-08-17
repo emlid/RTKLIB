@@ -682,7 +682,7 @@ void __fastcall TOptDialog::LoadOpt(AnsiString file)
 	resetsysopts();
 	if (!loadopts(file.c_str(),sysopts)||
 	    !loadopts(file.c_str(),rcvopts)) return;
-	getsysopts(&prcopt,&solopt,&filopt);
+	getsysopts(&prcopt,&solopt,1,&filopt);
 	
 	for (int i=0;i<8;i++) {
 		MainForm->StreamC[i]=strtype[i]!=STR_NONE;

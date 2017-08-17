@@ -3896,30 +3896,46 @@ extern int smoothing_carrier(obsd_t obs, rtk_t *rtk, int freq, double wavelength
     double P = obs.P[freq];
     double L = obs.L[freq];
     gtime_t time = obs.time;
-    
-    int is_bad_data = (sat < 0) || (MAXSAT <= sat) || (rcv < 0) || (MAXRCV_SMOOTH <= rcv);
-    
-    if ( is_bad_data ) return 0;
-    
-    smoothing_data_t *smoothing_data = &rtk->smoothing_data;
-    double  *P_smooth    = &smoothing_data->P_smooth[rcv][sat][freq];
-    double  *L_prev      = &smoothing_data->L       [rcv][sat][freq];
-    int     *count       = &smoothing_data->count   [rcv][sat][freq];
-    gtime_t *time_start  = &smoothing_data->time_start[rcv][sat][freq];
-    gtime_t *time_prev   = &smoothing_data->time      [rcv][sat][freq];
-    double  age          = fabs(timediff(time, *time_start));
-    double  dt           = timediff(time, *time_prev);
-    int direction        = SIGN(dt);
-    int *direction_prev  = &smoothing_data->direction[rcv][sat][freq];
+    smoothing_data_t *smoothing_data;
+    double  *P_smooth;
+    double  *L_prev;
+    int     *count;
+    gtime_t *time_start;
+    gtime_t *time_prev;
+    double  age;
+    double  dt;
+    int direction;
+    int *direction_prev;
+    int is_cycle_slip;
+    int is_phase_defined;
+    int is_smoothing_direction_changed;
+    int is_filter_out_of_date;
+    int is_initialization;
+    int is_reinitialization;
     double weight, delta;
-    
-    int is_cycle_slip        = detect_slip_LLI(obs, &rtk->smoothing_data, direction, freq);
-    int is_phase_defined     = (L != 0.0) && (*L_prev != 0.0);
-    int is_smoothing_direction_changed = (direction != *direction_prev) && (*count > 1);
-    int is_filter_out_of_date          = fabs(dt) > REINIT_TIME_SMOOTH;
-    
-    int is_initialization   = (*count <= 0) || (*P_smooth == 0.0);
-    int is_reinitialization = is_filter_out_of_date || is_cycle_slip || 
+
+    int is_bad_data = (sat < 0) || (MAXSAT <= sat) || (rcv < 0) || (MAXRCV_SMOOTH <= rcv);
+
+    if ( is_bad_data ) return 0;
+
+    smoothing_data = &rtk->smoothing_data;
+    P_smooth    = &smoothing_data->P_smooth[rcv][sat][freq];
+    L_prev      = &smoothing_data->L       [rcv][sat][freq];
+    count       = &smoothing_data->count   [rcv][sat][freq];
+    time_start  = &smoothing_data->time_start[rcv][sat][freq];
+    time_prev   = &smoothing_data->time      [rcv][sat][freq];
+    age          = fabs(timediff(time, *time_start));
+    dt           = timediff(time, *time_prev);
+    direction        = SIGN(dt);
+    direction_prev  = &smoothing_data->direction[rcv][sat][freq];
+
+    is_cycle_slip        = detect_slip_LLI(obs, &rtk->smoothing_data, direction, freq);
+    is_phase_defined     = (L != 0.0) && (*L_prev != 0.0);
+    is_smoothing_direction_changed = (direction != *direction_prev) && (*count > 1);
+    is_filter_out_of_date          = fabs(dt) > REINIT_TIME_SMOOTH;
+
+    is_initialization   = (*count <= 0) || (*P_smooth == 0.0);
+    is_reinitialization = is_filter_out_of_date || is_cycle_slip ||
                               is_smoothing_direction_changed || (!is_phase_defined);
                               
     /* no actions if smoothing is already done at the moment */
@@ -3948,18 +3964,18 @@ extern int smoothing_carrier(obsd_t obs, rtk_t *rtk, int freq, double wavelength
 extern double smoothing_weight_from_count(const smoothing_data_t *smoothing_data, 
                                           const prcopt_t *opt, int rcv, int sat, int freq)
 {
-    if ( (!smoothing_data) || (!opt) ) return 1.0;
-    
-    int count_smooth = smoothing_data->count[rcv][sat][freq];
+
+    int count_smooth;
     double weight;
-    
+    count_smooth = smoothing_data->count[rcv][sat][freq];
+    if ( (!smoothing_data) || (!opt) ) return 1.0;
     if ( (opt->smoothing_mode) && (count_smooth > 1) ) {
         weight = 1.0 / (2 * count_smooth - 1) + opt->smoothing_varratio;
         weight = MIN(weight, 1.0);
     }
     else
         weight = 1.0;
-    
+
     return weight;
 }
 

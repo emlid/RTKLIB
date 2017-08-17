@@ -621,7 +621,7 @@ int ppp=PosMode->ItemIndex>=PMODE_PPP_KINEMA;
 	
 	resetsysopts();
 	if (!loadopts(file.c_str(),sysopts)) return;
-	getsysopts(&prcopt,&solopt,&filopt);
+	getsysopts(&prcopt,&solopt,1,&filopt);
 	
 	PosMode		 ->ItemIndex	=prcopt.mode;
 	Freq		 ->ItemIndex	=prcopt.nf>NFREQ-1?NFREQ-1:prcopt.nf-1;

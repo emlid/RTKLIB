@@ -1114,7 +1114,7 @@ void __fastcall TMainForm::MenuExitClick(TObject *Sender)
 void __fastcall TMainForm::SvrStart(void)
 {
     AnsiString s;
-    solopt_t solopt[2];
+    solopt_t solopt[MAXSOLRTK];
     double pos[3],nmeapos[3];
     int itype[]={
         STR_SERIAL,STR_TCPCLI,STR_TCPSVR,STR_NTRIPCLI,STR_FILE,STR_FTP,STR_HTTP
@@ -1271,7 +1271,7 @@ void __fastcall TMainForm::SvrStart(void)
     if (DCBFileF!="") {
         readdcb(DCBFileF.c_str(),&rtksvr.nav,NULL);
     }
-    for (i=0;i<2;i++) {
+    for (i=0;i<MAXSOLRTK;i++) {
         solopt[i]=SolOpt;
         solopt[i].posf=Format[i+3];
     }
