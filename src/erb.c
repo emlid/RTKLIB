@@ -166,8 +166,10 @@ static void buildstat(char *payload, struct erb_stat status, const uint32_t time
     double baseline_enu[3];  /* ENU  vector between base position and rover position in meters */
     int i;
     uint8_t fixStatus,fixType;
-    uint32_t rtcm_tow_ms = 0;
-    int rtcm_week_nr = 0;
+    uint32_t tow_ms;
+    int week_number;
+    double time_sec;
+    gtime_t time_of_last_baseline;
 
     if (sol->stat == SOLQ_SINGLE) {
         fixStatus = 0x01;
@@ -192,18 +194,24 @@ static void buildstat(char *payload, struct erb_stat status, const uint32_t time
     /* Introduced in ERB version 0.2.0 */
     if (sol->type == 0) { /* xyz-ecef */
         ecef2pos(rb, pos);                 /* transform the base ecef position to a geodetic position */
-        for (i=0;i<3;i++) baseline_ecef[i] = sol->rr[i] - rb[i];
+        for (i = 0; i < 3; i++) {
+            baseline_ecef[i] = sol->rr[i] - rb[i];
+        }
         ecef2enu(pos, baseline_ecef, baseline_enu);
     } else {              /* enu-baseline */
-        for (i=0;i<3;i++) baseline_enu[i] = sol->rr[i];
+        for (i = 0; i < 3; i++) {
+            baseline_enu[i] = sol->rr[i];
+        }
     }
-    status.base_num_sats = 0;    /* TODO Current number of satellites used for RTK calculation */
-    /*
-    TODO access rtcm_t->time
-    rtcm_tow_ms = time2gpst(rtcm_t->time, &rtcm_week_nr) * 1000;
-    */
-    status.base_week_number = rtcm_week_nr;  /* GPS Week Number of last baseline */
-    status.base_time_week_ms = rtcm_tow_ms;  /* GPS Time of Week of last baseline in milliseconds */
+    status.base_num_sats = sol->ns;    /* Current number of satellites used for RTK calculation */
+
+    time_sec = (double)sol->time.time + sol->time.sec - sol->age;
+    time_of_last_baseline.time = (time_t)time_sec;
+    time_of_last_baseline.sec = time_sec - (double)time_of_last_baseline.time;
+    tow_ms = time2gpst(time_of_last_baseline, &week_number);
+
+    status.base_week_number = week_number;  /* GPS Week Number of last baseline */
+    status.base_time_week_ms = tow_ms;  /* GPS Time of Week of last baseline in milliseconds */
     status.iar_num_hypotheses = 0;  /* TODO Current number of integer ambiguity hypotheses */
     status.num_leap_seconds = 0x7F; /* TODO access rtcm->nav->leaps instead; GPS leap seconds (0x7F indicates invalid) */
 
