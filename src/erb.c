@@ -189,7 +189,7 @@ static void buildstat(char *payload, struct erb_stat status, const uint32_t time
     status.weekGPS = week;
     status.fixType = fixType;
     status.fixStatus = fixStatus;
-    status.numSV = sol->ns;
+    status.numSV = sol->nSV;
 
     /* Introduced in ERB version 0.2.0 */
     if (sol->type == 0) { /* xyz-ecef */
