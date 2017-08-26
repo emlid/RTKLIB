@@ -37,6 +37,7 @@
 #ifndef RTKLIB_H
 #define RTKLIB_H
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
@@ -540,6 +541,86 @@ extern "C" {
 #define unlock(f)   pthread_mutex_unlock(f)
 #define FILEPATHSEP '/'
 #endif
+
+/* definitions for ERB protocol ----------------------------------------------*/
+#define ERB_SYNC_CHAR1    0x45 /* erb message sync code 1 */
+#define ERB_SYNC_CHAR2    0x52 /* erb message sync code 2 */
+#define ID_VER            0x01 /* message id ERB-VER */
+#define ID_POS            0x02 /* message id ERB-POS */
+#define ID_STAT           0x03 /* message id ERB-STAT */
+#define ID_DOPS           0x04 /* message id ERB-DOPS */
+#define ID_VEL            0x05 /* message id ERB-VEL */
+#define ID_SVI            0x06 /* message id ERB-SVI */
+#define LENGTH_VER           7 /* length of payload ERB-VER message */
+#define LENGTH_POS          44 /* length of payload ERB-POS message */
+#define LENGTH_STAT          9 /* length of payload ERB-STAT message */
+#define LENGTH_DOPS         12 /* length of payload ERB-DOPS message */
+#define LENGTH_VEL          28 /* length of payload ERB-VEL message */
+#define LENGTH_SVI_HEAD      5 /* length of head of payload ERB-SVI message */
+#define LENGTH_SVI_SV       20 /* length of 1 SV information in ERB-SVI message */
+#define VERSION_HIGH         0 /* High level of version */
+#define VERSION_MEDIUM       1 /* Medium level of version */
+#define VERSION_LOW          0 /* Low level of version */
+
+/* structures for ERB protocol -----------------------------------------------*/
+struct erb_ver {
+    uint32_t timeGPS;
+    uint8_t verH;
+    uint8_t verM;
+    uint8_t verL;
+};
+
+struct erb_pos {
+    uint32_t timeGPS;
+    double lng;
+    double lat;
+    double altEl;
+    double altMsl;
+    uint32_t accHor;
+    uint32_t accVer;
+};
+
+struct erb_stat {
+    uint32_t timeGPS;
+    uint16_t weekGPS;
+    uint8_t fixType;
+    uint8_t fixStatus;
+    uint8_t numSV;
+};
+
+struct erb_dops {
+    uint32_t timeGPS;
+    uint16_t dopGeo;
+    uint16_t dopPos;
+    uint16_t dopVer;
+    uint16_t dopHor;
+};
+
+struct erb_vel {
+    uint32_t timeGPS;
+    int32_t velN;
+    int32_t velE;
+    int32_t velD;
+    uint32_t speed;
+    int32_t heading;
+    uint32_t accS;
+};
+
+struct erb_svi_head {
+    uint32_t timeGPS;
+    uint8_t nSV;
+};
+
+struct erb_svi_sat {
+    uint8_t idSV;
+    uint8_t typeSV;
+    int32_t carPh;
+    int32_t psRan;
+    int32_t freqD;
+    uint16_t snr;
+    uint16_t azim;
+    uint16_t elev;
+};
 
 /* type definitions ----------------------------------------------------------*/
 
@@ -1928,6 +2009,7 @@ EXPORT int  strsvrstart(strsvr_t *svr, int *opts, int *strs, char **paths,
                         strconv_t **conv, char **cmds, char **cmds_priodic,
                         const double *nmeapos);
 EXPORT void strsvrstop (strsvr_t *svr, char **cmds);
+EXPORT void strsvrstopold (strsvr_t *svr, char *cmds);
 EXPORT void strsvrstat (strsvr_t *svr, int *stat, int *byte, int *bps, char *msg);
 EXPORT strconv_t *strconvnew(int itype, int otype, const char *msgs, int staid,
                              int stasel, const char *opt);

@@ -687,6 +687,22 @@ extern void strsvrstop(strsvr_t *svr, char **cmds)
     pthread_join(svr->thread,NULL);
 #endif
 }
+/* compatibility with old code */
+extern void strsvrstopold (strsvr_t *svr, char *cmd)
+{
+    tracet(3,"strsvrstop:\n");
+
+    if (cmd) strsendcmd(svr->stream,cmd);
+
+    svr->state=0;
+
+#ifdef WIN32
+    WaitForSingleObject(svr->thread,10000);
+    CloseHandle(svr->thread);
+#else
+    pthread_join(svr->thread,NULL);
+#endif
+}
 /* get stream server status ----------------------------------------------------
 * get status of stream server
 * args   : strsvr_t *svr    IO  stream sever struct

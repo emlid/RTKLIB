@@ -132,7 +132,7 @@ public:
 	int NmeaReq,NmeaCycle,InTimeTag,OutTimeTag,OutAppend,LogTimeTag,LogAppend;
 	int TimeoutTime,ReconTime,SbasCorr,DgpsCorr,TideCorr,FileSwapMargin;
 	int Stream[MAXSTRRTK],StreamC[MAXSTRRTK],Format[MAXSTRRTK];
-	int CmdEna[3][2],CmdEnaTcp[3][2];
+	int CmdEna[3][3],CmdEnaTcp[3][3];
 	int TimeSys,SolType,PlotType1,FreqType1,PlotType2,FreqType2;
     int TrkType1,TrkType2,TrkScale1,TrkScale2,BLMode1,BLMode2;
 	int MoniPort,OpenPort;

@@ -596,8 +596,10 @@ void MainForm::SvrStart(void)
         matcpy(conv[i]->out.sta.del,AntOff,3,1);
     }
     // stream server start
-    if (!strsvrstart(&strsvr,opt,strs,paths,conv,cmd,AntPos)) return;
-    
+    char *cmds[] = {cmd};
+    char *cmds_periodic[] = {};
+    if (!strsvrstart(&strsvr,opt,strs,paths,conv,cmds,cmds_periodic,AntPos)) return;
+
     StartTime=utc2gpst(timeget());
     Panel1    ->setEnabled(false);
     BtnStart  ->setVisible(false);
@@ -620,7 +622,7 @@ void MainForm::SvrStop(void)
     else if (Input->currentIndex()==1||Input->currentIndex()==3) {
         if (CmdEnaTcp[1]) strncpy(cmd,qPrintable(CmdsTcp[1]),1024);
     }
-    strsvrstop(&strsvr,cmd);
+    strsvrstopold(&strsvr,cmd);
     
     EndTime=utc2gpst(timeget());
     Panel1    ->setEnabled(true);
