@@ -1632,7 +1632,7 @@ extern int outsols(unsigned char *buff, const sol_t *sol, const double *rb,
         case SOLF_ENU:  p+=outenu(p,s,sol,rb,opt); break;
         case SOLF_NMEA: p+=outnmea_rmc(p,sol);
                         p+=outnmea_gga(p,sol);     break;
-        case SOLF_ERB:  p+=outerb(p,sol);          break;
+        case SOLF_ERB:  p+=outerb(p,sol,rb);       break;
     }
     return p-buff;
 }
