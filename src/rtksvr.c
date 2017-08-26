@@ -530,6 +530,162 @@ static void send_nmea(rtksvr_t *svr, unsigned int *tickreset)
                sol_nmea.rr[2]);
     }
 }
+/*  */
+static int obs_make_copy(const obs_t *obs, obs_t *obs_destination)
+{
+    int i;
+    obsd_t *data = obs_destination->data;
+    
+    if ( (!obs) || (!obs_destination) ) return 0;
+    
+    *obs_destination = *obs;
+    
+    for (i = 0; i < obs->n; i++) {
+        data[i] = obs->data[i];
+    }
+    
+    obs_destination->data = data;
+    
+    return 1;
+}
+/*  */
+static int obs_queue_is_index_valid(const obs_queue_t *obs_queue, int index)
+{
+    int is_index_in_bounds;
+    int offset, is_offset_in_bounds;
+    
+    if ( !obs_queue ) return 0;
+    
+    is_index_in_bounds = (index >= 0) && (index < MAXOBSQUEUE) && (index < obs_queue->length);
+    if ( !is_index_in_bounds ) return 0;
+    
+    offset = obs_queue->offset[index];
+    is_offset_in_bounds = (offset >= 0) && (offset < MAXOBSQUEUE);
+    if ( !is_offset_in_bounds ) return 0;
+    
+    return 1;
+}
+/*  */
+static int obs_queue_cut(obs_queue_t *obs_queue, int index_cut)
+{
+    int i;
+    int offset_cut[MAXOBSQUEUE];
+    int is_index_cut_valid = obs_queue_is_index_valid(obs_queue, index_cut);
+    
+    if ( (!obs_queue) || (!is_index_cut_valid) ) return 0;
+    
+    if ( index_cut > 0 ) {
+        for (i = 0; i < index_cut; i++ ) {
+            offset_cut[i] = obs_queue->offset[i];
+        }
+        for (i = 0; i < MAXOBSQUEUE - index_cut; i++ ) {
+            obs_queue->offset[i] = obs_queue->offset[i + index_cut];
+        }
+        for (i = MAXOBSQUEUE - index_cut; i < MAXOBSQUEUE; i++ ) {
+            obs_queue->offset[i] = offset_cut[i - MAXOBSQUEUE + index_cut];
+        }
+        obs_queue->length -= index_cut;
+        if ( obs_queue->index_optimum < index_cut ) {
+            obs_queue->index_optimum = -1;
+        }
+        else {
+            obs_queue->index_optimum -= index_cut;
+        }
+    }
+        
+    return 1;
+}
+/*  */
+static int obs_queue_get(const obs_queue_t *obs_queue, int index, obs_t *obs)
+{
+    int is_index_valid = obs_queue_is_index_valid(obs_queue, index);
+    int offset;
+    
+    if ( (!obs_queue) || (!is_index_valid) || (!obs) ) return 0;
+    
+    offset = obs_queue->offset[index];
+    obs_make_copy(&obs_queue->obs[offset], obs);
+    
+    return 1;
+}
+/*  */
+static int obs_queue_get_optimum(const obs_queue_t *obs_queue, obs_t *obs)
+{
+    if ( (!obs_queue) || (!obs) ) return 0;
+
+    return obs_queue_get(obs_queue, obs_queue->index_optimum, obs);
+}
+/*  */
+static int obs_queue_compare(const obs_queue_t *obs_queue, int index1, int index2)
+{
+    int is_index1_valid = obs_queue_is_index_valid(obs_queue, index1); 
+    int is_index2_valid = obs_queue_is_index_valid(obs_queue, index2);
+    int offset1, offset2;
+    
+    if ( (!obs_queue) || (!is_index1_valid) || (!is_index2_valid) ) return 0;
+    
+    offset1 = obs_queue->offset[index1];
+    offset2 = obs_queue->offset[index2];
+    
+    if ( obs_queue->obs[offset1].n < obs_queue->obs[offset2].n ) return 1;
+    else                                                         return -1;
+        
+    return -1;
+}
+/*  */
+static int obs_queue_find_optimum(obs_queue_t *obs_queue)
+{
+    int is_previous_optimum_defined = obs_queue_is_index_valid(obs_queue, obs_queue->index_optimum);
+                                      
+    int i, index_start_search = 1;
+    int index_optimum = 0;
+    
+    if ( !obs_queue ) return 0;
+    
+    if ( is_previous_optimum_defined ) {
+        index_start_search = obs_queue->index_optimum + 1;
+        index_optimum = obs_queue->index_optimum;
+    }
+        
+    for (i = index_start_search; i < obs_queue->length; i++) {
+        if ( obs_queue_compare(obs_queue, index_optimum, i) > 0 ) index_optimum = i;
+    }
+    
+    obs_queue->index_optimum = index_optimum;
+    
+    return 1;
+}
+/*  */
+static int obs_queue_add(obs_queue_t *obs_queue, const obs_t *obs, int nobs)
+{
+    int i, offset;
+    
+    if ( (!obs_queue) || (!obs) || (nobs <= 0) ) return 0;
+    
+    for (i = 0; i < nobs; i++) {
+        if ( obs_queue->length <= 0 ) {
+            offset = obs_queue->offset[0];
+            obs_queue->obs[offset] = obs[i];
+            obs_queue->length = 1;
+        }
+        else if ( obs_queue->length < MAXOBSQUEUE ) {
+            offset = obs_queue->offset[obs_queue->length];
+            obs_queue->obs[offset] = obs[i];
+            obs_queue->length++;
+        }
+        else if ( obs_queue->length >= MAXOBSQUEUE ) {
+            obs_queue_cut(obs_queue, 1);
+            offset = obs_queue->offset[MAXOBSQUEUE - 1];
+            obs_queue->obs[offset] = obs[i];
+            obs_queue->length = MAXOBSQUEUE;
+        }
+    }
+    
+    obs_queue_find_optimum(obs_queue);
+    obs_queue_cut(obs_queue, obs_queue->index_optimum);
+    
+    return 1;
+}
 /* rtk server thread ---------------------------------------------------------*/
 #ifdef WIN32
 static DWORD WINAPI rtksvrthread(void *arg)
@@ -606,6 +762,12 @@ static void *rtksvrthread(void *arg)
             }
             for (i=0;i<3;i++) svr->rtk.opt.rb[i]=svr->rb_ave[i];
         }
+        rtksvrlock(svr);
+        if ( fobs[1] > 0 ) {
+            obs_queue_add(&svr->base_queue, &svr->obs[1][0], fobs[1]);
+            obs_queue_get_optimum(&svr->base_queue, &svr->obs[1][0]); 
+        }
+        rtksvrunlock(svr);
         for (i=0;i<fobs[0];i++) { /* for each rover observation data */
             obs.n=0;
             for (j=0;j<svr->obs[0][i].n&&obs.n<MAXOBS*2;j++) {
@@ -841,6 +1003,9 @@ extern int rtksvrstart(rtksvr_t *svr, int cycle, int buffsize, int *strs,
     svr->nsbs=0;
     svr->nsol=0;
     svr->prcout=0;
+    svr->base_queue.length = 0;
+    svr->base_queue.index_optimum = -1;
+    for (i=0;i<MAXOBSQUEUE;i++) svr->base_queue.offset[i] = i;
     rtkfree(&svr->rtk);
     rtkinit(&svr->rtk,prcopt);
 

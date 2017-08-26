@@ -270,6 +270,7 @@ extern "C" {
 #define MAXANT      64                  /* max length of station name/antenna type */
 #define MAXSOLBUF   256                 /* max number of solution buffer */
 #define MAXOBSBUF   128                 /* max number of observation data buffer */
+#define MAXOBSQUEUE 8                   /*  */
 #define MAXNRPOS    16                  /* max number of reference positions */
 #define MAXLEAPS    64                  /* max number of leap seconds table */
 #define MAXGISLAYER 32                  /* max number of GIS data layers */
@@ -588,6 +589,13 @@ typedef struct {        /* observation data */
     int tmcount;        /* time mark count */
     obsd_t *data;       /* observation data records */
 } obs_t;
+
+typedef struct {
+    int length;
+    int    index_optimum;
+    int    offset[MAXOBSQUEUE];
+    obs_t  obs[MAXOBSQUEUE];
+} obs_queue_t;
 
 typedef struct {        /* earth rotation parameter data type */
     double mjd;         /* mjd (days) */
@@ -1401,6 +1409,7 @@ typedef struct {        /* RTK server type */
     gtime_t ftime[3];   /* download time {rov,base,corr} */
     char files[3][MAXSTRPATH]; /* download paths {rov,base,corr} */
     obs_t obs[3][MAXOBSBUF]; /* observation data {rov,base,corr} */
+    obs_queue_t base_queue; /*  */
     nav_t nav;          /* navigation data */
     sbsmsg_t sbsmsg[MAXSBSMSG]; /* SBAS message buffer */
     stream_t stream[MAXSTRRTK]; /* streams {rov,base,corr,sol1,sol2,logr,logb,logc} */
