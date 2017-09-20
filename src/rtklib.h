@@ -45,6 +45,7 @@
 #include <math.h>
 #include <time.h>
 #include <ctype.h>
+#include <assert.h>
 #ifdef WIN32
 #include <winsock2.h>
 #include <windows.h>
@@ -216,6 +217,7 @@ extern "C" {
 #define NSYSLEO     0
 #endif
 #define NSYS        (NSYSGPS+NSYSGLO+NSYSGAL+NSYSQZS+NSYSCMP+NSYSIRN+NSYSLEO) /* number of systems */
+#define MAXSYS      8
 
 #define MINPRNSBS   120                 /* min satellite PRN number of SBAS */
 #define MAXPRNSBS   142                 /* max satellite PRN number of SBAS */
@@ -270,6 +272,7 @@ extern "C" {
 #define MAXANT      64                  /* max length of station name/antenna type */
 #define MAXSOLBUF   256                 /* max number of solution buffer */
 #define MAXOBSBUF   128                 /* max number of observation data buffer */
+#define MAXOBSQUEUE 64                  /* max number of observations in queue */
 #define MAXNRPOS    16                  /* max number of reference positions */
 #define MAXLEAPS    64                  /* max number of leap seconds table */
 #define MAXGISLAYER 32                  /* max number of GIS data layers */
@@ -588,6 +591,13 @@ typedef struct {        /* observation data */
     int tmcount;        /* time mark count */
     obsd_t *data;       /* observation data records */
 } obs_t;
+
+typedef struct {               /* observations queue */
+    int   length;              /* in [0, MAXOBSQUEUE] */
+    int   offset[MAXOBSQUEUE]; /* i-th element in the queue is stored in obs[offset[i]] */
+    obs_t *obs[MAXOBSQUEUE];   /* observations */
+    int   is_cycle_slip_detected[MAXSAT][NFREQ]; /* cycle-slip flag */
+} obs_queue_t;
 
 typedef struct {        /* earth rotation parameter data type */
     double mjd;         /* mjd (days) */
@@ -1124,6 +1134,8 @@ typedef struct {        /* processing options type */
                         /* [1-3]:error factor a/b/c of phase (m) */
                         /* [4]:doppler frequency (hz) */
     
+    int    base_multi_epoch; /* is base data from different epochs allowed? (0:off,1:on) */
+                        
     int    smoothing_mode;   /* is code smoothing carried out? (0:off,1:on) */
     double smoothing_window; /* smoothing window (s)  */
     double smoothing_varratio; /* asymptotic factor of code variance decrease due to smoothing */
@@ -1238,7 +1250,7 @@ typedef struct {        /* satellite status type */
     double azel[2];     /* azimuth/elevation angles {az,el} (rad) */
     double resp[NFREQ]; /* residuals of pseudorange (m) */
     double resc[NFREQ]; /* residuals of carrier-phase (m) */
-	double icbias[NFREQ];  /* glonass IC bias (cycles) */
+    double icbias[NFREQ];  /* glonass IC bias (cycles) */
     unsigned char vsat[NFREQ]; /* valid satellite flag */
     unsigned char snr [NFREQ]; /* signal strength (0.25 dBHz) */
     unsigned char fix [NFREQ]; /* ambiguity fix flag (1:fix,2:float,3:hold) */
@@ -1401,6 +1413,7 @@ typedef struct {        /* RTK server type */
     gtime_t ftime[3];   /* download time {rov,base,corr} */
     char files[3][MAXSTRPATH]; /* download paths {rov,base,corr} */
     obs_t obs[3][MAXOBSBUF]; /* observation data {rov,base,corr} */
+    obs_queue_t *base_queue; /* several consecutive base observations to find optimum */
     nav_t nav;          /* navigation data */
     sbsmsg_t sbsmsg[MAXSBSMSG]; /* SBAS message buffer */
     stream_t stream[MAXSTRRTK]; /* streams {rov,base,corr,sol1,sol2,logr,logb,logc} */

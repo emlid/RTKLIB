@@ -119,6 +119,8 @@ EXPORT opt_t sysopts[]={
     {"smooth-window",   1,  (void *)&prcopt_.smoothing_window,"s"},
     {"smooth-varratio", 1,  (void *)&prcopt_.smoothing_varratio,""},
     
+    {"base-multi_epoch",3,  (void *)&prcopt_.base_multi_epoch,SWTOPT},
+    
     {"out-solformat",   3,  (void *)&solopt_.posf,       SOLOPT },
     {"out-outhead",     3,  (void *)&solopt_.outhead,    SWTOPT },
     {"out-outopt",      3,  (void *)&solopt_.outopt,     SWTOPT },

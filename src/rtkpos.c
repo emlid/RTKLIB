@@ -1340,7 +1340,9 @@ static int ddres(rtk_t *rtk, const nav_t *nav, const obsd_t *obs, double dt, con
                     continue;
                 }
                 /* single-differenced measurement error variances */
+                if ( rtk->opt.base_multi_epoch ) dt = timediff(obs[iu[i]].time, obs[ir[i]].time);
                 Ri[nv]=varerr(sat[i],sysi,azel[1+iu[i]*2],bl,dt,f,opt,&obs[iu[i]]);
+                if ( rtk->opt.base_multi_epoch ) dt = timediff(obs[iu[j]].time, obs[ir[j]].time);
                 Rj[nv]=varerr(sat[j],sysj,azel[1+iu[j]*2],bl,dt,f,opt,&obs[iu[j]]);
                 
                 /* reweighting of code measurments due to smoothing */
@@ -2292,11 +2294,12 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
     prcopt_t *opt=&rtk->opt;
     sol_t solb={{0}};
     gtime_t time;
+    gtime_t time_base_last;
     int i,nu,nr;
     char msg[128]="";
+    int sat, freq;
     trace(3,"rtkpos  : time=%s n=%d\n",time_str(obs[0].time,3),n);
     trace(4,"obs=\n"); traceobs(4,obs,n);
-    int sat, freq;
     /*trace(5,"nav=\n"); tracenav(5,nav);*/
     
     /* set base station position */
@@ -2384,7 +2387,13 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
     trace(3,"base pos: "); tracemat(3,rtk->rb,1,3,13,4);
     }
     else {
-        rtk->sol.age=(float)timediff(obs[0].time,obs[nu].time);
+        /* find last epoch in base obs */
+        time_base_last = obs[nu].time;
+        for (i = nu+1; i < nu+nr; i++) {
+            if ( timediff(obs[i].time, time_base_last) > 0.0 ) time_base_last = obs[i].time;
+        }
+        
+        rtk->sol.age=(float)timediff(obs[0].time, time_base_last);
         
         if (fabs(rtk->sol.age)>opt->maxtdiff) {
             errmsg(rtk,"age of differential error (age=%.1f)\n",rtk->sol.age);
