@@ -45,6 +45,7 @@
 #include <math.h>
 #include <time.h>
 #include <ctype.h>
+#include <assert.h>
 #ifdef WIN32
 #include <winsock2.h>
 #include <windows.h>
@@ -1124,10 +1125,16 @@ typedef struct {        /* processing options type */
                         /* [1-3]:error factor a/b/c of phase (m) */
                         /* [4]:doppler frequency (hz) */
     
-    int    smoothing_mode;   /* is code smoothing carried out? (0:off,1:on) */
-    double smoothing_window; /* smoothing window (s)  */
+    int    smoothing_mode;     /* is code smoothing carried out? (0:off,1:on) */
+    double smoothing_window;   /* smoothing window (s)  */
     double smoothing_varratio; /* asymptotic factor of code variance decrease due to smoothing */
 
+    int    residual_mode;         /* on/off */
+    int    residual_maxiter;      /* max number of iterations */ 
+    double residual_reset_fix;    /* carrier-phase residual threshold to reset phase-bias when solution status is FIX (m) */
+    double residual_reset_float;  /* carrier-phase residual threshold to reset phase-bias when solution status is FLOAT (m) */
+    double residual_block_fix_sat;/* carrier-phase residual threshold to prevent using a satellite for ambiguity resolution (m) */
+    
     double std[3];      /* initial-state std [0]bias,[1]iono [2]trop */
     double prn[6];      /* process-noise std [0]bias,[1]iono [2]trop [3]acch [4]accv [5] pos */
     double sclkstab;    /* satellite clock stability (sec/sec) */
@@ -1238,11 +1245,13 @@ typedef struct {        /* satellite status type */
     double azel[2];     /* azimuth/elevation angles {az,el} (rad) */
     double resp[NFREQ]; /* residuals of pseudorange (m) */
     double resc[NFREQ]; /* residuals of carrier-phase (m) */
-	double icbias[NFREQ];  /* glonass IC bias (cycles) */
+    double icbias[NFREQ];  /* glonass IC bias (cycles) */
     unsigned char vsat[NFREQ]; /* valid satellite flag */
     unsigned char snr [NFREQ]; /* signal strength (0.25 dBHz) */
-    unsigned char fix [NFREQ]; /* ambiguity fix flag (1:fix,2:float,3:hold) */
+    unsigned char fix [NFREQ]; /* ambiguity fix flag (1:float,2:fix,3:hold) */
     unsigned char slip[NFREQ]; /* cycle-slip flag */
+    unsigned char to_reset[NFREQ]; /* flag signalizing the need to reset phase-bias if not 0 */
+    unsigned char no_fix[NFREQ];   /* prevent using satellite for ambiguity resolution if not 0 */
     unsigned char half[NFREQ]; /* half-cycle valid flag */
     int lock [NFREQ];   /* lock counter of phase */
     unsigned int outc [NFREQ]; /* obs outage counter of phase */

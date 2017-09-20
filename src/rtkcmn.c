@@ -207,6 +207,7 @@ const prcopt_t prcopt_default={ /* defaults processing options */
     {100.0,0.003,0.003,0.0,1.0}, /* err[] */
 
     0, 100, 0.2,                /* smooth-mode, smooth-window, smooth-varratio */
+    0, 5, 0.2, 0.5, 0.05,       /* resid-mode, resid-maxiter, resid-reset_fix, resid-reset_float, resid-block_fix_sat */
 
     {30.0,0.03,0.3},            /* std[] */
     {1E-4,1E-3,1E-4,1E-1,1E-2,0.0}, /* prn[] */
