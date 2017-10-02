@@ -1,71 +1,100 @@
+#
 # makefile for pos2kml
+#
 
-BINDIR = /usr/local/bin
-SRC    = ../../../src
-CFLAGS_CMN = -Wall -ansi -pedantic -I$(SRC) -DTRACE
-LDLIBS  = -lm -lrt
+BINDIR      = /usr/local/bin
 
-OBJS = pos2kml.o convkml.o erb.o convgpx.o solution.o geoid.o rtkcmn.o preceph.o
-    
+# source files
+SRC_DIR_APP = ..
+SRC_DIR_1   = ../../../src
+SRC_DIR_2   = 
+SRC_DIRS   := $(SRC_DIR_APP) $(SRC_DIR_1) $(SRC_DIR_2)
+
+vpath %.c $(SRC_DIRS)
+
+SRC_NAMES_APP = pos2kml.c
+SRC_NAMES_1   = convkml.c erb.c convgpx.c solution.c geoid.c rtkcmn.c preceph.c
+SRC_NAMES_2   =
+SRC_NAMES    := $(SRC_NAMES_APP) $(SRC_NAMES_1) $(SRC_NAMES_2) 
+
+# object files
+OBJ_NAMES    := $(SRC_NAMES:%.c=%.o)
+
+# common compile options
+CC := gcc
+INCLUDE := -I$(SRC_DIR_1)
+OPTIONS := -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DENAIRN -DNFREQ=3
+CFLAGS_CMN := -ansi -pedantic -Wall -Wno-unused-but-set-variable -fno-strict-overflow $(INCLUDE) $(OPTIONS) -g
+LDLIBS  := -lm -lrt -lpthread
+EXEC    := pos2kml
+
+# target-specific options
+REL_OPTS    = -O3 -DNDEBUG
+PREREL_OPTS = -O3
+DBG_OPTS    = -O0
+
+####################################################################
+##### release / prerelease / debug targets 
+
 .DEFAULT_GOAL := release
-.PHONY: mkdir
+.PHONY: all release prerelease debug mkdir install clean
 
-RELOPTS    = -O3 -DNDEBUG
-PRERELOPTS = -O3
-DBGOPTS    = -O0
+all: release
 
-all:     release
+REL_DIR    = ./release
+PREREL_DIR = ./prerelease
+DBG_DIR    = ./debug
 
-release: CFLAGS  = $(CFLAGS_CMN) $(RELOPTS)
-release: EXEC    = pos2kml
-release: OBJ_DIR = ./release
-release: build
+REL_EXEC    := $(EXEC)
+PREREL_EXEC := $(addsuffix _prerel,$(EXEC))
+DBG_EXEC    := $(addsuffix _dbg,$(EXEC))
 
-prerelease: CFLAGS  = $(CFLAGS_CMN) $(PRERELOPTS)
-prerelease: EXEC    = pos2kml_prerel
-prerelease: OBJ_DIR = ./prerelease
-prerelease: build
+release: CFLAGS  := $(CFLAGS_CMN) $(REL_OPTS)
+release: OBJ_DIR := $(REL_DIR)
+release: mkdir
+release: $(REL_EXEC)
 
-debug: CFLAGS  = $(CFLAGS_CMN) $(DBGOPTS)
-debug: EXEC    = pos2kml_dbg
-debug: OBJ_DIR = ./debug
-debug: build
+prerelease: CFLAGS  := $(CFLAGS_CMN) $(PREREL_OPTS)
+prerelease: OBJ_DIR := $(PREREL_DIR)
+prerelease: mkdir
+prerelease: $(PREREL_EXEC)
 
-build: mkdir $(OBJS)
-	$(CC) -o $(EXEC) $(OBJS:%.o=$(OBJ_DIR)/%.o) $(LDLIBS)
+debug: CFLAGS  := $(CFLAGS_CMN) $(DBG_OPTS)
+debug: OBJ_DIR := $(DBG_DIR)
+debug: mkdir
+debug: $(DBG_EXEC)
+
+####################################################################
+
+#release
+$(REL_EXEC): $(addprefix $(REL_DIR)/,$(OBJ_NAMES))
+	$(CC) $^ -o $@ $(LDLIBS)
+
+$(REL_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+#prerelease
+$(PREREL_EXEC): $(addprefix $(PREREL_DIR)/,$(OBJ_NAMES))
+	$(CC) $^ -o $@ $(LDLIBS)
+
+$(PREREL_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# debug
+$(DBG_EXEC): $(addprefix $(DBG_DIR)/,$(OBJ_NAMES))
+	$(CC) $^ -o $@ $(LDLIBS) 
+
+$(DBG_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+####################################################################
 
 mkdir: 
-	mkdir -p $(OBJ_DIR)
-
-pos2kml.o  : ../pos2kml.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) ../pos2kml.c
-convkml.o  : $(SRC)/convkml.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/convkml.c
-erb.o      : $(SRC)/erb.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/erb.c
-convgpx.o  : $(SRC)/convgpx.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/convgpx.c
-solution.o : $(SRC)/solution.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/solution.c
-geoid.o    : $(SRC)/geoid.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/geoid.c
-rtkcmn.o   : $(SRC)/rtkcmn.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rtkcmn.c
-preceph.o  : $(SRC)/preceph.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/preceph.c
-
-pos2kml.o  : $(SRC)/rtklib.h
-convkml.o  : $(SRC)/rtklib.h
-erb.o      : $(SRC)/rtklib.h
-convgpx.o  : $(SRC)/rtklib.h
-solution.o : $(SRC)/rtklib.h
-geoid.o    : $(SRC)/rtklib.h
-rtkcmn.o   : $(SRC)/rtklib.h
-preceph.o  : $(SRC)/rtklib.h
+	@mkdir -p $(OBJ_DIR)
 
 install:
-	cp pos2kml $(BINDIR)
+	@cp $(REL_EXEC) $(BINDIR)
 
 clean:
-	rm -f pos2kml pos2kml_prerel pos2kml_dbg *.o
-	rm -rf ./release ./prerelease ./debug
+	@rm -f $(REL_EXEC) $(PREREL_EXEC) $(DBG_EXEC) *.o
+	@rm -rf $(REL_DIR) $(PREREL_DIR) $(DBG_DIR)
