@@ -590,23 +590,38 @@ static int timetag_parse_header(FILE *fp_tag, gtime_t *time_write, unsigned int 
     assert( tick_first != NULL );
     
     /* skip first line */
-    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) {
+
+        return 0;
+    } 
     
     /* read recording time */
-    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) {
+        
+        return 0;
+    }
     for(i = 0; i < TIMETAG_LINE_MAXLEN; i++) if ( isdigit(line[i]) ) break;
     for(j = i+1; j < TIMETAG_LINE_MAXLEN; j++) if ( line[j] == '\n' ) break;
-    if ( str2time_(line, i, j-i, time_write) < 0 ) return 0;
+    if ( str2time_(line, i, j-i, time_write) < 0 ) {
+        
+        return 0;
+    }
     
     /* read first tick */
-    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) {
+    
+        return 0;
+    }
     for(i = 0; i < TIMETAG_LINE_MAXLEN; i++) if ( isdigit(line[i]) ) break;
     tick_trial = strtoul(&line[i], NULL, 10);
     assert( tick_trial <= UINT_MAX );
     *tick_first = (unsigned int) tick_trial;
     
     /* skip column titles line */
-    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) {
+        
+        return 0;
+    }
     
     return 1;
 }
@@ -644,7 +659,10 @@ static int timetag_parse_line(FILE *fp_tag, unsigned int *tick, long int *fpos)
 {
     char line[TIMETAG_LINE_MAXLEN];
     
-    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) {
+        
+        return 0;
+    }
     sscanf(line, "%u %li", tick, fpos);
     
     return 1;
