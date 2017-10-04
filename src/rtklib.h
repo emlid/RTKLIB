@@ -46,6 +46,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <assert.h>
+#include <limits.h>
 #ifdef WIN32
 #include <winsock2.h>
 #include <windows.h>
@@ -65,7 +66,7 @@ extern "C" {
 
 /* constants -----------------------------------------------------------------*/
 
-#define VER_RTKLIB  "2.4.3 Emlid"             /* library version */
+#define VER_RTKLIB  "2.4.3 Emlid"       /* library version */
 
 #define PATCH_LEVEL "b28"               /* patch level */
 
@@ -1537,6 +1538,7 @@ EXPORT void add_fatal(fatalfunc_t *func);
 /* time and string functions -------------------------------------------------*/
 EXPORT double  str2num(const char *s, int i, int n);
 EXPORT int     str2time(const char *s, int i, int n, gtime_t *t);
+EXPORT int     str2time_(const char *s, int i, int n, gtime_t *t);
 EXPORT void    time2str(gtime_t t, char *str, int n);
 EXPORT gtime_t epoch2time(const double *ep);
 EXPORT void    time2epoch(gtime_t t, double *ep);

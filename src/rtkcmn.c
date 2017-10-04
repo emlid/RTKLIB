@@ -1270,6 +1270,26 @@ extern int str2time(const char *s, int i, int n, gtime_t *t)
     *t=epoch2time(ep);
     return 0;
 }
+/* inversion of time2str (contrary to original str2time)------------------------
+* convert substring in string to gtime_t struct
+* args   : char   *s        I   string ("... yyyy/mm/dd hh:mm:ss ...")
+*          int    i,n       I   substring position and width
+*          gtime_t *t       O   gtime_t struct
+* return : status (0:ok,0>:error)
+*-----------------------------------------------------------------------------*/
+extern int str2time_(const char *s, int i, int n, gtime_t *t)
+{
+    double ep[6];
+    char str[256],*p=str;
+    
+    if (i<0||(int)strlen(s)<i||(int)sizeof(str)-1<i) return -1;
+    for (s+=i;*s&&--n>=0;) *p++=*s++; *p='\0';
+    if (sscanf(str,"%lf/%lf/%lf %lf:%lf:%lf",ep,ep+1,ep+2,ep+3,ep+4,ep+5)<6)
+        return -1;
+    if (ep[0]<100.0) ep[0]+=ep[0]<80.0?2000.0:1900.0;
+    *t=epoch2time(ep);
+    return 0;
+}
 /* convert calendar day/time to time -------------------------------------------
 * convert calendar day/time to gtime_t struct
 * args   : double *ep       I   day/time {year,month,day,hour,min,sec}

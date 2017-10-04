@@ -61,6 +61,8 @@
 *-----------------------------------------------------------------------------*/
 #include <ctype.h>
 #include "rtklib.h"
+#include <stdio.h>
+#include <assert.h>
 #ifndef WIN32
 #include <fcntl.h>
 #include <sys/time.h>
@@ -84,6 +86,8 @@ static const char rcsid[]="$Id$";
 #define TINTACT             200         /* period for stream active (ms) */
 #define SERIBUFFSIZE        4096        /* serial buffer size (bytes) */
 #define TIMETAGH_LEN        64          /* time tag file header length */
+#define TIMETAG_LINE_MAXLEN 128         /* */
+#define TIME_STRING_MAXLEN  64          /* */
 #define MAXCLI              32          /* max client connection for tcp svr */
 #define MAXSTATMSG          32          /* max length of status message */
 #define DEFAULT_MEMBUF_SIZE 4096        /* default memory buffer size (bytes) */
@@ -139,7 +143,7 @@ typedef struct {            /* file control type */
     gtime_t wtime;          /* write time */
     unsigned int tick;      /* start tick */
     unsigned int tick_f;    /* start tick in file */
-    unsigned int fpos;      /* current file position */
+    long int fpos;          /* current file position */
     double start;           /* start offset (s) */
     double speed;           /* replay speed (time factor) */
     double swapintv;        /* swap interval (hr) (0: no swap) */
@@ -574,14 +578,94 @@ static int statexserial(serial_t *serial, char *msg)
 #endif
     return state;
 }
+/* parse time tag file header ------------------------------------------------*/
+static int timetag_parse_header(FILE *fp_tag, gtime_t *time_write, unsigned int *tick_first)
+{
+    int i, j;
+    char line[TIMETAG_LINE_MAXLEN];
+    unsigned long tick_trial;
+    
+    assert( fp_tag != NULL );
+    assert( time_write != NULL );
+    assert( tick_first != NULL );
+    
+    /* skip first line */
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    
+    /* read recording time */
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    for(i = 0; i < TIMETAG_LINE_MAXLEN; i++) if ( isdigit(line[i]) ) break;
+    for(j = i+1; j < TIMETAG_LINE_MAXLEN; j++) if ( line[j] == '\n' ) break;
+    if ( str2time_(line, i, j-i, time_write) < 0 ) return 0;
+    
+    /* read first tick */
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    for(i = 0; i < TIMETAG_LINE_MAXLEN; i++) if ( isdigit(line[i]) ) break;
+    tick_trial = strtoul(&line[i], NULL, 10);
+    assert( tick_trial <= UINT_MAX );
+    *tick_first = (unsigned int) tick_trial;
+    
+    /* skip column titles line */
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    
+    return 1;
+}
+/* write time tag file header ------------------------------------------------*/
+static int timetag_write_header(FILE *fp_tag, gtime_t time_write, unsigned int tick_first)
+{
+    char line[TIMETAG_LINE_MAXLEN];
+    char time_s[TIME_STRING_MAXLEN];
+    int len;
+    
+    assert( fp_tag != NULL );
+    
+    /* write title */
+    len = sprintf(line, "TIMETAG RTKLIB %s\n", VER_RTKLIB);
+    fwrite(line, len, sizeof(char), fp_tag);
+    
+    /* write recording time */
+    time2str(time_write, time_s, 2);
+    len = sprintf(line, "Start Time: %s\n", time_s);
+    fwrite(line, len , sizeof(char), fp_tag);
+    
+    /* write first tick */
+    len = sprintf(line, "Start Tick[ms]: %u\n", tick_first);
+    fwrite(line, len, sizeof(char), fp_tag);
+    
+    /* write column titles */
+    len = sprintf(line, "TIME_OFFSET[ms] FILE_POS\n");
+    fwrite(line, len, sizeof(char), fp_tag);
+    
+    fflush(fp_tag);
+    return 1;
+}
+/*  */
+static int timetag_parse_line(FILE *fp_tag, unsigned int *tick, long int *fpos)
+{
+    char line[TIMETAG_LINE_MAXLEN];
+    
+    if ( fgets(line, TIMETAG_LINE_MAXLEN, fp_tag) == NULL ) return 0;
+    sscanf(line, "%u %li", tick, fpos);
+    
+    return 1;
+}
+/*  */
+static int timetag_write_line(FILE *fp_tag, unsigned int tick, long int fpos)
+{
+    char line[TIMETAG_LINE_MAXLEN];
+    int len;
+    
+    len = sprintf(line, "%u %li\n", tick, fpos);
+    fwrite(line, len, sizeof(char), fp_tag);
+    
+    fflush(fp_tag);
+    return 1;
+}
 /* open file -----------------------------------------------------------------*/
 static int openfile_(file_t *file, gtime_t time, char *msg)
 {    
     FILE *fp;
-    double time_sec;
-    unsigned int time_buf[2];
     char *rw,tagpath[MAXSTRPATH+4]="";
-    char tagh[TIMETAGH_LEN+1]="";
     
     tracet(3,"openfile_: path=%s time=%s\n",file->path,time_str(time,0));
     
@@ -623,32 +707,19 @@ static int openfile_(file_t *file, gtime_t time, char *msg)
         tracet(4,"openfile_: open tag file %s (%s)\n",tagpath,rw);
         
         if (file->mode&STR_MODE_R) {
-            if (fread(&tagh,TIMETAGH_LEN,1,file->fp_tag)==1&&
-                fread(&time_buf,file->size_time,1,file->fp_tag)==1&&
-                fread(&time_sec,sizeof(double),1,file->fp_tag)==1) {
-                memcpy(&file->tick_f,tagh+TIMETAGH_LEN-4,sizeof(file->tick_f));
-                file->time.time=(time_t)time_buf[0];
-                if (file->size_time==8&&sizeof(time_t)==8) {
-                    file->time.time+=((time_t)time_buf[1])<<32;
-                }
-                file->time.sec=time_sec;
+            if ( timetag_parse_header(file->fp_tag, &file->time, &file->tick_f) ) {
                 file->wtime=file->time;
             }
             else {
                 file->tick_f=0;
             }
+#if 0 /* buggy behaviour leading to meaningless file->time value */
             /* adust time to read playback file */
             timeset(file->time);
+#endif
         }
         else {
-            sprintf(tagh,"TIMETAG RTKLIB %s",VER_RTKLIB);
-            memcpy(tagh+TIMETAGH_LEN-4,&file->tick_f,sizeof(file->tick_f));
-            fwrite(&tagh,1,TIMETAGH_LEN,file->fp_tag);
-            fwrite(&file->time,1,sizeof(file->time),file->fp_tag);
-            /* time tag file structure   */
-            /*   HEADER(60)+TICK(4)+TIME(4/8+8)+ */
-            /*   TICK0(4)+FPOS0(4/8)+    */
-            /*   TICK1(4)+FPOS1(4/8)+... */
+            timetag_write_header(file->fp_tag, file->time, file->tick_f);
         }
     }
     else if (file->mode&STR_MODE_W) { /* remove time-tag */
@@ -801,10 +872,9 @@ static int readfile(file_t *file, unsigned char *buff, int nmax, char *msg)
 {
     struct timeval tv={0};
     fd_set rs;
-    unsigned int fpos_buff[2];
-    unsigned int t,tick;
-    int nr=0;
-    size_t fpos;
+    long int fpos, fpos_prev, fpos_tag;
+    unsigned int t, tick, tick_prev, tick_system;
+    int nr = 0;
     
     tracet(4,"readfile: fp=%d nmax=%d\n",file->fp,nmax);
     
@@ -824,74 +894,51 @@ static int readfile(file_t *file, unsigned char *buff, int nmax, char *msg)
     if (file->fp_tag) {
         
         /* target tick */
-        if (file->repmode) { /* slave */
-            t=(unsigned int)(tick_master+file->offset);
+        if ( (file->repmode) && (tick_master > 0) ) { /* slave (with master initialized) */
+            assert( tick_master >= -file->offset );
+            t = (unsigned int) (tick_master + file->offset);
         }
-        else { /* master */
-            t=(unsigned int)((tickget()-file->tick)*file->speed+file->start*1000.0);
+        else { /* master (or slave with no master initialized) */
+            assert( file->start >= 0.0 );
+            assert( file->speed >  0.0 );
+            tick_system = tickget();
+            assert( tick_system >= file->tick );
+            t = (unsigned int) ((tick_system - file->tick) * file->speed + file->start * 1000.0);
         }
-#if 0
-        for (;;) { /* seek file position */
-            if (fread(&tick,sizeof(tick),1,file->fp_tag)<1||
-                fread(fpos_buff,file->size_fpos,1,file->fp_tag)<1) {
-                fseek(file->fp,0,SEEK_END);
-                sprintf(msg,"end");
-                break;
-            }
-            fpos=(size_t)fpos_buff[0];
-            if (file->size_fpos==8&&sizeof(size_t)==8) {
-                fpos+=((size_t)fpos_buff[1]<<32);
-            }
-            /* skip if overload */
-            if (file->repmode||file->speed>0.0) {
-                if ((int)(tick-t)<1) continue;
-            }
-            if (!file->repmode) tick_master=tick;
-            
-            sprintf(msg,"T%+.1fs",(int)tick<0?0.0:(int)tick/1000.0);
-            file->wtime = timeadd(file->time,tick*0.001);
-            
-            /* skip if buffer overflow */
-            if ((int)(fpos-file->fpos)>=nmax) {
-               fseek(file->fp,fpos,SEEK_SET);
-               file->fpos=fpos;
-               return 0;
-            }
-            nmax=(int)(fpos-file->fpos);
-            
-            if (file->repmode||file->speed>0.0) {
-                fseek(file->fp_tag,-(long)(sizeof(tick)+file->size_fpos),SEEK_CUR);
-            }
-            break;
-        }
-#else
+        
+        /* store previous state */
+        fpos_prev = file->fpos;
+        fpos_tag = ftell(file->fp_tag);
+        assert( (fpos_tag >= 0) && "ftell error" );
+
+        tick_prev = timediff(file->wtime, file->time) * 1000;
+        
         /* next file position */
-        if (fread(&tick,sizeof(tick),1,file->fp_tag)<1||
-            fread(fpos_buff,file->size_fpos,1,file->fp_tag)<1) {
-            fseek(file->fp,0,SEEK_END);
-            sprintf(msg,"end");
+        if ( !timetag_parse_line(file->fp_tag, &tick, &fpos) ) {
+            fseek(file->fp, 0, SEEK_END);
+            sprintf(msg, "end");
             return 0;
         }
-        if (!file->repmode) tick_master=tick;
-        fpos=(size_t)fpos_buff[0];
-        if (file->size_fpos==8&&sizeof(size_t)==8) {
-            fpos+=((size_t)fpos_buff[1]<<32);
-        }
-        sprintf(msg,"T%+.1fs",tick<=0?0.0:tick*0.001);
-        file->wtime = timeadd(file->time,tick*0.001);
         
-        if ((int)(tick-t)>0) {
-            fseek(file->fp_tag,-(long)(sizeof(tick)+file->size_fpos),SEEK_CUR);
+        if ( tick > t ) {
+            fseek(file->fp_tag, fpos_tag, SEEK_SET);
+            fpos = fpos_prev;
+            tick = tick_prev;
         }
-        nmax = MIN(nmax,(int)(fpos-file->fpos));
-#endif
+        else {
+            file->wtime = timeadd(file->time, tick*0.001);
+        }
+        
+        if (!file->repmode) tick_master = tick;
+        sprintf(msg, "T%+.1fs", (tick <= 0) ? 0.0 : tick*0.001);
+        nmax = MIN(nmax, fpos - file->fpos);
     }
-    if (nmax>0) {
-        nr=(int)fread(buff,1,nmax,file->fp);
-        file->fpos+=nr;
-        if (nr<=0) sprintf(msg,"end");
+    if (nmax > 0) {
+        nr = (int)fread(buff, 1, nmax, file->fp);
+        file->fpos += nr;
+        if (nr <= 0) sprintf(msg, "end");
     }
-    tracet(5,"readfile: fp=%d nr=%d fpos=%d\n",file->fp,nr,file->fpos);
+    tracet(5,"readfile: fp=%d nr=%d fpos=%li\n",file->fp,nr,file->fpos);
     return nr;
 }
 /* write file ----------------------------------------------------------------*/
@@ -901,7 +948,7 @@ static int writefile(file_t *file, unsigned char *buff, int n, char *msg)
     unsigned int tick=tickget();
     int week1,week2,ns;
     double tow1,tow2,intv;
-    size_t fpos,fpos_tmp;
+    long int fpos, fpos_tmp;
     
     tracet(3,"writefile: fp=%d n=%d\n",file->fp,n);
     
@@ -928,28 +975,27 @@ static int writefile(file_t *file, unsigned char *buff, int n, char *msg)
     if (!file->fp) return 0;
     
     ns=(int)fwrite(buff,1,n,file->fp);
-    fpos=ftell(file->fp);
+    fpos = ftell(file->fp);
+    assert( (fpos >= 0) && "ftell error" );
     fflush(file->fp);
     file->wtime=wtime;
     
     if (file->fp_tmp) {
         fwrite(buff,1,n,file->fp_tmp);
-        fpos_tmp=ftell(file->fp_tmp);
+        fpos_tmp = ftell(file->fp_tmp);
+        assert( (fpos_tmp >= 0) && "ftell error" );
         fflush(file->fp_tmp);
     }
     if (file->fp_tag) {
+        assert( tick > file->tick );
         tick-=file->tick;
-        fwrite(&tick,1,sizeof(tick),file->fp_tag);
-        fwrite(&fpos,1,sizeof(fpos),file->fp_tag);
-        fflush(file->fp_tag);
+        timetag_write_line(file->fp_tag, tick, fpos);
         
         if (file->fp_tag_tmp) {
-            fwrite(&tick,1,sizeof(tick),file->fp_tag_tmp);
-            fwrite(&fpos_tmp,1,sizeof(fpos_tmp),file->fp_tag_tmp);
-            fflush(file->fp_tag_tmp);
+            timetag_write_line(file->fp_tag_tmp, tick, fpos);
         }
     }
-    tracet(5,"writefile: fp=%d ns=%d tick=%5d fpos=%d\n",file->fp,ns,tick,fpos);
+    tracet(5,"writefile: fp=%d ns=%d tick=%5u fpos=%li\n",file->fp,ns,tick,fpos);
     
     return ns;
 }
