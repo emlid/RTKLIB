@@ -764,7 +764,7 @@ static file_t *openfile(const char *path, int mode, char *msg)
 {
     file_t *file;
     gtime_t time,time0={0};
-    double speed=0.0,start=0.0,swapintv=0.0;
+    double speed=1.0,start=0.0,swapintv=0.0;
     char *p;
     int timetag=0,size_fpos=(int)sizeof(size_t),size_time=(int)sizeof(time_t);
     
