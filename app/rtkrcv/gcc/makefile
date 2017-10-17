@@ -1,184 +1,104 @@
+#
 # makefile for rtkrcv
+#
 
-BINDIR = /usr/local/bin
-SRC    = ../../../src
+BINDIR      = /usr/local/bin
 
-OPTIONS = -DENAGLO -DENAQZS -DENACMP -DENAGAL -DENAIRN -DNFREQ=3 -DSVR_REUSEADDR
+# source files
+SRC_DIR_APP = ..
+SRC_DIR_1   = ../../../src
+SRC_DIR_2   = ../../../src/rcv
+SRC_DIRS   := $(SRC_DIR_APP) $(SRC_DIR_1) $(SRC_DIR_2)
 
-CFLAGS_CMN = -Wall -fno-strict-overflow -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) -I.. -DTRACE $(OPTIONS) -g
-LDLIBS  = -lm -lrt -lpthread
+vpath %.c $(SRC_DIRS)
 
-# for beagleboard
-#CTARGET= -mfpu=neon -mfloat-abi=softfp -ffast-math
+SRC_NAMES_APP = rtkrcv.c vt.c
+SRC_NAMES_1   = stream.c rtkcmn.c rinex.c sbas.c preceph.c rcvraw.c \
+    rtcm.c rtcm2.c rtcm3.c rtcm3e.c pntpos.c ephemeris.c ionex.c qzslex.c \
+    lambda.c geoid.c options.c ppp.c ppp_ar.c ppp_corr.c tides.c \
+    rtksvr.c rtkpos.c erb.c solution.c
+SRC_NAMES_2   = novatel.c ss2.c ublox.c crescent.c skytraq.c gw10.c javad.c nvs.c \
+    binex.c rt17.c tersus.c septentrio.c cmr.c
+SRC_NAMES    := $(SRC_NAMES_APP) $(SRC_NAMES_1) $(SRC_NAMES_2) 
 
-OBJS = rtkrcv.o vt.o rtkcmn.o rtksvr.o rtkpos.o geoid.o erb.o solution.o lambda.o \
-    sbas.o stream.o rcvraw.o rtcm.o preceph.o options.o pntpos.o ppp.o ppp_ar.o \
-    novatel.o ublox.o ss2.o crescent.o skytraq.o gw10.o javad.o nvs.o binex.o \
-    rt17.o tersus.o ephemeris.o rinex.o ionex.o rtcm2.o rtcm3.o rtcm3e.o qzslex.o \
-    ppp_corr.o tides.o septentrio.o cmr.o
+# object files
+OBJ_NAMES    := $(SRC_NAMES:%.c=%.o)
+
+# common compile options
+CC := gcc
+INCLUDE := -I$(SRC_DIR_1) -I$(SRC_DIR_APP)
+OPTIONS := -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DENAIRN -DNFREQ=3 -DSVR_REUSEADDR
+CFLAGS_CMN := -ansi -pedantic -Wall -Wno-unused-but-set-variable -fno-strict-overflow $(INCLUDE) $(OPTIONS) -g
+LDLIBS  := -lm -lrt -lpthread
+EXEC    := rtkrcv
+
+# target-specific options
+REL_OPTS    = -O3 -DNDEBUG
+PREREL_OPTS = -O3
+DBG_OPTS    = -O0
+
+####################################################################
+##### release / prerelease / debug targets 
 
 .DEFAULT_GOAL := release
-.PHONY: mkdir
+.PHONY: all release prerelease debug mkdir install clean
 
-RELOPTS    = -O3 -DNDEBUG
-PRERELOPTS = -O3
-DBGOPTS    = -O0
+all: release
 
-all:     release
+REL_DIR    = ./release
+PREREL_DIR = ./prerelease
+DBG_DIR    = ./debug
 
-release: CFLAGS  = $(CFLAGS_CMN) $(RELOPTS)
-release: EXEC    = rtkrcv
-release: OBJ_DIR = ./release
-release: build
+REL_EXEC    := $(EXEC)
+PREREL_EXEC := $(addsuffix _prerel,$(EXEC))
+DBG_EXEC    := $(addsuffix _dbg,$(EXEC))
 
-prerelease: CFLAGS  = $(CFLAGS_CMN) $(PRERELOPTS)
-prerelease: EXEC    = rtkrcv_prerel
-prerelease: OBJ_DIR = ./prerelease
-prerelease: build
+release: CFLAGS  := $(CFLAGS_CMN) $(REL_OPTS)
+release: OBJ_DIR := $(REL_DIR)
+release: mkdir
+release: $(REL_EXEC)
 
-debug: CFLAGS  = $(CFLAGS_CMN) $(DBGOPTS)
-debug: EXEC    = rtkrcv_dbg
-debug: OBJ_DIR = ./debug
-debug: build
+prerelease: CFLAGS  := $(CFLAGS_CMN) $(PREREL_OPTS)
+prerelease: OBJ_DIR := $(PREREL_DIR)
+prerelease: mkdir
+prerelease: $(PREREL_EXEC)
 
-build: mkdir $(OBJS)
-	$(CC) -o $(EXEC) $(OBJS:%.o=$(OBJ_DIR)/%.o) $(LDLIBS)
+debug: CFLAGS  := $(CFLAGS_CMN) $(DBG_OPTS)
+debug: OBJ_DIR := $(DBG_DIR)
+debug: mkdir
+debug: $(DBG_EXEC)
+
+####################################################################
+
+#release
+$(REL_EXEC): $(addprefix $(REL_DIR)/,$(OBJ_NAMES))
+	$(CC) $^ -o $@ $(LDLIBS)
+
+$(REL_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+#prerelease
+$(PREREL_EXEC): $(addprefix $(PREREL_DIR)/,$(OBJ_NAMES))
+	$(CC) $^ -o $@ $(LDLIBS)
+
+$(PREREL_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# debug
+$(DBG_EXEC): $(addprefix $(DBG_DIR)/,$(OBJ_NAMES))
+	$(CC) $^ -o $@ $(LDLIBS) 
+
+$(DBG_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+####################################################################
 
 mkdir: 
-	mkdir -p $(OBJ_DIR)
-
-rtkrcv.o   : ../rtkrcv.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) ../rtkrcv.c
-vt.o       : ../vt.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) ../vt.c
-rtkcmn.o   : $(SRC)/rtkcmn.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rtkcmn.c
-rtksvr.o   : $(SRC)/rtksvr.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rtksvr.c
-rtkpos.o   : $(SRC)/rtkpos.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rtkpos.c
-geoid.o    : $(SRC)/geoid.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/geoid.c
-erb.o      : $(SRC)/erb.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/erb.c
-solution.o : $(SRC)/solution.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/solution.c
-lambda.o   : $(SRC)/lambda.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/lambda.c
-sbas.o     : $(SRC)/sbas.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/sbas.c
-stream.o   : $(SRC)/stream.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/stream.c
-rcvraw.o : $(SRC)/rcvraw.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcvraw.c
-rtcm.o     : $(SRC)/rtcm.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rtcm.c
-rtcm2.o    : $(SRC)/rtcm2.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rtcm2.c
-rtcm3.o    : $(SRC)/rtcm3.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rtcm3.c
-rtcm3e.o   : $(SRC)/rtcm3e.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rtcm3e.c
-preceph.o  : $(SRC)/preceph.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/preceph.c
-options.o  : $(SRC)/options.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/options.c
-pntpos.o   : $(SRC)/pntpos.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/pntpos.c
-ppp.o      : $(SRC)/ppp.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/ppp.c
-ppp_ar.o   : $(SRC)/ppp_ar.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/ppp_ar.c
-novatel.o  : $(SRC)/rcv/novatel.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/novatel.c
-ublox.o    : $(SRC)/rcv/ublox.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/ublox.c
-ss2.o      : $(SRC)/rcv/ss2.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/ss2.c
-crescent.o : $(SRC)/rcv/crescent.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/crescent.c
-skytraq.o  : $(SRC)/rcv/skytraq.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/skytraq.c
-gw10.o     : $(SRC)/rcv/gw10.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/gw10.c
-javad.o    : $(SRC)/rcv/javad.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/javad.c
-nvs.o      : $(SRC)/rcv/nvs.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/nvs.c
-binex.o    : $(SRC)/rcv/binex.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/binex.c
-rt17.o     : $(SRC)/rcv/rt17.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/rt17.c
-tersus.o   : $(SRC)/rcv/tersus.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/tersus.c
-ephemeris.o: $(SRC)/ephemeris.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/ephemeris.c
-rinex.o    : $(SRC)/rinex.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rinex.c
-ionex.o    : $(SRC)/ionex.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/ionex.c
-qzslex.o   : $(SRC)/qzslex.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/qzslex.c
-tides.o    : $(SRC)/tides.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/tides.c
-ppp_corr.o : $(SRC)/ppp_corr.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/ppp_corr.c
-septentrio.o: $(SRC)/rcv/septentrio.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/septentrio.c
-cmr.o      : $(SRC)/rcv/cmr.c
-	$(CC) -o $(OBJ_DIR)/$@ -c $(CFLAGS) $(SRC)/rcv/cmr.c
-
-rtkrcv.o   : $(SRC)/rtklib.h ../vt.h
-rtkcmn.o   : $(SRC)/rtklib.h
-rtksvr.o   : $(SRC)/rtklib.h
-rtkpos.o   : $(SRC)/rtklib.h
-geoid.o    : $(SRC)/rtklib.h
-erb.o      : $(SRC)/rtklib.h
-solution.o : $(SRC)/rtklib.h
-lambda.o   : $(SRC)/rtklib.h
-sbas.o     : $(SRC)/rtklib.h
-rcvraw.o   : $(SRC)/rtklib.h
-rtcm.o     : $(SRC)/rtklib.h
-rtcm2.o    : $(SRC)/rtklib.h
-rtcm3.o    : $(SRC)/rtklib.h
-rtcm3e.o   : $(SRC)/rtklib.h
-preceph.o  : $(SRC)/rtklib.h
-options.o  : $(SRC)/rtklib.h
-pntpos.o   : $(SRC)/rtklib.h
-ppp.o      : $(SRC)/rtklib.h
-novatel.o  : $(SRC)/rtklib.h
-ublox.o    : $(SRC)/rtklib.h
-ss2.o      : $(SRC)/rtklib.h
-crescent.o : $(SRC)/rtklib.h
-skytraq.o  : $(SRC)/rtklib.h
-gw10.o     : $(SRC)/rtklib.h
-javad.o    : $(SRC)/rtklib.h
-nvs.o      : $(SRC)/rtklib.h
-binex.o    : $(SRC)/rtklib.h
-rt17.o     : $(SRC)/rtklib.h
-tersus.o     : $(SRC)/rtklib.h
-septentrio.o: $(SRC)/rtklib.h
-cmr.o      : $(SRC)/rtklib.h
-ephemeris.o: $(SRC)/rtklib.h
-rinex.o    : $(SRC)/rtklib.h
-ionex.o    : $(SRC)/rtklib.h
-qzslex.o   : $(SRC)/rtklib.h
-tides.o    : $(SRC)/rtklib.h
-ppp_corr.o : $(SRC)/rtklib.h
+	@mkdir -p $(OBJ_DIR)
 
 install:
-	cp rtkrcv $(BINDIR)
-
-test1:
-	./$(EXEC) -t 4 -m 52001 -t 4
-
-test2:
-	./$(EXEC) -p 2105 -m 52001
-
-test3:
-	./$(EXEC) -o ../rtk_pb.conf
+	@cp $(REL_EXEC) $(BINDIR)
 
 clean:
-	rm -f rtkrcv rtkrcv_prerel rtkrcv_dbg rtkrcv.nav *.o *.out *.trace
-	rm -rf ./release ./prerelease ./debug
-
+	@rm -f $(REL_EXEC) $(PREREL_EXEC) $(DBG_EXEC) *.o
+	@rm -rf $(REL_DIR) $(PREREL_DIR) $(DBG_DIR)

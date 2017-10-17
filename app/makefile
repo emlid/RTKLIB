@@ -7,6 +7,7 @@ IERS_DIR = ../lib/iers
 DIRS     = pos2kml str2str rnx2rtkp convbin rtkrcv
 
 .DEFAULT_GOAL := release
+.PHONY: all release prerelease debug build install clean 
 
 all:     release
 
