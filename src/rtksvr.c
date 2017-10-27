@@ -42,7 +42,11 @@
 
 static const char rcsid[]="$Id:$";
 
-#define MIN_INT_RESET   30000   /* mininum interval of reset command (ms) */
+#define MIN_INT_RESET               30000   /* mininum interval of reset command (ms) */
+#define NMEAREQ_SEND_NONE           0       /* don't send nmea request */
+#define NMEAREQ_SEND_LLH            1       /* nmea request with llh position */
+#define NMEAREQ_SEND_SINGLE         2       /* nmea request with single solution */
+#define NMEAREQ_SEND_RESET_SINGLE   3       /* send reset and nmea request with single solution */
 
 /* write solution header to output stream ------------------------------------*/
 static void writesolhead(stream_t *stream, const solopt_t *solopt)
@@ -465,21 +469,22 @@ static void send_nmea(rtksvr_t *svr, unsigned int *tickreset)
 
     if (svr->stream[1].state!=1) return;
 
-    if (svr->nmeareq==1) { /* lat-lon-hgt mode */
+    if (svr->nmeareq == NMEAREQ_SEND_LLH) { /* lat-lon-hgt mode */
         sol_nmea.stat=SOLQ_SINGLE;
         sol_nmea.time=utc2gpst(timeget());
         matcpy(sol_nmea.rr,svr->nmeapos,3,1);
         strsendnmea(svr->stream+1,&sol_nmea);
     }
-    else if (svr->nmeareq==2) { /* single-solution mode */
-        if (norm(svr->rtk.sol.rr,3)<=0.0) return;
+    else if (svr->nmeareq == NMEAREQ_SEND_SINGLE) { /* single-solution mode */
+        if (norm(svr->rtk.sol.rr,3)<=0.0 || svr->rtk.sol.stat == SOLQ_NONE)
+            return;
         sol_nmea.stat=SOLQ_SINGLE;
         sol_nmea.time=utc2gpst(timeget());
         sol_nmea.ns = svr->rtk.sol.ns;
         matcpy(sol_nmea.rr,svr->rtk.sol.rr,3,1);
         strsendnmea(svr->stream+1,&sol_nmea);
     }
-    else if (svr->nmeareq==3) { /* reset-and-single-sol mode */
+    else if (svr->nmeareq == NMEAREQ_SEND_RESET_SINGLE) { /* reset-and-single-sol mode */
 
         /* send reset command if baseline over threshold */
         bl=baseline_len(&svr->rtk);
@@ -937,6 +942,7 @@ static void *rtksvrthread(void *arg)
     gtime_t time_base, time_rover, time_last;
     double maxage = svr->rtk.opt.maxtdiff;
     int    navsys = svr->rtk.opt.navsys; 
+    int ntrip_single_required = 0;
 
     /* This "fake" solution structure is passed to strsendnmea
      * when inpstr2-nmeareq is set to latlon*/
@@ -953,11 +959,20 @@ static void *rtksvrthread(void *arg)
     ticknmea=tick1hz=svr->tick-1000;
     tickreset=svr->tick-MIN_INT_RESET;
     
+    if (svr->nmeareq == NMEAREQ_SEND_SINGLE) {
+        ntrip_single_required = 1;
+    }
+
     for (cycle=0;svr->state;cycle++) {
         tick=tickget();
-
+        
         for (i=0;i<3;i++) {
             p=svr->buff[i]+svr->nb[i]; q=svr->buff[i]+svr->buffsize;
+
+            /* don't connect if single solution is required but absent */
+            if (svr->stream[i].type == STR_NTRIPCLI && ntrip_single_required) 
+                if (svr->rtk.sol.stat == SOLQ_NONE) 
+                    continue;
 
             /* read receiver raw/rtcm data from input stream */
             if ((n=strread(svr->stream+i,p,q-p))<=0) {
@@ -1120,7 +1135,7 @@ extern int rtksvrinit(rtksvr_t *svr)
 
     tracet(3,"rtksvrinit:\n");
 
-    svr->state=svr->cycle=svr->nmeacycle=svr->nmeareq=0;
+    svr->state=svr->cycle=svr->nmeacycle=svr->nmeareq=NMEAREQ_SEND_NONE;
     for (i=0;i<3;i++) svr->nmeapos[i]=0.0;
     svr->buffsize=0;
     for (i=0;i<3;i++) svr->format[i]=0;
