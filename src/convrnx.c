@@ -37,7 +37,7 @@ static const char rcsid[]="$Id:$";
 #define NOUTFILE        9       /* number of output files */
 #define TSTARTMARGIN    60.0    /* time margin for file name replacement */
 #define STR_DELAY       25.0    /* ms */
-#define TINT_MIN_VALUE   1e-3	/* min value for time interval */
+#define TINT_MIN_VALUE  1e-3   /* min value for time interval */
 
 /* type definition -----------------------------------------------------------*/
 
@@ -746,7 +746,7 @@ static int openfile(FILE **ofp, char *files[], const char *file,
         /* create directory if not exist */
         createdir(path);
         
-        if (!(ofp[i]=fopen(path,"w"))) {
+        if (!(ofp[i]=fopen(path,"w+"))) {
             showmsg("file open error: %s",path);
             for (i--;i>=0;i--) if (ofp[i]) fclose(ofp[i]);
             return 0;
@@ -1333,6 +1333,12 @@ static int convrnx_s(int sess, int format, rnxopt_t *opt, const char *file,
     else if (format==STRFMT_CMR) {
         raw2opt(&str->raw,opt);
     }
+    
+    if ( ofp[0] != NULL ) {
+            
+            rinex3_sort_epochs(ofp[0]);
+    }
+    
     /* close output files */
     closefile(ofp,opt,str->nav);
     

@@ -2711,3 +2711,104 @@ extern int outrnxinavh(FILE *fp, const rnxopt_t *opt, const nav_t *nav)
     }
     return fprintf(fp,"%60s%-20s\n","","END OF HEADER")!=EOF;
 }
+
+/* ------------------------------------------------------------------------- */
+#define MAXEPOCHS  1000000
+#define MAXRNXBUFF 8192
+
+typedef struct {
+    
+    long int fpos_start;
+    long int fpos_end;
+    gtime_t  time;
+    
+} rinex_record_info_t;
+
+/*  */
+static int epoch_compare_by_time(const void *epoch1, const void *epoch2)
+{
+    rinex_record_info_t *epoch1_ = (rinex_record_info_t *) epoch1;
+    rinex_record_info_t *epoch2_ = (rinex_record_info_t *) epoch2;
+    
+    return (timediff(epoch1_->time, epoch2_->time) >= 0.0) ? 1 : -1;
+}
+
+/*  */
+extern void rinex3_sort_epochs(FILE *rinex_fp)
+{
+    FILE *rinex_tmp_fp;
+    rinex_record_info_t *epoch = malloc(MAXEPOCHS * sizeof(rinex_record_info_t));
+    unsigned long int i, n_epochs = 0;
+    char line[MAXRNXLEN];
+    char buff[MAXRNXBUFF];
+    int flag, n_sats, len, len_read;
+    double version_min = 3.00;
+    
+    assert( rinex_fp != NULL );
+    
+    rewind(rinex_fp);
+    
+    /* skip header */
+    while ( fgets(line, MAXRNXLEN, rinex_fp) ) {
+        
+        if ( strstr(line, "END OF HEADER") ) break;
+    }
+    
+    /* read epochs */
+    while ( fgets(line, MAXRNXLEN, rinex_fp) ) {
+        
+        if ( strstr(line, ">") ) {
+            
+            epoch[n_epochs].fpos_start = ftell(rinex_fp) - strlen(line);
+            if ( n_epochs > 0 ) epoch[n_epochs-1].fpos_end = epoch[n_epochs].fpos_start;
+            decode_obsepoch(rinex_fp, line, version_min, &epoch[n_epochs].time, &flag, &n_sats); /* read time */
+            assert( (n_epochs < MAXEPOCHS) && "rinex file is too big" );
+            n_epochs++;
+        }
+    }
+    if ( n_epochs <= 0 ) { /* no obs data */
+        
+        return;
+    }
+    epoch[n_epochs-1].fpos_end = ftell(rinex_fp);
+    
+    rinex_tmp_fp = tmpfile();
+    assert( (rinex_tmp_fp != NULL) && "tmpfile error" );
+    
+    /* copy rinex header */
+    rewind(rinex_fp);
+    
+    len = epoch[0].fpos_start;
+    len_read = fread(buff, sizeof(char), len, rinex_fp);
+    assert( (len_read == len) && "fread error" );
+    
+    fwrite(buff, sizeof(char), len, rinex_tmp_fp);
+    fflush(rinex_tmp_fp);
+    
+    qsort(epoch, n_epochs, sizeof(rinex_record_info_t), epoch_compare_by_time);
+    
+    /* write sorted data to tmp file */
+    for (i = 0; i < n_epochs; i++) {
+        
+        fseek(rinex_fp, epoch[i].fpos_start, SEEK_SET);
+        len = epoch[i].fpos_end - epoch[i].fpos_start;
+        len_read = fread(buff, sizeof(char), len, rinex_fp);
+        assert( (len_read == len) && "fread error" );
+        
+        fwrite(buff, sizeof(char), len, rinex_tmp_fp);
+        fflush(rinex_tmp_fp);
+    }
+    
+    rewind(rinex_fp);
+    rewind(rinex_tmp_fp);
+    
+    /* rewrite rinex file */
+    while ( fgets(line, MAXRNXLEN, rinex_tmp_fp) ) {
+        
+        fputs(line, rinex_fp);
+        fflush(rinex_fp);
+    }
+    
+    free(epoch);
+    fclose(rinex_tmp_fp);
+}

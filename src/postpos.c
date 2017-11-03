@@ -366,7 +366,9 @@ static sol_t fillsoltm(const sol_t solold, const sol_t solnew, const gtime_t tm)
     t1 = solold.time;
     t2 = solnew.time;
     sol.time = tm;
-
+    
+    assert( (timediff(tm, t1) * timediff(t2, tm)) >= 0.0 ); /* no extrapolation */
+    
     for (i=0;i<6;i++)
     {
         sol.rr[i] = solold.rr[i] + timediff(tm,t1) / timediff(t2,t1) * (solnew.rr[i] - solold.rr[i]);
