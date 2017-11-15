@@ -111,16 +111,16 @@ extern int init_rtcm(rtcm_t *rtcm)
     /* reallocate memory for observation and ephemris buffer */
     if (!(rtcm->obs.data=(obsd_t *)malloc(sizeof(obsd_t)*MAXOBS))||
         !(rtcm->nav.eph =(eph_t  *)malloc(sizeof(eph_t )*MAXSAT))||
-        !(rtcm->nav.geph=(geph_t *)malloc(sizeof(geph_t)*MAXPRNGLO))) {
+        !(rtcm->nav.geph=(geph_t *)malloc(sizeof(geph_t)*MAXPRNGLO*2))) {
         free_rtcm(rtcm);
         return 0;
     }
     rtcm->obs.n=0;
     rtcm->nav.n=MAXSAT;
-    rtcm->nav.ng=MAXPRNGLO;
+    rtcm->nav.ng=MAXPRNGLO*2;
     for (i=0;i<MAXOBS   ;i++) rtcm->obs.data[i]=data0;
     for (i=0;i<MAXSAT   ;i++) rtcm->nav.eph [i]=eph0;
-    for (i=0;i<MAXPRNGLO;i++) rtcm->nav.geph[i]=geph0;
+    for (i=0;i<MAXPRNGLO*2;i++) rtcm->nav.geph[i]=geph0;
     return 1;
 }
 /* free rtcm control ----------------------------------------------------------

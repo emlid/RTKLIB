@@ -266,6 +266,11 @@ extern "C" {
 #define MAXSOLRTK   4                   /* max number of solution streams in RTK server */
 #endif
 
+#define ROVER_STREAM 0                    /* number of rover stream in RTK server */
+#define BASE_STREAM  1                   /* number of base stream in RTK server */
+#define CORR_STREAM  2                   /* number of correction stream in RTK server */
+#define N_INPUTSTR   3                   /* number of input streams in RTK server */
+
 #define MAXSBSMSG   32                  /* max number of SBAS msg in RTK server */
 #define MAXSOLMSG   8191                /* max length of solution message */
 #define MAXRAWLEN   4096                /* max length of receiver raw message */
@@ -1403,25 +1408,25 @@ typedef struct {        /* RTK server type */
     int nmeareq;        /* NMEA request (0:no,1:nmeapos,2:single sol) */
     double nmeapos[3];  /* NMEA request position (ecef) (m) */
     int buffsize;       /* input buffer size (bytes) */
-    int format[3];      /* input format {rov,base,corr} */
+    int format[N_INPUTSTR];      /* input format {rov,base,corr} */
     solopt_t solopt[MAXSOLRTK]; /* output solution options {sol1,sol2} */
     int navsel;         /* ephemeris select (0:all,1:rover,2:base,3:corr) */
     int nsbs;           /* number of sbas message */
     int nsol;           /* number of solution buffer */
     rtk_t rtk;          /* RTK control/result struct */
-    int nb [3];         /* bytes in input buffers {rov,base} */
+    int nb [N_INPUTSTR];         /* bytes in input buffers {rov,base,corr} */
     int nsb[MAXSOLRTK];         /* bytes in soulution buffers */
-    int npb[3];         /* bytes in input peek buffers */
-    unsigned char *buff[3]; /* input buffers {rov,base,corr} */
+    int npb[N_INPUTSTR];         /* bytes in input peek buffers */
+    unsigned char *buff[N_INPUTSTR]; /* input buffers {rov,base,corr} */
     unsigned char *sbuf[MAXSOLRTK]; /* output buffers {sol1,sol2} */
-    unsigned char *pbuf[3]; /* peek buffers {rov,base,corr} */
+    unsigned char *pbuf[N_INPUTSTR]; /* peek buffers {rov,base,corr} */
     sol_t solbuf[MAXSOLBUF]; /* solution buffer */
-    unsigned int nmsg[3][10]; /* input message counts */
-    raw_t  raw [3];     /* receiver raw control {rov,base,corr} */
-    rtcm_t rtcm[3];     /* RTCM control {rov,base,corr} */
-    gtime_t ftime[3];   /* download time {rov,base,corr} */
-    char files[3][MAXSTRPATH]; /* download paths {rov,base,corr} */
-    obs_t obs[3][MAXOBSBUF]; /* observation data {rov,base,corr} */
+    unsigned int nmsg[N_INPUTSTR][10]; /* input message counts */
+    raw_t  raw [N_INPUTSTR];     /* receiver raw control {rov,base,corr} */
+    rtcm_t rtcm[N_INPUTSTR];     /* RTCM control {rov,base,corr} */
+    gtime_t ftime[N_INPUTSTR];   /* download time {rov,base,corr} */
+    char files[N_INPUTSTR][MAXSTRPATH]; /* download paths {rov,base,corr} */
+    obs_t obs[N_INPUTSTR][MAXOBSBUF]; /* observation data {rov,base,corr} */
     obs_queue_t *base_queue; /* several consecutive base observations to find optimum */
     nav_t nav;          /* navigation data */
     sbsmsg_t sbsmsg[MAXSBSMSG]; /* SBAS message buffer */
@@ -1433,7 +1438,7 @@ typedef struct {        /* RTK server type */
     int prcout;         /* missing observation data count */
     int nave;           /* number of averaging base pos */
     double rb_ave[3];   /* averaging base pos */
-    char cmds_periodic[3][MAXRCVCMD]; /* periodic commands */
+    char cmds_periodic[N_INPUTSTR][MAXRCVCMD]; /* periodic commands */
     char cmd_reset[MAXRCVCMD]; /* reset command */
     double bl_reset;    /* baseline length to reset (km) */
     lock_t lock;        /* lock flag */
