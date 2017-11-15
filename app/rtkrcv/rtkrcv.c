@@ -145,7 +145,7 @@ static const char *helptxt[]={
     "solution [cycle]      : show solution",
     "status [cycle]        : show rtk status",
     "satellite [-n] [cycle]: show satellite status",
-    "observ [-n] [cycle]   : show observation data",
+    "observ [-n][-v][cycle]: show observation data (-v for actually used sats",
     "navidata [cycle]      : show navigation data",
     "stream [cycle]        : show stream status",
     "error                 : show error/warning messages",
@@ -823,41 +823,75 @@ static void prsatellite(vt_t *vt, int nf)
         vt_printf(vt,"\n");
     }
 }
+static int verify_obs(ssat_t * ssat, int sat, int solstat, int nfreq) {
+    if (solstat == SOLQ_NONE) 
+        return 0;
+    if (solstat == SOLQ_SINGLE) {
+        return ssat[sat].vs;
+    }
+    else {
+        return ssat[sat].vsat[nfreq];
+    }
+}
 /* print observation data ----------------------------------------------------*/
-static void probserv(vt_t *vt, int nf)
+static void probserv(vt_t *vt, int nf, int only_valid)
 {
-    obsd_t obs[MAXOBS*2];
-    char tstr[64],id[32];
-    int i,j,n=0,frq[]={1,2,5,7,8,6,9};
+    obsd_t obs[MAXOBS * 2];
+    ssat_t *ssat;
+    char tstr[64], sat_id[32];
+    int i, j, n = 0, frq[] = {1, 2, 5, 7, 8, 6, 9}, id, f;
+    int n_excluded_freq, sat, solstat;
+    trace(4, "probserv:\n");
 
-    trace(4,"probserv:\n");
+    if (nf <= 0 || nf > NFREQ) 
+        nf = NFREQ;
 
     rtksvrlock(&svr);
-    for (i=0;i<svr.obs[0][0].n&&n<MAXOBS*2;i++) {
-        obs[n++]=svr.obs[0][0].data[i];
-    }
-    for (i=0;i<svr.obs[1][0].n&&n<MAXOBS*2;i++) {
-        obs[n++]=svr.obs[1][0].data[i];
+    solstat = svr.rtk.sol.stat;
+    ssat = svr.rtk.ssat;
+
+    /* id: 0 - rover, 1 - base */
+    for (id = 0; id < 2; id++) {
+        for (i = 0; i < svr.obs[id][0].n && n < MAXOBS * 2; i++) { 
+        
+            obs[n++] = svr.obs[id][0].data[i];
+
+            if (only_valid) {
+                sat = obs[n - 1].sat - 1;
+                n_excluded_freq = 0;
+                for (f = 0; f < nf; f++) {
+                    if (!verify_obs(ssat, sat, solstat, f)) {
+                        n_excluded_freq++;
+                    }
+                }
+
+                /* exclude obs if no valid measurements for all frequencies */ 
+                if (n_excluded_freq == nf) {
+                    n--;
+                }
+            }
+        }
     }
     rtksvrunlock(&svr);
 
-    if (nf<=0||nf>NFREQ) nf=NFREQ;
-    vt_printf(vt,"\n%s%-22s %3s %s",ESC_BOLD,"      TIME(GPST)","SAT","R");
-    for (i=0;i<nf;i++) vt_printf(vt,"        P%d(m)" ,frq[i]);
-    for (i=0;i<nf;i++) vt_printf(vt,"       L%d(cyc)",frq[i]);
-    for (i=0;i<nf;i++) vt_printf(vt,"  D%d(Hz)"      ,frq[i]);
-    for (i=0;i<nf;i++) vt_printf(vt," S%d"           ,frq[i]);
-    vt_printf(vt," LLI%s\n",ESC_RESET);
-    for (i=0;i<n;i++) {
-        time2str(obs[i].time,tstr,2);
-        satno2id(obs[i].sat,id);
-        vt_printf(vt,"%s %3s %d",tstr,id,obs[i].rcv);
-        for (j=0;j<nf;j++) vt_printf(vt,"%13.3f",obs[i].P[j]);
-        for (j=0;j<nf;j++) vt_printf(vt,"%14.3f",obs[i].L[j]);
-        for (j=0;j<nf;j++) vt_printf(vt,"%8.1f" ,obs[i].D[j]);
-        for (j=0;j<nf;j++) vt_printf(vt,"%3.0f" ,obs[i].SNR[j]*0.25);
-        for (j=0;j<nf;j++) vt_printf(vt,"%2d"   ,obs[i].LLI[j]);
-        vt_printf(vt,"\n");
+    vt_printf(vt, "\n%s%-22s %3s %s", ESC_BOLD, "      TIME(GPST)", "SAT", "R");
+    for (i = 0; i < nf; i++) vt_printf(vt, "        P%d(m)", frq[i]);
+    for (i = 0; i < nf; i++) vt_printf(vt, "       L%d(cyc)", frq[i]);
+    for (i = 0; i < nf; i++) vt_printf(vt, "  D%d(Hz)", frq[i]);
+    for (i = 0; i < nf; i++) vt_printf(vt, " S%d", frq[i]);
+    vt_printf(vt, " LLI%s\n", ESC_RESET);
+
+    for (i = 0; i < n; i++)
+    {
+        time2str(obs[i].time, tstr, 2);
+        satno2id(obs[i].sat, sat_id);
+        vt_printf(vt, "%s %3s %d", tstr, sat_id, obs[i].rcv);
+        for (j = 0; j < nf; j++) vt_printf(vt, "%13.3f", obs[i].P[j]);
+        for (j = 0; j < nf; j++) vt_printf(vt, "%14.3f", obs[i].L[j]);
+        for (j = 0; j < nf; j++) vt_printf(vt, "%8.1f", obs[i].D[j]);
+        for (j = 0; j < nf; j++) vt_printf(vt, "%3.0f", obs[i].SNR[j] * 0.25);
+        for (j = 0; j < nf; j++) vt_printf(vt, "%2d", obs[i].LLI[j]);
+        vt_printf(vt, "\n");
     }
 }
 /* print navigation data -----------------------------------------------------*/
@@ -1049,19 +1083,28 @@ static void cmd_satellite(char **args, int narg, vt_t *vt)
 /* observ command ------------------------------------------------------------*/
 static void cmd_observ(char **args, int narg, vt_t *vt)
 {
-    int i,nf=2,cycle=0;
+    int i, nf = prcopt.nf, cycle = 0, only_valid = 0;
 
-    trace(3,"cmd_observ:\n");
+    trace(3, "cmd_observ:\n");
 
-    for (i=1;i<narg;i++) {
-        if (sscanf(args[i],"-%d",&nf)<1) cycle=(int)(atof(args[i])*1000.0);
+    for (i = 1; i < narg; i++)
+    {
+        if (sscanf(args[i], "-%d", &nf) < 1)
+            cycle = (int)(atof(args[i]) * 1000.0);
+        if (!strcmp(args[i], "-v")) 
+            only_valid = 1;
     }
-    while (!vt_chkbrk(vt)) {
-        if (cycle>0) vt_printf(vt,ESC_CLEAR);
-        probserv(vt,nf);
-        if (cycle>0) sleepms(cycle); else return;
+    while (!vt_chkbrk(vt))
+    {
+        if (cycle > 0) vt_printf(vt, ESC_CLEAR);
+        probserv(vt, nf, only_valid);
+
+        if (cycle > 0) 
+            sleepms(cycle);
+        else 
+            return;
     }
-    vt_printf(vt,"\n");
+    vt_printf(vt, "\n");
 }
 /* navidata command ----------------------------------------------------------*/
 static void cmd_navidata(char **args, int narg, vt_t *vt)
