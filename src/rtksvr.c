@@ -42,7 +42,11 @@
 
 static const char rcsid[]="$Id:$";
 
-#define MIN_INT_RESET   30000   /* mininum interval of reset command (ms) */
+#define MIN_INT_RESET               30000   /* mininum interval of reset command (ms) */
+#define NMEAREQ_SEND_NONE           0       /* don't send nmea request */
+#define NMEAREQ_SEND_LLH            1       /* nmea request with llh position */
+#define NMEAREQ_SEND_SINGLE         2       /* nmea request with single solution */
+#define NMEAREQ_SEND_RESET_SINGLE   3       /* send reset and nmea request with single solution */
 
 /* write solution header to output stream ------------------------------------*/
 static void writesolhead(stream_t *stream, const solopt_t *solopt)
@@ -475,13 +479,13 @@ static void send_nmea(rtksvr_t *svr, unsigned int *tickreset)
 
     if (svr->stream[1].state!=1) return;
 
-    if (svr->nmeareq==1) { /* lat-lon-hgt mode */
+    if (svr->nmeareq == NMEAREQ_SEND_LLH) { /* lat-lon-hgt mode */
         sol_nmea.stat=SOLQ_SINGLE;
         sol_nmea.time=utc2gpst(timeget());
         matcpy(sol_nmea.rr,svr->nmeapos,3,1);
         strsendnmea(svr->stream+1,&sol_nmea);
     }
-    else if (svr->nmeareq==2) { /* single-solution mode */
+    else if (svr->nmeareq == NMEAREQ_SEND_SINGLE) { /* single-solution mode */
         if (norm(svr->rtk.sol.rr,3)<=0.0) return;
         sol_nmea.stat=SOLQ_SINGLE;
         sol_nmea.time=utc2gpst(timeget());
@@ -489,7 +493,7 @@ static void send_nmea(rtksvr_t *svr, unsigned int *tickreset)
         matcpy(sol_nmea.rr,svr->rtk.sol.rr,3,1);
         strsendnmea(svr->stream+1,&sol_nmea);
     }
-    else if (svr->nmeareq==3) { /* reset-and-single-sol mode */
+    else if (svr->nmeareq == NMEAREQ_SEND_RESET_SINGLE) { /* reset-and-single-sol mode */
 
         /* send reset command if baseline over threshold */
         bl=baseline_len(&svr->rtk);
@@ -943,10 +947,11 @@ static void *rtksvrthread(void *arg)
     unsigned int tick,ticknmea,tick1hz,tickreset;
     unsigned char *p,*q;
     char msg[128];
-    int i,j,n,fobs[3]={0},cycle,cputime;
+    int i,j,n,fobs[3]={0},cycle,cputime, stream_number;
     gtime_t time_base, time_rover, time_last;
     double maxage = svr->rtk.opt.maxtdiff;
     int    navsys = svr->rtk.opt.navsys; 
+    int ntrip_single_required = 0;
 
     /* This "fake" solution structure is passed to strsendnmea
      * when inpstr2-nmeareq is set to latlon*/
@@ -963,41 +968,54 @@ static void *rtksvrthread(void *arg)
     ticknmea=tick1hz=svr->tick-1000;
     tickreset=svr->tick-MIN_INT_RESET;
     
+    if (svr->nmeareq == NMEAREQ_SEND_SINGLE) {
+        ntrip_single_required = 1;
+    }
+
     for (cycle=0;svr->state;cycle++) {
         tick=tickget();
 
-        for (i=0;i<N_INPUTSTR;i++) {
-            p=svr->buff[i]+svr->nb[i]; q=svr->buff[i]+svr->buffsize;
+        for (stream_number = 0; stream_number < N_INPUTSTR; stream_number++) {
+            p = svr->buff[stream_number] + svr->nb[stream_number];
+            q = svr->buff[stream_number] + svr->buffsize;
+
+            /* don't connect if single solution is required but absent */
+            if (svr->stream[stream_number].type == STR_NTRIPCLI && ntrip_single_required) 
+                if (i == BASE_STREAM && svr->rtk.sol.stat == SOLQ_NONE) 
+                    continue;
 
             /* read receiver raw/rtcm data from input stream */
-            if ((n=strread(svr->stream+i,p,q-p))<=0) {
+            if ((n=strread(svr->stream+stream_number,p,q-p))<=0) {
                 continue;
             }
             /* write receiver raw/rtcm data to log stream */
-            strwrite(svr->stream+i+LOGSTROFFSET,p,n);
-            svr->nb[i]+=n;
+            strwrite(svr->stream+stream_number+LOGSTROFFSET,p,n);
+            svr->nb[stream_number]+=n;
 
             /* save peek buffer */
             rtksvrlock(svr);
-            n=n<svr->buffsize-svr->npb[i]?n:svr->buffsize-svr->npb[i];
-            memcpy(svr->pbuf[i]+svr->npb[i],p,n);
-            svr->npb[i]+=n;
+            n=n<svr->buffsize-svr->npb[stream_number]?n:svr->buffsize-svr->npb[stream_number];
+            memcpy(svr->pbuf[stream_number]+svr->npb[stream_number],p,n);
+            svr->npb[stream_number]+=n;
             rtksvrunlock(svr);
         }
         
         rtksvrlock(svr);
-        
-        for (i=0;i<N_INPUTSTR;i++) {
-            if (svr->format[i]==STRFMT_SP3||svr->format[i]==STRFMT_RNXCLK) {
+
+        for (stream_number = 0; stream_number < N_INPUTSTR; stream_number++) {
+            if (svr->format[stream_number] == STRFMT_SP3 ||
+                svr->format[stream_number] == STRFMT_RNXCLK)
+            {
                 /* decode download file */
-                decodefile(svr,i);
+                decodefile(svr, stream_number);
             }
-            else {
+            else
+            {
                 /* decode receiver raw/rtcm data */
-                fobs[i]=decoderaw(svr,i);
+                fobs[stream_number] = decoderaw(svr, stream_number);
             }
         }
-        
+
         while ( (fobs[0] > 0) && (svr->obs[0][fobs[0]-1].n <= 0) ) { /* skip empty rover obs */
                 
             fobs[0]--;
