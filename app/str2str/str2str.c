@@ -118,6 +118,7 @@ static const char *help[]={
 " -ft file          ntrip souce table file []",
 " -fl file          log file [str2str.trace]",
 " -h                print help",
+" -m --mask         snr mask (0.25 dBHz)",
 };
 /* print help ----------------------------------------------------------------*/
 static void printhelp(void)
@@ -228,7 +229,7 @@ int main(int argc, char **argv)
     char *local="",*proxy="",*msg="1004,1019",*opt="",buff[256],*p;
     char strmsg[MAXSTRMSG]="",*antinfo="",*rcvinfo="";
     char *ant[]={"","",""},*rcv[]={"","",""},*logfile="";
-    int i,j,n=0,dispint=5000,trlevel=0,opts[]={10000,10000,2000,32768,10,0,30,0};
+    int i,j,n=0,dispint=5000,trlevel=0,opts[]={10000,10000,2000,32768,10,0,30,0,0.0};
     int types[MAXSTR]={STR_FILE,STR_FILE},stat[MAXSTR]={0},byte[MAXSTR]={0};
     int bps[MAXSTR]={0},fmts[MAXSTR]={0},sta=0;
     
@@ -282,6 +283,7 @@ int main(int argc, char **argv)
         else if (!strcmp(argv[i],"-ft" )&&i+1<argc) strcpy(srctbl,argv[++i]);
         else if (!strcmp(argv[i],"-fl" )&&i+1<argc) logfile=argv[++i];
         else if (!strcmp(argv[i],"-t"  )&&i+1<argc) trlevel=atoi(argv[++i]);
+        else if ((!strcmp(argv[i],"-m"  ) || !strcmp(argv[i], "--mask"))&&i+1<argc) opts[8]=atof(argv[++i]);
         else if (*argv[i]=='-') printhelp();
     }
     if (n<=0) n=1; /* stdout */

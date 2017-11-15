@@ -1394,6 +1394,7 @@ typedef struct {        /* stream server type */
     strconv_t *conv[16]; /* stream converter */
     thread_t thread;    /* server thread */
     lock_t lock;        /* lock flag */
+    double min_snr;     /* minimal signal strength (0.25 dBHz) */
 } strsvr_t;
 
 typedef struct {        /* RTK server type */

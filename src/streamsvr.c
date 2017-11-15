@@ -237,8 +237,34 @@ static void rtcm2rtcm(rtcm_t *out, const rtcm_t *rtcm, int ret, int stasel)
         out->nav.leaps=rtcm->nav.leaps;
     }
 }
+/* exclude obs by snr */
+static void obs_exclude_by_snr(obs_t *obs, double min_snr) {
+
+    int i, j;
+    int nobs = 0, n_valid_records;
+    double snr;
+    obsd_t *obsd = obs->data;
+
+    if (min_snr <= 0.0) return;
+
+    for (i = 0; i < obs->n; i++) {
+
+        n_valid_records = 0;
+        for (j = 0; j < NFREQ; j++) {
+            snr = 0.25 * obsd[i].SNR[j];
+            if ((snr > min_snr)) {
+                n_valid_records++;
+            }
+        }
+        if (n_valid_records > 0) {
+            obsd[nobs] = obsd[i];
+            nobs++;
+        }
+    }
+    obs->n = nobs;
+}
 /* write obs data messages ---------------------------------------------------*/
-static void write_obs(gtime_t time, stream_t *str, strconv_t *conv)
+static void write_obs(gtime_t time, stream_t *str, strconv_t *conv, double min_snr)
 {
     int i,j=0;
     
@@ -250,6 +276,7 @@ static void write_obs(gtime_t time, stream_t *str, strconv_t *conv)
     for (i=0;i<conv->nmsg;i++) {
         if (!is_obsmsg(conv->msgs[i])||!is_tint(time, conv->time_last_msg[i], conv->tint[i])) continue;
         
+        obs_exclude_by_snr(&conv->out.obs, min_snr);
         /* generate messages */
         if (conv->otype==STRFMT_RTCM2) {
             if (!gen_rtcm2(&conv->out,conv->msgs[i],i!=j)) continue;
@@ -379,7 +406,7 @@ static void write_sta_cycle(stream_t *str, strconv_t *conv)
     }
 }
 /* convert stearm ------------------------------------------------------------*/
-static void strconv(stream_t *str, strconv_t *conv, unsigned char *buff, int n)
+static void strconv(stream_t *str, strconv_t *conv, unsigned char *buff, int n, double min_snr)
 {
     int i,ret;
     
@@ -402,7 +429,7 @@ static void strconv(stream_t *str, strconv_t *conv, unsigned char *buff, int n)
         }
         /* write obs and nav data messages to stream */
         switch (ret) {
-            case 1: write_obs(conv->out.time,str,conv); break;
+            case 1: write_obs(conv->out.time,str,conv,min_snr); break;
             case 2: write_nav(conv->out.time,str,conv); break;
         }
     }
@@ -477,7 +504,7 @@ static void *strsvrthread(void *arg)
                 strsetsel(svr->stream+i,sel);
                 
                 if (svr->conv[i-1]) {
-                    strconv(svr->stream+i,svr->conv[i-1],svr->buff,n);
+                    strconv(svr->stream+i,svr->conv[i-1],svr->buff,n,svr->min_snr);
                 }
                 else {
                     strwrite(svr->stream+i,svr->buff,n);
@@ -547,6 +574,7 @@ extern void strsvrinit(strsvr_t *svr, int nout)
     svr->nstr=i;
     for (i=0;i<16;i++) svr->conv[i]=NULL;
     svr->thread=0;
+    svr->min_snr=0.0;
     initlock(&svr->lock);
 }
 /* start stream server ---------------------------------------------------------
@@ -608,6 +636,7 @@ extern int strsvrstart(strsvr_t *svr, int *opts, int *strs, char **paths,
     svr->buffsize=opts[3]<4096?4096:opts[3]; /* >=4096byte */
     svr->nmeacycle=0<opts[5]&&opts[5]<1000?1000:opts[5]; /* >=1s */
     svr->relayback=opts[7];
+    svr->min_snr = opts[8];
     for (i=0;i<3;i++) svr->nmeapos[i]=nmeapos?nmeapos[i]:0.0;
     for (i=0;i<4;i++) {
         strcpy(svr->cmds_periodic[i],!cmds_periodic[i]?"":cmds_periodic[i]);
