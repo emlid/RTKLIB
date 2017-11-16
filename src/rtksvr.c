@@ -549,7 +549,6 @@ static void navsys_convert_binary_to_array(int sys_binary, int *sys_array, int *
     /* other systems are single */
     if ( sys_binary & SYS_GLO ) { sys_array[*nsys] = SYS_GLO; (*nsys)++; }
     if ( sys_binary & SYS_GAL ) { sys_array[*nsys] = SYS_GAL; (*nsys)++; }
-    if ( sys_binary & SYS_QZS ) { sys_array[*nsys] = SYS_QZS; (*nsys)++; }
     if ( sys_binary & SYS_CMP ) { sys_array[*nsys] = SYS_CMP; (*nsys)++; }
     if ( sys_binary & SYS_IRN ) { sys_array[*nsys] = SYS_IRN; (*nsys)++; }
     if ( sys_binary & SYS_LEO ) { sys_array[*nsys] = SYS_LEO; (*nsys)++; }
