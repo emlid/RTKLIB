@@ -1357,8 +1357,8 @@ extern int outnmea_gsv(unsigned char *buff, const sol_t *sol,
 /* output solution in the form of nmea VTG sentence --------------------------*/
 extern int outnmea_vtg(unsigned char *buff, const sol_t *sol) {
     static double dirp = 0.0;
-    double pos[3], enuv[3], vel, dir, amag = 0.0;
-    char *p = (char *) buff, *q, sum, *emag = "E";
+    double pos[3], enuv[3], vel, dir;
+    char *p = (char *) buff, *q, sum;
     char posmode;
     trace(3, "outnmea_vtg:\n");
     if (sol->stat <= SOLQ_NONE) {
@@ -1369,12 +1369,13 @@ extern int outnmea_vtg(unsigned char *buff, const sol_t *sol) {
     }
     ecef2pos(sol->rr, pos);
     ecef2enu(pos, sol->rr + 3, enuv);
-    vel = norm(enuv, 3);
+    vel = norm(enuv, 2);
     if (vel >= 1.0) {
         dir = atan2(enuv[0], enuv[1]) * R2D;
         if (dir < 0.0) dir += 360.0;
         dirp = dir;
     } else dir = dirp;
+
     switch (sol->stat) {
         case SOLQ_DR:
             posmode = 'E';
@@ -1386,8 +1387,8 @@ extern int outnmea_vtg(unsigned char *buff, const sol_t *sol) {
             posmode = 'A';
             break;
     }
-    p += sprintf(p, "$GPVTG,%4.2f,T,%4.2f,M,%4.2f,N,%4.2f,K,%c", dir, dir + (*emag == 'E' ? 1 : -1) * amag, vel / KNOT2M,
-                 +vel, posmode);
+    p += sprintf(p, "$GPVTG,%4.2f,T,,M,%4.2f,N,%4.2f,K,%c", dir, vel / KNOT2M,
+                 vel * 3.6, posmode);
     for (q = (char *) buff + 1, sum = 0; *q; q++) sum ^= *q; /* check-sum */
     p += sprintf(p, "*%02X%c%c", sum, 0x0D, 0x0A);
     return p - (char *) buff;
