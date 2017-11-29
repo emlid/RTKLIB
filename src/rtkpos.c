@@ -2144,6 +2144,11 @@ static int relpos(rtk_t *rtk, const obsd_t *obs, int nu, int nr,
             rtk->sol.rr[i]=rtk->xa[i];
             rtk->sol.qr[i]=(float)rtk->Pa[i+i*rtk->na];
         }
+        if (rtk->opt.dynamics) {
+            for (i = 3; i < 6; i++) {
+                rtk->sol.rr[i] = rtk->xa[i];
+            }
+        }
         rtk->sol.qr[3]=(float)rtk->Pa[1];
         rtk->sol.qr[4]=(float)rtk->Pa[1+2*rtk->na];
         rtk->sol.qr[5]=(float)rtk->Pa[2];
@@ -2152,6 +2157,11 @@ static int relpos(rtk_t *rtk, const obsd_t *obs, int nu, int nr,
         for (i=0;i<3;i++) {
             rtk->sol.rr[i]=rtk->x[i];
             rtk->sol.qr[i]=(float)rtk->P[i+i*rtk->nx];
+        }
+        if (rtk->opt.dynamics) {
+            for (i = 3; i < 6; i++) {
+                rtk->sol.rr[i] = rtk->x[i];
+            }
         }
         rtk->sol.qr[3]=(float)rtk->P[1];
         rtk->sol.qr[4]=(float)rtk->P[1+2*rtk->nx];
