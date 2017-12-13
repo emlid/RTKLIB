@@ -740,6 +740,7 @@ void MainWindow::ConvertFile(void)
             ||conversionThread->format==STRFMT_CMR) {
         
         // input start date/time for rtcm 2, rtcm 3, RT17 or CMR
+        startDialog->setFileName(&InFile_Text);
         startDialog->exec();
         if (startDialog->result()!=QDialog::Accepted) return;
         conversionThread->rnxopt.trtcm=startDialog->Time;
@@ -874,7 +875,7 @@ void MainWindow::LoadOpt(void)
     QSettings ini(IniFile,QSettings::IniFormat);
     QString mask="1111111111111111111111111111111111111111111";
     
-    RnxVer              =ini.value ("opt/rnxver",      0).toInt();
+    RnxVer              =ini.value ("opt/rnxver",      6).toInt();
     RnxFile             =ini.value ("opt/rnxfile",     0).toInt();
     RnxCode             =ini.value ("opt/rnxcode","0000").toString();
     RunBy               =ini.value ("opt/runby",      "").toString();
@@ -898,9 +899,9 @@ void MainWindow::LoadOpt(void)
     Comment[0]          =ini.value ("opt/comment0",   "").toString();
     Comment[1]          =ini.value ("opt/comment1",   "").toString();
     RcvOption           =ini.value ("opt/rcvoption",  "").toString();
-    NavSys              =ini.value ("opt/navsys",    0x3).toInt();
+    NavSys              =ini.value ("opt/navsys",    SYS_ALL).toInt();
     ObsType             =ini.value ("opt/obstype",   0xF).toInt();
-    FreqType            =ini.value ("opt/freqtype",  0x3).toInt();
+    FreqType            =ini.value ("opt/freqtype",  0x1).toInt();
     ExSats              =ini.value ("opt/exsats",     "").toString();
     TraceLevel          =ini.value ("opt/tracelevel",  0).toInt();
     RnxTime.time        =ini.value ("opt/rnxtime",     0).toInt();

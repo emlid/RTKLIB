@@ -267,7 +267,7 @@ static strfile_t *gen_strfile(int format, const char *opt, gtime_t time)
     
     trace(3,"init_strfile:\n");
     
-    if (!(str=(strfile_t *)calloc(sizeof(strfile_t),1))) return NULL;
+    if (!(str=(strfile_t *)calloc(1,sizeof(strfile_t)))) return NULL;
     
     if (format==STRFMT_RTCM2||format==STRFMT_RTCM3) {
         if (!init_rtcm(&str->rtcm)) {
@@ -485,7 +485,7 @@ static void update_stas(stas_t **stas, strfile_t *str)
             return;
         }
     }
-    if (!(p=(stas_t *)calloc(sizeof(stas_t),1))) return;
+    if (!(p=(stas_t *)calloc(1,sizeof(stas_t)))) return;
     p->staid=str->rtcm.staid;
     p->sta=str->rtcm.sta;
     p->next=*stas;

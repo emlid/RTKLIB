@@ -16,6 +16,7 @@ protected:
 public slots:
     void BtnOkClick();
     void BtnFileTimeClick();
+    void setFileName(QString *filename);
 public:
 	gtime_t Time;
     QString FileName;

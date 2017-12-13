@@ -46,7 +46,7 @@ public:
     }
 
     ~ConversionThread() {
-        for (int i=0;i<7;i++) delete[] ofile[i];
+        for (int i=0;i<NOUTFILE;i++) delete[] ofile[i];
     }
 
 protected:

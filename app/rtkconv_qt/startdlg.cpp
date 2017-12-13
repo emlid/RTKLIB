@@ -16,6 +16,7 @@ StartDialog::StartDialog(QWidget *parent)
 
     connect(BtnOk,SIGNAL(clicked(bool)),this,SLOT(BtnOkClick()));
     connect(BtnCancel,SIGNAL(clicked(bool)),this,SLOT(reject()));
+    connect(BtnFileTime,SIGNAL(clicked(bool)),this,SLOT(BtnFileTimeClick()));
 }
 //---------------------------------------------------------------------------
 void StartDialog::showEvent(QShowEvent *event)
@@ -30,9 +31,14 @@ void StartDialog::showEvent(QShowEvent *event)
     TimeY1->setDate(date.date());
     TimeH1->setTime(date.time());
 }
+void StartDialog::setFileName(QString *filename)
+{
+    FileName = *filename;
+}
 //---------------------------------------------------------------------------
 void StartDialog::BtnOkClick()
 {
+
     QDateTime date(TimeY1->date(),TimeH1->time());
     Time.time=date.toTime_t();Time.sec=date.time().msec()/1000;
 
@@ -41,6 +47,7 @@ void StartDialog::BtnOkClick()
 //---------------------------------------------------------------------------
 void StartDialog::BtnFileTimeClick()
 {
+    //FileName = mainWindow->conversionThread->ifile;
     QFileInfo fi(FileName);
     QDateTime d=fi.created();
 

@@ -549,7 +549,7 @@ int main(int argc, char **argv)
 {
     rnxopt_t opt={{0}};
     int format,trace=0,stat=1;
-    char *ifile="",*ofile[9]={0},*dir="",*path=NULL;
+    char *ifile="",*ofile[NOUTFILE]={0},*dir="",*path=NULL;
     stream_t stream;
 
     /* parse command line options */
