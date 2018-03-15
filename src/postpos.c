@@ -40,6 +40,8 @@
 *           2016/10/10  1.22 fix bug on identification of file fopt->blq
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
+#include "multihypothesis.h"
+#include "fix_and_hold_refinement_strategy.h"
 
 static const char rcsid[]="$Id: postpos.c,v 1.1 2008/07/17 21:48:06 ttaka Exp $";
 
@@ -80,6 +82,12 @@ static char rtcm_path[1024]=""; /* rtcm data path */
 static gtime_t invalidtm[100]={{0}};/* invalid time marks */
 static rtcm_t rtcm;             /* rtcm control struct */
 static FILE *fp_rtcm=NULL;      /* rtcm data file pointer */
+
+static rtk_multi_t *rtk_multi;
+
+rtk_multi_strategy_t rtk_multi_strategy_fxhr = {&rtk_multi_split_fxhr,
+                                                &rtk_multi_qualify_fxhr,
+                                                &rtk_multi_merge_fxhr};
 
 /* show message and check break ----------------------------------------------*/
 static int checkbrk(const char *format, ...)
@@ -416,7 +424,9 @@ static void procpos(FILE *fp, FILE *fptm, const prcopt_t *popt, const solopt_t *
     sol_t sol={{0}},oldsol={{0}},newsol={{0}};
     obsd_t obs[MAXOBS*2]; /* for rover and base */
     double rb[3]={0};
+    int rtk_status = 1;
     int i,nobs,n,solstatic,num=0,pri[]={0,1,2,3,4,5,1,6};
+    rtk_input_data_t *rtk_input_data = malloc(sizeof(rtk_input_data_t));
     
     trace(3,"procpos : mode=%d\n",mode);
     
@@ -451,17 +461,37 @@ static void procpos(FILE *fp, FILE *fptm, const prcopt_t *popt, const solopt_t *
             for (i=0;i<n;i++) obs[i].L[1]=obs[i].P[1]=0.0;
         }
 #endif
-        if (!rtkpos(rtk,obs,n,&navs)) {
-            if (rtk->sol.eventime.time != 0) {
+        if ( (popt->multihyp_mode) && (popt->modear == ARMODE_FIXHOLD) ) { /* multihypothesis mode on */
+            
+            rtk_input_data->obsd = obs;
+            rtk_input_data->n_obsd = n;
+            rtk_input_data->nav = &navs;
+            rtk_multi_estimate(rtk_multi, &rtk_multi_strategy_fxhr, rtk_input_data);
+            assert( rtk_multi_is_valid_fxhr(rtk_multi) );
+        }
+        else { /* multihypothesis mode off */
+            
+            rtk_status = rtkpos(rtk, obs, n, &navs);
+        }
+        
+        if ( (rtk_status == 0) || (rtk->sol.stat == SOLQ_NONE) ) {
+            
+            if ( rtk->sol.eventime.time != 0 ) {
+                
                 if (mode == 0) {
+                    
                     outinvalidtm(fptm, sopt, rtk->sol.eventime);
-                } else if (!revs) {
+                } 
+                else if ( !revs ) {
+                    
                     invalidtm[nitm++] = rtk->sol.eventime;
                 }
             }
             continue;
         }
-        
+        outsolstat(rtk, &navs);
+ 
+        /* todo: repair and/or test combined mode for multihypothesis estimation */
         if (mode==0) { /* forward/backward */
             if (!solstatic) {
                 outsol(fp,&rtk->sol,rtk->rb,sopt);
@@ -501,6 +531,8 @@ static void procpos(FILE *fp, FILE *fptm, const prcopt_t *popt, const solopt_t *
         sol.time=time;
         outsol(fp,&sol,rb,sopt);
     }
+    
+    free(rtk_input_data);
 }
 /* validation of combined solutions ------------------------------------------*/
 static int valcomb(const sol_t *solf, const sol_t *solb)
@@ -1066,7 +1098,7 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
                    char **infile, const int *index, int n, char *outfile)
 {
     FILE *fp,*fptm;
-    rtk_t rtk;
+    rtk_t *rtk;
     prcopt_t popt_=*popt;
     solopt_t tmsopt = *sopt;
     char tracefile[1024],statfile[1024],path[1024],*ext,outfiletm[1024]={0};
@@ -1151,9 +1183,20 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
 
     iobsu=iobsr=isbs=ilex=revs=aborts=0;
     
+    if ( (popt_.multihyp_mode) && (popt_.modear == ARMODE_FIXHOLD) ) { /* multihypothesis mode on */
+        
+        rtk_multi = rtk_multi_init_fxhr(popt_);
+        rtk       = rtk_multi->rtk_out;
+        assert( rtk_multi_is_valid_fxhr(rtk_multi) );
+    }
+    else { /* multihypothesis mode on */
+        
+        rtk = rtk_init(&popt_);
+    }
+    
     if (popt_.soltype==0) {
         if ((fp=openfile(outfile)) && (fptm=openfile(outfiletm))) {
-            procpos(fp,fptm,&popt_,sopt,&rtk,0); /* forward */
+            procpos(fp,fptm,&popt_,sopt,rtk,0); /* forward */
             fclose(fp);
             fclose(fptm);
         }
@@ -1161,7 +1204,7 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
     else if (popt_.soltype==1) {
         if ((fp=openfile(outfile)) && (fptm=openfile(outfiletm))) {
             revs=1; iobsu=iobsr=obss.n-1; isbs=sbss.n-1; ilex=lexs.n-1;
-            procpos(fp,fptm,&popt_,sopt,&rtk,0); /* backward */
+            procpos(fp,fptm,&popt_,sopt,rtk,0); /* backward */
             fclose(fp);
             fclose(fptm);
         }
@@ -1174,9 +1217,9 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
         
         if (solf&&solb) {
             isolf=isolb=0;
-            procpos(NULL,NULL,&popt_,sopt,&rtk,1); /* forward */
+            procpos(NULL,NULL,&popt_,sopt,rtk,1); /* forward */
             revs=1; iobsu=iobsr=obss.n-1; isbs=sbss.n-1; ilex=lexs.n-1;
-            procpos(NULL,NULL,&popt_,sopt,&rtk,1); /* backward */
+            procpos(NULL,NULL,&popt_,sopt,rtk,1); /* backward */
             
             /* combine forward/backward solutions */
             if (!aborts&&(fp=openfile(outfile))  && (fptm=openfile(outfiletm))) {
@@ -1190,10 +1233,18 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
         free(solb);
         free(rbf);
         free(rbb);
-        rtkfree(&rtk);
     }
     /* free obs and nav data */
     freeobsnav(&obss,&navs);
+    
+    if ( (popt_.multihyp_mode) && (popt_.modear == ARMODE_FIXHOLD) ) { /* multihypothesis mode on */
+        
+        rtk_multi_free(rtk_multi);
+    }
+    else { /* multihypothesis mode on */
+     
+        rtk_free(rtk);
+    }
     
     return aborts?1:0;
 }

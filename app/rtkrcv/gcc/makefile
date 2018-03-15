@@ -8,7 +8,8 @@ BINDIR      = /usr/local/bin
 SRC_DIR_APP = ..
 SRC_DIR_1   = ../../../src
 SRC_DIR_2   = ../../../src/rcv
-SRC_DIRS   := $(SRC_DIR_APP) $(SRC_DIR_1) $(SRC_DIR_2)
+SRC_DIR_3   = ../../../src/MULTIHYPOTHESIS
+SRC_DIRS   := $(SRC_DIR_APP) $(SRC_DIR_1) $(SRC_DIR_2) $(SRC_DIR_3)
 
 vpath %.c $(SRC_DIRS)
 
@@ -19,15 +20,17 @@ SRC_NAMES_1   = stream.c rtkcmn.c rinex.c sbas.c preceph.c rcvraw.c \
     rtksvr.c rtkpos.c erb.c solution.c
 SRC_NAMES_2   = novatel.c ss2.c ublox.c crescent.c skytraq.c gw10.c javad.c nvs.c \
     binex.c rt17.c tersus.c septentrio.c cmr.c
-SRC_NAMES    := $(SRC_NAMES_APP) $(SRC_NAMES_1) $(SRC_NAMES_2) 
+SRC_NAMES_3   = multihypothesis.c fix_and_hold_refinement_strategy.c
+SRC_NAMES    := $(SRC_NAMES_APP) $(SRC_NAMES_1) $(SRC_NAMES_2) $(SRC_NAMES_3)
 
 # object files
 OBJ_NAMES    := $(SRC_NAMES:%.c=%.o)
 
 # common compile options
-INCLUDE := -I$(SRC_DIR_1) -I$(SRC_DIR_APP)
+INCLUDE := -I$(SRC_DIR_1) -I$(SRC_DIR_APP) -I$(SRC_DIR_3)
 OPTIONS := -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DENAIRN -DNFREQ=3 -DSVR_REUSEADDR
-CFLAGS_CMN := -ansi -pedantic -Wall -Wno-unused-but-set-variable -fno-strict-overflow -Werror -Wno-error=unused-function $(INCLUDE) $(OPTIONS) -g
+CFLAGS_CMN := -ansi -pedantic -Wall -Wno-unused-but-set-variable -fno-strict-overflow \
+    -Werror -Wno-error=unused-function -Wno-error=unused-variable $(INCLUDE) $(OPTIONS) -g
 LDLIBS  := -lm -lrt -lpthread
 EXEC    := rtkrcv
 
@@ -73,21 +76,21 @@ debug: $(DBG_EXEC)
 $(REL_EXEC): $(addprefix $(REL_DIR)/,$(OBJ_NAMES))
 	$(CC) $^ -o $@ $(LDLIBS)
 
-$(REL_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h
+$(REL_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h $(SRC_DIR_3)/multihypothesis.h $(SRC_DIR_3)/fix_and_hold_refinement_strategy.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 #prerelease
 $(PREREL_EXEC): $(addprefix $(PREREL_DIR)/,$(OBJ_NAMES))
 	$(CC) $^ -o $@ $(LDLIBS)
 
-$(PREREL_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h
+$(PREREL_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h $(SRC_DIR_3)/multihypothesis.h $(SRC_DIR_3)/fix_and_hold_refinement_strategy.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # debug
 $(DBG_EXEC): $(addprefix $(DBG_DIR)/,$(OBJ_NAMES))
 	$(CC) $^ -o $@ $(LDLIBS) 
 
-$(DBG_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h
+$(DBG_DIR)/%.o: %.c $(SRC_DIR_1)/rtklib.h $(SRC_DIR_APP)/vt.h $(SRC_DIR_3)/multihypothesis.h $(SRC_DIR_3)/fix_and_hold_refinement_strategy.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 ####################################################################

@@ -1155,6 +1155,8 @@ typedef struct {        /* processing options type */
     double residual_reset_float;  /* carrier-phase residual threshold to reset phase-bias when solution status is FLOAT (m) */
     double residual_block_fix_sat;/* carrier-phase residual threshold to prevent using a satellite for ambiguity resolution (m) */
     
+    int    multihyp_mode; /* on/off */
+    
     double std[3];      /* initial-state std [0]bias,[1]iono [2]trop */
     double prn[6];      /* process-noise std [0]bias,[1]iono [2]trop [3]acch [4]accv [5] pos */
     double sclkstab;    /* satellite clock stability (sec/sec) */
@@ -1312,6 +1314,8 @@ typedef struct {        /* RTK control/result type */
     prcopt_t opt;       /* processing options */
     int initial_mode;   /* initial positioning mode */
     smoothing_data_t smoothing_data; /* data related to smoothing of code */
+    int is_alternative_fix_possible;
+    sol_t sol_alternative;          
 } rtk_t;
 
 typedef struct half_cyc_tag {  /* half-cycle correction list type */
@@ -1934,6 +1938,13 @@ EXPORT int  rtkpos (rtk_t *rtk, const obsd_t *obs, int nobs, const nav_t *nav);
 EXPORT int  rtkopenstat(const char *file, int level);
 EXPORT void rtkclosestat(void);
 EXPORT int  rtkoutstat(rtk_t *rtk, char *buff);
+
+extern void outsolstat(rtk_t *rtk,const nav_t *nav);
+
+extern rtk_t *rtk_init(const prcopt_t *opt);
+extern void rtk_free(rtk_t *rtk);
+extern void rtk_copy(const rtk_t *rtk_source, rtk_t *rtk_destination);
+extern int rtk_is_valid(const rtk_t *rtk);
 
 /* precise point positioning -------------------------------------------------*/
 EXPORT void pppos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav);

@@ -325,7 +325,7 @@ static void swapsolstat(void)
     trace(3,"swapsolstat: path=%s\n",path);
 }
 /* output solution status ----------------------------------------------------*/
-static void outsolstat(rtk_t *rtk,const nav_t *nav)
+extern void outsolstat(rtk_t *rtk,const nav_t *nav)
 {
     ssat_t *ssat;
     double tow;
@@ -2193,27 +2193,41 @@ static int relpos(rtk_t *rtk, const obsd_t *obs, int nu, int nr,
 
 /* ------------------------------------------------------------------------------ */
 
-static int rtk_is_valid(const rtk_t *rtk)
+extern int rtk_is_valid(const rtk_t *rtk)
 {
-    if ( !rtk ) return 0;
-    if ( (!rtk->x) || (!rtk->xa) ) return 0;
-    if ( (!rtk->P) || (!rtk->Pa) ) return 0;
+    if ( rtk == NULL ) {
+        
+        return 0;
+    }
+    if ( (rtk->x == NULL) || (rtk->xa == NULL) ) {
+        
+        return 0;
+    }
+    if ( (rtk->P == NULL) || (rtk->Pa == NULL) ) {
+        
+        return 0;
+    }
     
     return 1;
 }
 
 static void rtk_copy_states(const rtk_t *rtk_source, rtk_t *rtk_destination)
 {
-    assert( rtk_source != NULL );
-    assert( rtk_destination != NULL );
+    int n_float = rtk_source->nx;
+    int n_fixed = rtk_source->na;
     
-    memcpy(rtk_destination->x, rtk_source->x, rtk_source->nx * sizeof(double));
-    memcpy(rtk_destination->P, rtk_source->P, SQR(rtk_source->nx) * sizeof(double));
-    memcpy(rtk_destination->xa, rtk_source->xa, rtk_source->na * sizeof(double));
-    memcpy(rtk_destination->Pa, rtk_source->Pa, SQR(rtk_source->na) * sizeof(double));
+    assert( rtk_is_valid(rtk_source) );
+    assert( rtk_is_valid(rtk_destination) );
+    assert( (rtk_source->nx == rtk_destination->nx) && "number of float states should coincides" );
+    assert( (rtk_source->na == rtk_destination->na) && "number of fixed states should coincides" );
+    
+    memcpy(rtk_destination->x, rtk_source->x, sizeof(double) * n_float);
+    memcpy(rtk_destination->P, rtk_source->P, sizeof(double) * SQR(n_float));
+    memcpy(rtk_destination->xa, rtk_source->xa, sizeof(double) * n_fixed);
+    memcpy(rtk_destination->Pa, rtk_source->Pa, sizeof(double) * SQR(n_fixed));
 }
 
-static void rtk_copy(const rtk_t *rtk_source, rtk_t *rtk_destination)
+extern void rtk_copy(const rtk_t *rtk_source, rtk_t *rtk_destination)
 {
     double *x, *P;
     double *xa, *Pa;
@@ -2240,19 +2254,28 @@ static void rtk_copy(const rtk_t *rtk_source, rtk_t *rtk_destination)
     rtk_copy_states(rtk_source, rtk_destination);
 }
 
-static void rtk_free(rtk_t *rtk)
+extern void rtk_free(rtk_t *rtk)
 {
     rtkfree(rtk);
     free(rtk);
 }
 
-static rtk_t *rtk_init(prcopt_t *opt)
+extern rtk_t *rtk_init(const prcopt_t *opt)
 {
     rtk_t *rtk = malloc(sizeof(rtk_t));
-    if ( !rtk ) return NULL;
+    if ( rtk == NULL ) {
+
+        return NULL;
+    }
+
+    rtk->x  = NULL;
+    rtk->P  = NULL;
+    rtk->xa = NULL;
+    rtk->Pa = NULL;
+    
     rtkinit(rtk, opt);
-    if ( !rtk_is_valid(rtk) ) { 
-        rtk_free(rtk); 
+    if ( !rtk_is_valid(rtk) ) {
+        rtk_free(rtk);
         return NULL;
     }
     
@@ -2379,11 +2402,15 @@ static int rtk_estimate_iterative(rtk_t *rtk, const obsd_t *obsd, int n_obsd, co
     if ( maxiter <= 0 ) maxiter = 1;
     
     rtk_trial = rtk_init(&rtk->opt);
-    if ( !rtk_trial ) return 0;
+    if ( !rtk_is_valid(rtk_trial) ) {
+        
+        return 0;
+    }
     rtk_trial_prev = rtk_init(&rtk->opt);
-    if ( !rtk_trial_prev ) { 
-        rtk_free(rtk_trial); 
-        return 0; 
+    if ( !rtk_is_valid(rtk_trial_prev) ) {
+        
+        rtk_free(rtk_trial);
+        return 0;
     }
     
     for (i = 0; i < maxiter; i++) {
@@ -2391,6 +2418,7 @@ static int rtk_estimate_iterative(rtk_t *rtk, const obsd_t *obsd, int n_obsd, co
         rtk_copy(rtk, rtk_trial);
         stat = estimator(rtk_trial, obsd, n_obsd, nav);
         if ( stat == 0 ) break;
+        if ( i == (maxiter-1) ) break;                            /* last iteration */
         if ( !reestimation_modifier(rtk, rtk_trial) ) break;      /* modify some rtk struct fields to produce reestimation;
                                                                      break if no modifications applied */
         rtk_copy(rtk_trial, rtk_trial_prev);
@@ -2433,9 +2461,13 @@ extern void rtkinit(rtk_t *rtk, const prcopt_t *opt)
     rtk->nx=opt->mode<=PMODE_FIXED?NX(opt):pppnx(opt);
     rtk->na=opt->mode<=PMODE_FIXED?NR(opt):pppnx(opt);
     rtk->tt=0.0;
+    if ( rtk->x != NULL ) free(rtk->x);
     rtk->x=zeros(rtk->nx,1);
+    if ( rtk->P != NULL ) free(rtk->P);
     rtk->P=zeros(rtk->nx,rtk->nx);
+    if ( rtk->xa != NULL ) free(rtk->xa);
     rtk->xa=zeros(rtk->na,1);
+    if ( rtk->Pa != NULL ) free(rtk->Pa);
     rtk->Pa=zeros(rtk->na,rtk->na);
     rtk->nfix=rtk->neb=0;
     for (i=0;i<MAXSAT;i++) {
@@ -2464,6 +2496,9 @@ extern void rtkinit(rtk_t *rtk, const prcopt_t *opt)
             rtk->ssat[sat].no_fix[freq]   = 0;
         }
     }
+    
+    rtk->is_alternative_fix_possible = 0;
+    rtk->sol_alternative = sol0;
 }
 /* free rtk control ------------------------------------------------------------
 * free memory for rtk control struct
@@ -2551,7 +2586,6 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
 
     trace(3,"rtkpos  : time=%s n=%d\n",time_str(obs[0].time,3),n);
     trace(4,"obs=\n"); traceobs(4,obs,n);
-    /*trace(5,"nav=\n"); tracenav(5,nav);*/
     
     /* set base station position */
     if (opt->refpos<=POSOPT_RINEX&&opt->mode!=PMODE_SINGLE&&
@@ -2579,7 +2613,6 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
         errmsg(rtk,"point pos error (%s)\n",msg);
         
         if (!rtk->opt.dynamics) {
-            outsolstat(rtk,nav);
             return 0;
         }
     }
@@ -2598,7 +2631,6 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
 
     /* single point positioning */
     if (opt->mode==PMODE_SINGLE) {
-        outsolstat(rtk,nav);
         return 1;
     }
     /* suppress output of single solution */
@@ -2608,13 +2640,11 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
     /* precise point positioning */
     if (opt->mode>=PMODE_PPP_KINEMA) {
         pppos(rtk,obs,nu,nav);
-        outsolstat(rtk,nav);
         return 1;
     }
     /* check number of data of base station and age of differential */
     if (nr==0) {
         errmsg(rtk,"no base station observation data for rtk\n");
-        outsolstat(rtk,nav);
         return 1;
     }
     if (opt->mode==PMODE_MOVEB) { /*  moving baseline */
@@ -2648,7 +2678,6 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
         
         if (fabs(rtk->sol.age)>opt->maxtdiff) {
             errmsg(rtk,"age of differential error (age=%.1f)\n",rtk->sol.age);
-            outsolstat(rtk,nav);
             return 1;
         }
     }
@@ -2661,8 +2690,6 @@ extern int rtkpos(rtk_t *rtk, const obsd_t *obs, int n, const nav_t *nav)
     else {
         rtk_estimate_standard(rtk, obs, n, nav);
     }
-    
-    outsolstat(rtk, nav);
     
     return 1;
 }

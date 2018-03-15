@@ -127,6 +127,8 @@ EXPORT opt_t sysopts[]={
     {"resid-reset_float",1, (void *)&prcopt_.residual_reset_float,"m"},
     {"resid-block_fix_sat",1,(void *)&prcopt_.residual_block_fix_sat, "m"},
     
+    {"multihyp-mode",   3,  (void *)&prcopt_.multihyp_mode,SWTOPT},
+    
     {"out-solformat",   3,  (void *)&solopt_.posf,       SOLOPT },
     {"out-outhead",     3,  (void *)&solopt_.outhead,    SWTOPT },
     {"out-outopt",      3,  (void *)&solopt_.outopt,     SWTOPT },

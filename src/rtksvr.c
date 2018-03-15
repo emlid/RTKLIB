@@ -39,6 +39,8 @@
 *           2017/04/11  1.21 add rtkfree() in rtksvrfree()
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
+#include "multihypothesis.h"
+#include "fix_and_hold_refinement_strategy.h"
 
 static const char rcsid[]="$Id:$";
 
@@ -47,6 +49,12 @@ static const char rcsid[]="$Id:$";
 #define NMEAREQ_SEND_LLH            1       /* nmea request with llh position */
 #define NMEAREQ_SEND_SINGLE         2       /* nmea request with single solution */
 #define NMEAREQ_SEND_RESET_SINGLE   3       /* send reset and nmea request with single solution */
+
+static rtk_multi_t *rtk_multi;
+
+rtk_multi_strategy_t rtk_multi_strategy_fxhr = {&rtk_multi_split_fxhr,
+                                                &rtk_multi_qualify_fxhr,
+                                                &rtk_multi_merge_fxhr};
 
 /* write solution header to output stream ------------------------------------*/
 static void writesolhead(stream_t *stream, const solopt_t *solopt)
@@ -931,6 +939,116 @@ static void obs_queue_get_projection(obs_queue_t *obs_queue, obs_t *obs_destinat
 
 /* -------------------------------------------------------------------------- */
 
+static rtk_input_data_t *rtksvr_get_input_data(rtksvr_t *svr, int rover_data_index)
+{
+    int i, n_obsd, n_rover, n_base;
+    obsd_t *obsd;
+    double maxage = svr->rtk.opt.maxtdiff;
+    int    navsys = svr->rtk.opt.navsys;
+    gtime_t time_rover;
+    rtk_input_data_t *rtk_input_data;
+    
+    assert( svr != NULL );
+    assert( rover_data_index >= 0 );
+    assert( rover_data_index < MAXOBSBUF );
+    
+    obsd = malloc(sizeof(obsd_t) * MAXOBS * 2);
+    if ( obsd == NULL ) {
+        
+        return NULL;
+    }
+    rtk_input_data = malloc(sizeof(rtk_input_data_t));
+    if ( rtk_input_data == NULL ) {
+        
+        free(obsd);
+        return NULL;
+    }
+    
+    /* load rover data */
+    n_rover = svr->obs[0][rover_data_index].n;
+    assert( n_rover <= MAXOBS );
+    for (i = 0; i < n_rover; i++) {
+        
+        obsd[i] = svr->obs[0][rover_data_index].data[i];
+    }
+    
+    /* get optimal base obs from the queue to svr->obs[1][0] */
+    if ( svr->rtk.opt.base_multi_epoch ) {
+        
+        time_rover = obs_get_time(&svr->obs[0][rover_data_index]);
+        obs_queue_get_projection(svr->base_queue, &svr->obs[1][0], navsys, time_rover, maxage);
+    }
+    /* load base data */
+    n_base = svr->obs[1][0].n;
+    assert( n_base <= MAXOBS );
+    for (i = 0; i < n_base; i++) {
+        
+        obsd[i + n_rover] = svr->obs[1][0].data[i];
+    }
+    
+    n_obsd = n_rover + n_base;
+    
+    /* carrier phase bias correction */
+    if ( !strstr(svr->rtk.opt.pppopt, "-DIS_FCB") ) {
+        
+        corr_phase_bias(obsd, n_obsd, &svr->nav);
+    }
+    
+    rtk_input_data->obsd   = obsd;
+    rtk_input_data->n_obsd = n_obsd;
+    rtk_input_data->nav    = &svr->nav;
+    
+    return rtk_input_data;
+}
+
+static int rtksvr_compute_solution(rtksvr_t *svr, int rover_data_index, rtk_t *rtk)
+{
+    rtk_input_data_t *rtk_input_data;
+    
+    
+    assert( svr != NULL );
+    assert( rover_data_index >= 0 );
+    assert( rover_data_index < MAXOBSBUF );
+    
+    rtk_input_data = rtksvr_get_input_data(svr, rover_data_index);
+    
+    if ( rtk_input_data == NULL ) {
+        
+        return 0;
+    }
+    
+    /* rtk positioning */
+    rtkpos(rtk, rtk_input_data->obsd, rtk_input_data->n_obsd, rtk_input_data->nav);
+    
+    return 1;
+}
+
+static int rtksvr_compute_solution_multi(rtksvr_t *svr, int rover_data_index, rtk_multi_t *rtk_multi)
+{
+    rtk_input_data_t *rtk_input_data;
+    
+    assert( svr != NULL );
+    assert( rover_data_index >= 0 );
+    assert( rover_data_index < MAXOBSBUF );
+    
+    rtk_input_data = rtksvr_get_input_data(svr, rover_data_index);
+    
+    if ( rtk_input_data == NULL ) {
+        
+        return 0;
+    }
+    
+    /* update processing options (including base position) */
+    rtk_multi->opt = svr->rtk.opt;
+    memcpy(rtk_multi->opt.rb, svr->rtk.rb, sizeof(double) * 3);
+    
+    /* rtk positioning */
+    rtk_multi_estimate(rtk_multi, &rtk_multi_strategy_fxhr, rtk_input_data);
+    assert( rtk_multi_is_valid_fxhr(rtk_multi) );
+    
+    return 1;
+}
+
 /* rtk server thread ---------------------------------------------------------*/
 #ifdef WIN32
 static DWORD WINAPI rtksvrthread(void *arg)
@@ -946,19 +1064,19 @@ static void *rtksvrthread(void *arg)
     unsigned int tick,ticknmea,tick1hz,tickreset;
     unsigned char *p,*q;
     char msg[128];
-    int i,j,n,fobs[3]={0},cycle,cputime, stream_number;
-    gtime_t time_base, time_rover, time_last;
+    int i,n,fobs[3]={0},cycle,cputime, stream_number;
     double maxage = svr->rtk.opt.maxtdiff;
-    int    navsys = svr->rtk.opt.navsys; 
+    int    navsys = svr->rtk.opt.navsys;
+    gtime_t time_base, time_rover, time_last;
     int ntrip_single_required = 0;
+    rtk_t *rtk_tmp = rtk_init(&svr->rtk.opt);
 
     /* This "fake" solution structure is passed to strsendnmea
      * when inpstr2-nmeareq is set to latlon*/
     sol_t latlon_sol={{0}};
     latlon_sol.stat=SOLQ_SINGLE;
     latlon_sol.time=utc2gpst(timeget());
-    for (i=0;i<3;i++)
-        latlon_sol.rr[i]=svr->nmeapos[i];
+    for (i=0;i<3;i++) latlon_sol.rr[i]=svr->nmeapos[i];
 
     tracet(3,"rtksvrthread:\n");
 
@@ -971,8 +1089,9 @@ static void *rtksvrthread(void *arg)
         ntrip_single_required = 1;
     }
 
-    for (cycle=0;svr->state;cycle++) {
-        tick=tickget();
+    for (cycle = 0; svr->state; cycle++) {
+        
+        tick = tickget();
 
         for (stream_number = 0; stream_number < N_INPUTSTR; stream_number++) {
             p = svr->buff[stream_number] + svr->nb[stream_number];
@@ -1002,21 +1121,19 @@ static void *rtksvrthread(void *arg)
         rtksvrlock(svr);
 
         for (stream_number = 0; stream_number < N_INPUTSTR; stream_number++) {
-            if (svr->format[stream_number] == STRFMT_SP3 ||
-                svr->format[stream_number] == STRFMT_RNXCLK)
-            {
+            if (svr->format[stream_number] == STRFMT_SP3
+             || svr->format[stream_number] == STRFMT_RNXCLK) {
                 /* decode download file */
                 decodefile(svr, stream_number);
             }
-            else
-            {
+            else {
                 /* decode receiver raw/rtcm data */
                 fobs[stream_number] = decoderaw(svr, stream_number);
             }
         }
 
         while ( (fobs[0] > 0) && (svr->obs[0][fobs[0]-1].n <= 0) ) { /* skip empty rover obs */
-                
+            
             fobs[0]--;
         }
         while ( (fobs[1] > 0) && (svr->obs[1][fobs[1]-1].n <= 0) ) { /* skip empty base obs */
@@ -1053,55 +1170,36 @@ static void *rtksvrthread(void *arg)
             }
         }
         
-        for (i=0;i<fobs[0];i++) { /* for each rover observation data */
-            
-            obs.n=0;
-            /* load rover data */
-            for (j=0;j<svr->obs[0][i].n&&obs.n<MAXOBS*2;j++) {
-                obs.data[obs.n++]=svr->obs[0][i].data[j];
-            }
-            if ( obs.n <= 0 ) continue; 
-            
-            /* get optimal base obs from the queue to svr->obs[1][0] */
-            if ( svr->rtk.opt.base_multi_epoch ) {
-                time_rover = obs_get_time(&svr->obs[0][i]);
-                obs_queue_get_projection(svr->base_queue, &svr->obs[1][0], navsys, time_rover, maxage);
-            }
-            /* load base data */
-            for (j=0;j<svr->obs[1][0].n&&obs.n<MAXOBS*2;j++) {
-                obs.data[obs.n++]=svr->obs[1][0].data[j];
-            }
-            /* carrier phase bias correction */
-            if (!strstr(svr->rtk.opt.pppopt,"-DIS_FCB")) {
-                corr_phase_bias(obs.data,obs.n,&svr->nav);
-            }
-            /* rtk positioning */
-            rtkpos(&svr->rtk,obs.data,obs.n,&svr->nav);
+        for (i = 0; i < fobs[0]; i++) { /* for each rover observation data */
 
-            if (svr->rtk.sol.stat!=SOLQ_NONE) {
+            if ( (svr->rtk.opt.multihyp_mode) && (svr->rtk.opt.modear == ARMODE_FIXHOLD) ) { /* multihypothesis mode on */
+                
+                rtksvr_compute_solution_multi(svr, i, rtk_multi);
+                rtk_copy(rtk_multi->rtk_out, &svr->rtk);
+                svr->rtk.opt = rtk_multi->opt;
+            }
+            else { /* multihypothesis mode off */
+                
+                rtksvr_compute_solution(svr, i, &svr->rtk); 
+            }
+            
+            if ( svr->rtk.sol.stat != SOLQ_NONE ) {
 
                 /* adjust current time */
-                tt=(int)(tickget()-tick)/1000.0+DTTOL;
-                timeset(gpst2utc(timeadd(svr->rtk.sol.time,tt)));
+                tt = (int) (tickget() - tick) / 1000.0 + DTTOL;
+                timeset(gpst2utc(timeadd(svr->rtk.sol.time, tt)));
 
                 /* write solution */
-                writesol(svr,i);
-            }
-            /* if cpu overload, inclement obs outage counter and break */
-            if ((int)(tickget()-tick)>=svr->cycle) {
-                svr->prcout+=fobs[0]-i-1;
-#if 0 /* omitted v.2.4.1 */
-                break;
-#endif
+                writesol(svr, i);
             }
         }
         
         rtksvrunlock(svr);
         
         /* send null solution if no solution (1hz) */
-        if (svr->rtk.sol.stat==SOLQ_NONE&&(int)(tick-tick1hz)>=1000) {
-            writesol(svr,0);
-            tick1hz=tick;
+        if ( (svr->rtk.sol.stat == SOLQ_NONE) && ((int) (tick - tick1hz) >= 1000) ) {
+            writesol(svr, 0);
+            tick1hz = tick;
         }
         /* write periodic command to input stream */
         for (i=0;i<N_INPUTSTR;i++) {
@@ -1115,8 +1213,9 @@ static void *rtksvrthread(void *arg)
         if ((cputime=(int)(tickget()-tick))>0) svr->cputime=cputime;
 
         /* sleep until next cycle */
-        sleepms(svr->cycle-cputime);
+        sleepms(svr->cycle - cputime);
     }
+    
     for (i=0;i<MAXSTRRTK;i++) strclose(svr->stream+i);
     for (i=0;i<N_INPUTSTR;i++) {
         svr->nb[i]=svr->npb[i]=0;
@@ -1129,6 +1228,9 @@ static void *rtksvrthread(void *arg)
         svr->nsb[i]=0;
         free(svr->sbuf[i]); svr->sbuf[i]=NULL;
     }
+
+    free(rtk_tmp);
+    
     return 0;
 }
 /* initialize rtk server -------------------------------------------------------
@@ -1302,6 +1404,13 @@ extern int rtksvrstart(rtksvr_t *svr, int cycle, int buffsize, int *strs,
     svr->base_queue = obs_queue_init();
     rtkfree(&svr->rtk);
     rtkinit(&svr->rtk,prcopt);
+    
+    rtk_multi = NULL;
+    if ( (prcopt->multihyp_mode) && (prcopt->modear == ARMODE_FIXHOLD) ) { /* multihypothesis mode on */
+        
+        rtk_multi = rtk_multi_init_fxhr(*prcopt);
+        assert( rtk_multi_is_valid_fxhr(rtk_multi) );
+    }
 
     if (prcopt->initrst) { /* init averaging pos by restart */
         svr->nave=0;
@@ -1425,6 +1534,11 @@ extern void rtksvrstop(rtksvr_t *svr, char **cmds)
     svr->state=0;
 
     obs_queue_free(svr->base_queue);
+    
+    if ( rtk_multi != NULL ) {
+        
+        rtk_multi_free(rtk_multi);
+    }
     
     /* free rtk server thread */
 #ifdef WIN32
