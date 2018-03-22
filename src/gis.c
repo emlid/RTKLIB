@@ -12,7 +12,6 @@
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
-static const char rcsid[]="$Id:$";
 
 #define SHAPE_CODE  9994        /* shapefile code */
 
@@ -311,7 +310,7 @@ static int gis_read_record(FILE *fp, FILE *fp_idx, int type, double *bound,
 extern int gis_read(const char *file, gis_t *gis, int layer)
 {
     FILE *fp,*fp_idx;
-    char path[1024],*p,*q;
+    char path[1024],*p;
     int type1=0,type2=0;
     
     trace(3,"gis_read file=%s layer=%d\n",file,layer);

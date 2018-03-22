@@ -39,7 +39,6 @@
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
-static const char rcsid[]="$Id:$";
 
 #define PREAMB_CNAV 0x8B
 

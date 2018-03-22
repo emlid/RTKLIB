@@ -62,8 +62,6 @@
 #define ID_CFGBIN   0x1E        /* skytraq message id: configure binary message */
 #define ID_GETGLOEPH 0x5B       /* skytraq message id: get glonass ephemeris */
 
-static const char rcsid[]="$Id:$";
-
 /* extract field (big-endian) ------------------------------------------------*/
 #define U1(p)       (*((unsigned char *)(p)))
 #define I1(p)       (*((signed char *)(p)))
@@ -764,7 +762,7 @@ extern int gen_stq(const char *msg, unsigned char *buff)
 {
     const char *hz[]={"1Hz","2Hz","4Hz","5Hz","10Hz","20Hz",""};
     unsigned char *q=buff;
-    char mbuff[1024],*args[32],*p;
+    char mbuff[1024],*args[32] = {""},*p;
     int i,n,narg=0;
     
     trace(4,"gen_stq: msg=%s\n",msg);

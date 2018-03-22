@@ -32,7 +32,6 @@
 #endif
 #include "vt.h"
 
-static const char rcsid[]="$Id:$";
 
 #define DEF_DEV     "/dev/tty"          /* default console device */
 

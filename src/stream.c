@@ -79,7 +79,6 @@
 #include <netdb.h>
 #endif
 
-static const char rcsid[]="$Id$";
 
 /* constants -----------------------------------------------------------------*/
 
@@ -1601,7 +1600,7 @@ static int encbase64(char *str, const unsigned char *byte, int n)
 /* send ntrip server request -------------------------------------------------*/
 static int reqntrip_s(ntrip_t *ntrip, char *msg)
 {
-    char buff[256+NTRIP_MAXSTR],*p=buff;
+    char buff[512+NTRIP_MAXSTR],*p=buff;
     
     tracet(3,"reqntrip_s: state=%d\n",ntrip->state);
     
@@ -1976,7 +1975,7 @@ static void rsp_ntripc_c(ntripc_t *ntripc, int i)
 {
     const char *rsp1=NTRIP_RSP_UNAUTH,*rsp2=NTRIP_RSP_OK_CLI;
     ntripc_con_t *con=ntripc->con+i;
-    char url[256]="",mntpnt[256]="",proto[256]="",user[256],user_pwd[256],*p,*q;
+    char url[256]="",mntpnt[256]="",proto[256]="",user[512],user_pwd[256],*p,*q;
     
     tracet(3,"rspntripc_c i=%d\n",i);
     con->buff[con->nb]='\0';

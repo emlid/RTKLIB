@@ -41,7 +41,6 @@
 #include <math.h>
 #include <stdint.h>
 
-static const char rcsid[]="$Id: Septentrio SBF,v 1.1 2016/02/11 FT $";
 
 extern const sbsigpband_t igpband1[][8]; /* SBAS IGP band 0-8 */
 extern const sbsigpband_t igpband2[][5]; /* SBAS IGP band 9-10 */

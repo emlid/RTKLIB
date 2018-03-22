@@ -37,7 +37,6 @@
 #define ID_XD7SMOOTH   0xd7     /* */
 #define ID_XD5BIT      0xd5     /* */
 
-static const char rcsid[]="$Id: nvs.c,v 1.0 2012/01/30 00:05:05 MBAVA Exp $";
 
 /* get fields (little-endian) ------------------------------------------------*/
 #define U1(p) (*((unsigned char *)(p)))
@@ -552,7 +551,7 @@ extern int input_nvsf(raw_t *raw, FILE *fp)
 extern int gen_nvs(const char *msg, unsigned char *buff)
 {
     unsigned char *q=buff;
-    char mbuff[1024],*args[32],*p;
+    char mbuff[1024],*args[32] = {""},*p;
     unsigned int byte;
     int iRate,n,narg=0;
     unsigned char ui100Ms;

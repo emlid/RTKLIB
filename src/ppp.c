@@ -59,7 +59,6 @@
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
-static const char rcsid[]="$Id:$";
 
 #define SQR(x)      ((x)*(x))
 #define SQRT(x)     ((x)<=0.0?0.0:sqrt(x))

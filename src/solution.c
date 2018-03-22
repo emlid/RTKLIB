@@ -46,7 +46,6 @@
 #include <ctype.h>
 #include "rtklib.h"
 
-static const char rcsid[]="$Id: solution.c,v 1.1 2008/07/17 21:48:06 ttaka Exp $";
 
 /* constants and macros ------------------------------------------------------*/
 
@@ -279,7 +278,7 @@ static int test_solstat(const char *buff)
 /* decode nmea ---------------------------------------------------------------*/
 static int decode_nmea(char *buff, sol_t *sol)
 {
-    char *p,*q,*val[MAXFIELD];
+    char *p,*q,*val[MAXFIELD]={""};
     int n=0;
     
     trace(4,"decode_nmea: buff=%s\n",buff);
@@ -1602,10 +1601,11 @@ extern int outsols(unsigned char *buff, const sol_t *sol, const double *rb,
     gtime_t time,ts={0};
     double gpst;
     int week,timeu;
-    const char *sep=opt2sep(opt);
-    char s[64];
+    char sep[64];
+    char s[128];
     unsigned char *p=buff;
-    
+
+    strcpy(sep, opt2sep(opt));
     trace(3,"outsols :\n");
     
     /* suppress output if std is over opt->maxsolstd */

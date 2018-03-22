@@ -19,7 +19,6 @@
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
-static const char rcsid[]="$Id:$";
 
 /* constants -----------------------------------------------------------------*/
 
@@ -218,7 +217,9 @@ static int rescode(int iter, const obsd_t *obs, int n, const smoothing_data_t *s
     int rcv, sat;
     trace(3,"resprng : n=%d\n",n);
     
-    for (i=0;i<3;i++) rr[i]=x[i]; dtr=x[3];
+    for (i=0;i<3;i++)
+        rr[i]=x[i];
+    dtr=x[3];
     
     ecef2pos(rr,pos);
     

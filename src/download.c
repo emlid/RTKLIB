@@ -13,7 +13,6 @@
 
 #include "rtklib.h"
 
-static const char rcsid[]="$Id:$";
 
 #define NMAX_STA    2048            /* max number of stations */
 #define NMAX_TYPE   256             /* max number of data types */
@@ -319,7 +318,6 @@ static int get_list(const path_t *path, const char *usr, const char *pwd,
 {
     FILE *fp;
     char cmd[4096],env[1024]="",remot[1024],*opt="",*opt2="",*p;
-    int stat;
     
 #ifndef WIN32
     opt2=" -o /dev/null";
@@ -502,7 +500,7 @@ static int test_local(gtime_t ts, gtime_t te, double ti, const char *path,
                       FILE *fp)
 {
     gtime_t time;
-    char remot[1024],remot_p[1024],dir_t[1024],local[1024],str[1024];
+    char remot[1024],dir_t[1024],local[1024],str[1024];
     int stat,abort=0;
     
     for (time=ts;timediff(time,te)<=1E-3;time=timeadd(time,ti)) {
@@ -773,7 +771,6 @@ extern void dl_test(gtime_t ts, gtime_t te, double ti, const url_t *urls,
                     int ncol, int datefmt, FILE *fp)
 {
     gtime_t time;
-    double tow;
     char year[32],date[32],date_p[32];
     int i,j,n,m,*nc,*nt,week,flag,abort=0;
     
