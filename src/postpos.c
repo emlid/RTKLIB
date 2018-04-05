@@ -1219,7 +1219,7 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
     }
     /* free obs and nav data */
     freeobsnav(&obss,&navs);
-    
+    rtkfree(&rtk);    
     return aborts?1:0;
 }
 /* execute processing session for each rover ---------------------------------*/
