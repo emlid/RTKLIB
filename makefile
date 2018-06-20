@@ -25,7 +25,7 @@ OBJ_NAMES =$(patsubst %.c,%.o,$(SRC_NAMES))
 # common compile options
 INCLUDEDIR := -I$(SRC_DIR_1)
 OPTIONS	   = -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DENAIRN -DNFREQ=3 -DSVR_REUSEADDR
-CFLAGS_CMN = -std=c99 -pedantic -Wall -Werror -fno-strict-overflow -Wno-error=unused-but-set-variable \
+CFLAGS_CMN = -std=gnu++1z -pedantic -Wall -Werror -fno-strict-overflow -Wno-error=unused-but-set-variable \
 					-Wno-error=unused-function -Wno-error=unused-result $(INCLUDEDIR) $(OPTIONS)
 LDLIBS	   = lib/iers/gcc/iers.a -lm -lrt -lpthread
 TARGET_LIB = librtk.a
@@ -101,7 +101,7 @@ $(LIB):  $(OBJS)
 	ar rcs $@ $^
 
 $(BUILD_DIR)/src/%.o: %.c  $(DEPDIR)/%.d
-	$(CC) $(DEPFLAGS) -c $(CFLAGS) $< -o $@
+	$(CXX) $(DEPFLAGS) -c $(CFLAGS) $< -o $@
 	$(POSTCOMPILE)
 
 $(DEPDIR)/%.d: ;
@@ -110,22 +110,22 @@ $(DEPDIR)/%.d: ;
 
 # apps
 rtkrcv: $(addprefix $(BUILD_DIR)/app/, $(SRC_NAMES_RTKRCV:%.c=%.o)) | $(LIB)
-	$(CC) $^ -o $(BUILD_DIR)/$@ -L$(BUILD_DIR) -lrtk $(LDLIBS)
+	$(CXX) $^ -o $(BUILD_DIR)/$@ -L$(BUILD_DIR) -lrtk $(LDLIBS)
 
 rnx2rtkp: $(addprefix $(BUILD_DIR)/app/, $(SRC_NAMES_RNX2RTKP:%.c=%.o)) | $(LIB)
-	$(CC) $^ -o $(BUILD_DIR)/$@  -L$(BUILD_DIR) -lrtk $(LDLIBS)
+	$(CXX) $^ -o $(BUILD_DIR)/$@  -L$(BUILD_DIR) -lrtk $(LDLIBS)
 
 pos2kml: $(addprefix $(BUILD_DIR)/app/, $(SRC_NAMES_POS2KML:%.c=%.o))  | $(LIB)
-	$(CC) $^ -o $(BUILD_DIR)/$@  -L$(BUILD_DIR)  -lrtk $(LDLIBS)
+	$(CXX) $^ -o $(BUILD_DIR)/$@  -L$(BUILD_DIR)  -lrtk $(LDLIBS)
 
 convbin: $(addprefix $(BUILD_DIR)/app/, $(SRC_NAMES_CONVBIN:%.c=%.o)) | $(LIB)
-	$(CC) $^ -o $(BUILD_DIR)/$@  -L$(BUILD_DIR)  -lrtk $(LDLIBS)
+	$(CXX) $^ -o $(BUILD_DIR)/$@  -L$(BUILD_DIR)  -lrtk $(LDLIBS)
 
 str2str: $(addprefix $(BUILD_DIR)/app/, $(SRC_NAMES_STR2STR:%.c=%.o)) | $(LIB)
-	$(CC) $^ -o $(BUILD_DIR)/$@  -L$(BUILD_DIR)  -lrtk $(LDLIBS)
+	$(CXX) $^ -o $(BUILD_DIR)/$@  -L$(BUILD_DIR)  -lrtk $(LDLIBS)
 
 $(BUILD_DIR)/app/%.o: %.c $(DEPDIR)/%.d
-	$(CC) $(DEPFLAGS) -c $(CFLAGS) $< -o $@
+	$(CXX) $(DEPFLAGS) -c $(CFLAGS) $< -o $@
 	$(POSTCOMPILE)
 
 ####################################################################
