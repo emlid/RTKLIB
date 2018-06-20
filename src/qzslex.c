@@ -416,7 +416,8 @@ extern int lexreadmsg(const char *file, int sel, lex_t *lex)
     lexmsg_t *lex_msgs;
     int i,prn,type,alert;
     unsigned int b;
-    char buff[1024],*p;
+    char buff[1024];
+    const char *p;
     FILE *fp;
     
     trace(3,"readmsgs: file=%s sel=%d\n",file,sel);

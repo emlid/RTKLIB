@@ -1879,7 +1879,7 @@ static int valpos(rtk_t *rtk, const double *v, const double *R, const int *vflg,
 #endif
     double fact=thres*thres;
     int i,stat=1,sat1,sat2,type,freq;
-    char *stype;
+    const char *stype;
     
     trace(3,"valpos  : nv=%d thres=%.1f\n",nv,thres);
     
@@ -2249,7 +2249,7 @@ static void rtk_free(rtk_t *rtk)
 
 static rtk_t *rtk_init(prcopt_t *opt)
 {
-    rtk_t *rtk = malloc(sizeof(rtk_t));
+    rtk_t *rtk = static_cast<rtk_t*>(malloc(sizeof(rtk_t)));
     if ( !rtk ) return NULL;
     rtkinit(rtk, opt);
     if ( !rtk_is_valid(rtk) ) { 

@@ -559,7 +559,7 @@ static void navsys_convert_binary_to_array(int sys_binary, int *sys_array, int *
 
 static obs_t* obs_init()
 {
-    obs_t *obs = malloc(sizeof(obs_t));
+    obs_t *obs = static_cast<obs_t*>(malloc(sizeof(obs_t)));
     if ( !obs ) return NULL;
     
     obs->n        = 0;
@@ -568,7 +568,7 @@ static obs_t* obs_init()
     obs->rcvcount = 0;
     obs->tmcount  = 0;
     
-    obs->data = malloc(MAXOBS * sizeof(obsd_t));
+    obs->data = static_cast<obsd_t*>(malloc(MAXOBS * sizeof(obsd_t)));
     if ( !obs->data ) {
         free(obs);
         return NULL;
@@ -712,7 +712,7 @@ static int obs_sort_data_by_sat(obs_t *obs)
 static obs_queue_t *obs_queue_init()
 {
     int i, j, sat, freq;
-    obs_queue_t *obs_queue = malloc(sizeof(obs_queue_t));
+    obs_queue_t *obs_queue = static_cast<obs_queue_t*>(malloc(sizeof(obs_queue_t)));
     if ( !obs_queue ) return NULL;
     
     obs_queue->length = 0;

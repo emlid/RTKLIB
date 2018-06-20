@@ -211,7 +211,8 @@ static void chop(char *str)
 /* enum to string ------------------------------------------------------------*/
 static int enum2str(char *s, const char *comment, int val)
 {
-    char str[32],*p,*q;
+    char str[32];
+    const char *p, *q;
     int n;
     
     n=sprintf(str,"%d:",val);

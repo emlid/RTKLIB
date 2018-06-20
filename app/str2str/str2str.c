@@ -227,7 +227,7 @@ int main(int argc, char **argv)
     char *local="",*proxy="",*msg="1004,1019",*opt="",buff[256],*p;
     char strmsg[MAXSTRMSG]="",*antinfo="",*rcvinfo="";
     char *ant[]={"","",""},*rcv[]={"","",""},*logfile="";
-    int i,j,n=0,dispint=5000,trlevel=0,opts[]={10000,10000,2000,32768,10,0,30,0,0.0};
+    int i,j,n=0,dispint=5000,trlevel=0,opts[]={10000,10000,2000,32768,10,0,30,0,0};
     int types[MAXSTR]={STR_FILE,STR_FILE},stat[MAXSTR]={0},byte[MAXSTR]={0};
     int bps[MAXSTR]={0},fmts[MAXSTR]={0},sta=0;
     

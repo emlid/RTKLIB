@@ -1094,8 +1094,8 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
     rtk_t rtk;
     prcopt_t popt_=*popt;
     solopt_t tmsopt = *sopt;
-    char tracefile[1024],statfile[1024],path[1024],*ext,outfiletm[1024]={0};
-
+    char tracefile[1024],statfile[1024],path[1024],outfiletm[1024]={0};
+    const char *ext;
     trace(3,"execses : n=%d outfile=%s\n",n,outfile);
     
     /* open debug trace */

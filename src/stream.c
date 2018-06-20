@@ -354,13 +354,13 @@ static serial_t *openserial(const char *path, int mode, char *msg)
     
     if (!(serial=(serial_t *)calloc(1,sizeof(serial_t)))) return NULL;
     
-    if ((p=strchr(path,':'))) {
+    if ((p = const_cast<char*>(strchr(path,':'))))  {
         strncpy(port,path,p-path); port[p-path]='\0';
         sscanf(p,":%d:%d:%c:%d:%s",&brate,&bsize,&parity,&stopb,fctr);
     }
     else strcpy(port,path);
     
-    if ((p=strchr(path,'#'))) {
+    if ((p = const_cast<char*>(strchr(path,'#')))) {
         sscanf(p,"#%d",&tcp_port);
     }
     for (i=0;i<11;i++) if (br[i]==brate) break;
@@ -2506,7 +2506,7 @@ static void *ftpthread(void *arg)
     }
     /* proxy settings for wget (ref [2]) */
     if (*proxyaddr) {
-        proto=ftp->proto?"http":"ftp";
+        proto = const_cast<char*>(ftp->proto?"http":"ftp");
         sprintf(env,"set %s_proxy=http://%s & ",proto,proxyaddr);
         proxyopt="--proxy=on ";
     }

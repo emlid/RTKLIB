@@ -161,8 +161,8 @@ extern int convkml(const char *infile, const char *outfile, gtime_t ts,
     solbuf_t solbuf={0};
     double rr[3]={0},pos[3],dr[3];
     int i,j;
-    char *p,file[1024];
-    
+    char file[1024];
+    const char *p;
     trace(3,"convkml : infile=%s outfile=%s\n",infile,outfile);
     
     if (!*outfile) {

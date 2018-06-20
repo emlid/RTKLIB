@@ -196,8 +196,8 @@ static int convbin(int format, rnxopt_t *opt, const char *ifile, char **file,
 {
     int i,def;
     char work[1024],ofile_[9][1024]={"","","","","","","","",""},*ofile[9],*p;
-    char *extnav=opt->rnxver<=2.99||opt->navsys==SYS_GPS?"N":"P";
-    char *extlog=format==STRFMT_LEXR?"lex":"sbs";
+    char *extnav = const_cast<char*>(opt->rnxver<=2.99||opt->navsys==SYS_GPS?"N":"P");
+    char *extlog = const_cast<char*>(format==STRFMT_LEXR?"lex":"sbs");
     
     def=!file[0]&&!file[1]&&!file[2]&&!file[3]&&!file[4]&&!file[5]&&!file[6]&&!file[7]&&!file[8];
     

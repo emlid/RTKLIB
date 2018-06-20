@@ -858,7 +858,7 @@ extern void initsolbuf(solbuf_t *solbuf, int cyclic, int nmax)
     }
     if (cyclic) {
         if (nmax<=2) nmax=2;
-        if (!(solbuf->data=malloc(sizeof(sol_t)*nmax))) {
+        if (!(solbuf->data=static_cast<sol_t*>(malloc(sizeof(sol_t)*nmax)))) {
             trace(1,"initsolbuf: memory allocation error\n");
             return;
         }
@@ -907,7 +907,7 @@ static int sort_solstat(solstatbuf_t *statbuf)
     
     if (statbuf->n<=0) return 0;
     
-    if (!(statbuf_data=realloc(statbuf->data,sizeof(solstat_t)*statbuf->n))) {
+    if (!(statbuf_data=static_cast<solstat_t*>(realloc(statbuf->data,sizeof(solstat_t)*statbuf->n)))) {
         trace(1,"sort_solstat: memory allocation error\n");
         free(statbuf->data); statbuf->data=NULL; statbuf->n=statbuf->nmax=0;
         return 0;

@@ -120,7 +120,7 @@ static void remot2local(const char *remot, const char *dir, char *local)
 {
     char *p;
     
-    if ((p=strrchr(remot,'/'))) p++; else p=(char *)remot;
+    if((p=const_cast<char*>(strrchr(remot,'/')))) p++; else p=(char *)remot;
     
     sprintf(local,"%s%c%s",dir,FILEPATHSEP,p);
 }

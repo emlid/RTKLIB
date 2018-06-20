@@ -25,7 +25,7 @@ OBJ_NAMES =$(patsubst %.c,%.o,$(SRC_NAMES))
 # common compile options
 INCLUDEDIR := -I$(SRC_DIR_1)
 OPTIONS	   = -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DENAIRN -DNFREQ=3 -DSVR_REUSEADDR
-CFLAGS_CMN = -std=gnu++1z -pedantic -Wall -Werror -fno-strict-overflow -Wno-error=unused-but-set-variable \
+CFLAGS_CMN = -std=gnu++1z -pedantic -Wall -fno-strict-overflow -Wno-error=unused-but-set-variable \
 					-Wno-error=unused-function -Wno-error=unused-result $(INCLUDEDIR) $(OPTIONS)
 LDLIBS	   = lib/iers/gcc/iers.a -lm -lrt -lpthread
 TARGET_LIB = librtk.a

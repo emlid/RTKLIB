@@ -62,7 +62,7 @@ static const int navsys[]={     /* system codes */
     SYS_GPS,SYS_GLO,SYS_GAL,SYS_QZS,SYS_SBS,SYS_CMP,SYS_IRN,0,0
 };
 
-static gtime_t time_last_msg = {0.0};  /* last time of message for interval conversion */
+static gtime_t time_last_msg = {static_cast<time_t>(0.0)};  /* last time of message for interval conversion */
 /* convert rinex obs type ver.3 -> ver.2 -------------------------------------*/
 static void convcode(double ver, int sys, char *type)
 {
@@ -1202,9 +1202,10 @@ static int convrnx_s(int sess, int format, rnxopt_t *opt, const char *file,
     unsigned char slips[MAXSAT][NFREQ+NEXOBS]={{0}};
     int i,j,nf,type,n[NOUTFILE+2]={0},staid=-1,abort=0;
     char path[1024],*paths[NOUTFILE],s[NOUTFILE][1024];
-    char *epath[MAXEXFILE]={0},*staname=*opt->staid?opt->staid:"0000";
+    char *epath[MAXEXFILE]={0};
+    const char *staname = *opt->staid?opt->staid:"0000";
     unsigned int last_timestamp, timestamp; /* ms */
-    
+
     trace(3,"convrnx_s: sess=%d format=%d file=%s ofile=%s %s %s %s %s %s %s %s %s\n",
           sess,format,file,ofile[0],ofile[1],ofile[2],ofile[3],ofile[4],
           ofile[5],ofile[6],ofile[7],ofile[8]);
