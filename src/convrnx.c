@@ -498,7 +498,7 @@ static int scan_obstype(int format, char **files, int nf, rnxopt_t *opt,
     unsigned char codes[8][33]={{0}};
     unsigned char types[8][33]={{0}};
     char msg[128];
-    int i,j,k,l,m,c=0,type,sys,abort=0,n[NOUTFILE]={0};
+    int i,j,k,l,m,c=0,type,sys,abort=0,n[MAX_GNSS_CONSTELLATION]={0};
     
     trace(3,"scan_obstype: nf=%s, opt=%s\n",nf,opt);
     
@@ -564,10 +564,10 @@ static int scan_obstype(int format, char **files, int nf, rnxopt_t *opt,
         trace(2,"aborted in scan\n");
         return 0;
     }
-    for (i=0;i<NOUTFILE;i++) for (j=0;j<n[i];j++) {
+    for (i=0;i<MAX_GNSS_CONSTELLATION;i++) for (j=0;j<n[i];j++) {
         trace(2,"scan_obstype: sys=%d code=%s type=%d\n",i,code2obs(codes[i][j],NULL),types[i][j]);
     }
-    for (i=0;i<NOUTFILE;i++) {
+    for (i=0;i<MAX_GNSS_CONSTELLATION;i++) {
         
         /* sort codes */
         sort_codes(codes[i],types[i],n[i]);
