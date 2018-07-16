@@ -599,7 +599,9 @@ int main(int argc, char **argv)
 
     signal(SIGINT, sigshut); /* keyboard interrupt */
     signal(SIGTERM, sigshut); /* external shutdown signal */
+#ifndef WIN32
     signal(SIGUSR2, sigshut);
+#endif // !WIN32
 
     stat=convbin(format,&opt,ifile,ofile,dir,&intflg,&stream);
 
