@@ -94,7 +94,6 @@
 
 #define SQR(x)      ((x)*(x))
 
-#define NUMSYS      6                   /* number of systems */
 #define MAXRNXLEN   (16*MAXOBSTYPE+4)   /* max rinex record length */
 #define MAXPOSHEAD  1024                /* max head line position */
 #define MINFREQ_GLO -7                  /* min frequency number glonass */
@@ -1454,7 +1453,7 @@ static int readrnxfp(FILE *fp, gtime_t ts, gtime_t te, double tint,
 {
     double ver;
     int sys,tsys;
-    char tobs[NUMSYS][MAXOBSTYPE][4]={{""}};
+    char tobs[MAX_GNSS_CONSTELLATION][MAXOBSTYPE][4]={{""}};
     
     trace(3,"readrnxfp: flag=%d index=%d\n",flag,index);
     

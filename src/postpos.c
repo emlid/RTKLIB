@@ -732,6 +732,7 @@ static int readobsnav(gtime_t ts, gtime_t te, double ti, char **infile,
     obs->data=NULL; obs->n =obs->nmax =0;
     nav->eph =NULL; nav->n =nav->nmax =0;
     nav->geph=NULL; nav->ng=nav->ngmax=0;
+    free(nav->seph);
     nav->seph=NULL; nav->ns=nav->nsmax=0;
     nepoch=0;
     
@@ -1219,7 +1220,7 @@ static int execses(gtime_t ts, gtime_t te, double ti, const prcopt_t *popt,
     }
     /* free obs and nav data */
     freeobsnav(&obss,&navs);
-    
+    rtkfree(&rtk);    
     return aborts?1:0;
 }
 /* execute processing session for each rover ---------------------------------*/

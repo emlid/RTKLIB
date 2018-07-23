@@ -231,6 +231,7 @@ extern "C" {
 #ifndef MAXOBS
 #define MAXOBS      64                  /* max number of obs in an epoch */
 #endif
+#define MAX_GNSS_CONSTELLATION     7    /* max number of GNSS constellations */
 #define MAXRCV      64                  /* max receiver number (1 to MAXRCV) */
 #define MAXRCV_SMOOTH 2                 /* max receiver number for smoothing of code */
 #define MAXOBSTYPE  64                  /* max number of obs type in RINEX */
@@ -1231,7 +1232,7 @@ typedef struct {        /* RINEX options type */
     int navsys;         /* navigation system */
     int obstype;        /* observation type */
     int freqtype;       /* frequency type */
-    char mask[7][64];   /* code mask {GPS,GLO,GAL,QZS,SBS,CMP,IRN} */
+    char mask[MAX_GNSS_CONSTELLATION][64];   /* code mask {GPS,GLO,GAL,QZS,SBS,CMP,IRN} */
     char staid [32];    /* station id for rinex file name */
     char prog  [100];    /* program */
     char runby [32];    /* run-by */
@@ -1256,8 +1257,8 @@ typedef struct {        /* RINEX options type */
     gtime_t tstart;     /* first obs time */
     gtime_t tend;       /* last obs time */
     gtime_t trtcm;      /* approx log start time for rtcm */
-    char tobs[7][MAXOBSTYPE][4]; /* obs types {GPS,GLO,GAL,QZS,SBS,CMP,IRN} */
-    int nobs[7];        /* number of obs types {GPS,GLO,GAL,QZS,SBS,CMP,IRN} */
+    char tobs[MAX_GNSS_CONSTELLATION][MAXOBSTYPE][4]; /* obs types {GPS,GLO,GAL,QZS,SBS,CMP,IRN} */
+    int nobs[MAX_GNSS_CONSTELLATION];        /* number of obs types {GPS,GLO,GAL,QZS,SBS,CMP,IRN} */
 } rnxopt_t;
 
 typedef struct {        /* satellite status type */

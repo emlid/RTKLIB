@@ -1494,7 +1494,7 @@ static void con_close(con_t *con)
     trace(3,"con_close:\n");
 
     if (!con) return;
-    con->state=con->vt->state=0;
+    con->state=0;
     pthread_join(con->thread,NULL);
     free(con);
 }

@@ -330,7 +330,8 @@ static void outsolstat(rtk_t *rtk,const nav_t *nav)
     double tow;
     char buff[MAXSOLMSG+1],id[32];
     int i,j,k,n,week,nfreq,nf=NF(&rtk->opt);
-    
+    double  phase_bias, var_phase_bias;
+
     if (statlevel<=0||!fp_stat||!rtk->sol.stat) return;
     
     trace(3,"outsolstat:\n");
@@ -355,12 +356,19 @@ static void outsolstat(rtk_t *rtk,const nav_t *nav)
         if (!ssat->vs) continue;
         satno2id(i+1,id);
         for (j=0;j<nfreq;j++) {
+            if (rtk->opt.mode <= PMODE_DGPS) {
+                phase_bias = var_phase_bias = 0;
+            }
+            else {
+                phase_bias = rtk->x[k];
+                var_phase_bias = rtk->P[k+k*rtk->nx];
+            }
             fprintf(fp_stat,"$SAT,%d,%.3f,%s,%d,%.1f,%.1f,%.4f,%.4f,%d,%.0f,%d,%d,%d,%d,%d,%d,%.2f,%.6f,%.5f,%.5f\n",
                     week,tow,id,j+1,ssat->azel[0]*R2D,ssat->azel[1]*R2D,
                     ssat->resp[j],ssat->resc[j],ssat->vsat[j],ssat->snr[j]*0.25,
                     ssat->fix[j],ssat->slip[j]&3,ssat->lock[j],ssat->outc[j],
-                    ssat->slipc[j],ssat->rejc[j],rtk->x[k],rtk->P[k+k*rtk->nx],
-                    nav->lam[i][j],ssat->icbias[j]);
+                    ssat->slipc[j],ssat->rejc[j],ssat->icbias[j],phase_bias,var_phase_bias,
+                    nav->lam[i][j]);
         }
     }
 }
