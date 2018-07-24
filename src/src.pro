@@ -11,10 +11,11 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 include(../RTKLib.pri)
+QMAKE_CC = $$QMAKE_CXX
+QMAKE_CFLAGS  = $$QMAKE_CXXFLAGS
+QMAKE_CFLAGS += -Wall -std=gnu++1z -pedantic -Wno-unused-but-set-variable -DTRACE
 
-QMAKE_CFLAGS += -Wall -std=c99 -pedantic -Wno-unused-but-set-variable  -DTRACE -g
 DEFINES -= UNICODE
-
 SOURCES += rtkcmn.c \
     convkml.c \
     convrnx.c \
