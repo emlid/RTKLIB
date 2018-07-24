@@ -11,7 +11,7 @@ prerelease:
 
 debug:
 	mkdir -p build/debug
-	cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../.. && make -j`nproc`
+	cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold ../.. && make -j`nproc`
 
 clean:
 	rm -rf build
