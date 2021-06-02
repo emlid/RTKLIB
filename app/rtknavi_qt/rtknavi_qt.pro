@@ -107,3 +107,5 @@ RESOURCES += \
     rtknavi_qt.qrc
 
 RC_FILE = rtknavi_qt.rc
+target.path = /usr/bin
+INSTALLS += target

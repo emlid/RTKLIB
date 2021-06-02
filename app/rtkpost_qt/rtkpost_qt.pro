@@ -80,3 +80,5 @@ RESOURCES += \
     rtkpost_qt.qrc
 
 RC_FILE = rtkpost_qt.rc
+target.path = /usr/bin
+INSTALLS += target

@@ -66,3 +66,5 @@ RESOURCES +=  \
     srctblbrows_qt.qrc
 
 RC_FILE = srctblbrows_qt.rc
+target.path = /usr/bin
+INSTALLS += target

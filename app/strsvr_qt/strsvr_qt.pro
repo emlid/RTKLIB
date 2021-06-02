@@ -84,3 +84,5 @@ RESOURCES +=  \
     strsvr_qt.qrc
 
 RC_FILE = strsvr_qt.rc
+target.path = /usr/bin
+INSTALLS += target

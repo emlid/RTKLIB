@@ -69,3 +69,5 @@ RESOURCES += \
     rtkconv_qt.qrc
 
 RC_FILE = rtkconv_qt.rc
+target.path = /usr/bin
+INSTALLS += target
