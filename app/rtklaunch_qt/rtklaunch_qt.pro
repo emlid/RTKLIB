@@ -37,3 +37,5 @@ RESOURCES += \
     rtklaunch_qt.qrc
 
 RC_FILE = rtklaunch_qt.rc
+target.path = /usr/bin
+INSTALLS += target

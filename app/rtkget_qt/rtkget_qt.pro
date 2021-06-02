@@ -66,3 +66,5 @@ RESOURCES += \
 
 
 RC_FILE = rtkget_qt.rc
+target.path = /usr/bin
+INSTALLS += target

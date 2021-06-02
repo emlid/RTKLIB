@@ -131,3 +131,5 @@ RESOURCES += \
     rtkplot_qt.qrc
 
 RC_FILE = rtkplot_qt.rc
+target.path = /usr/bin
+INSTALLS += target
