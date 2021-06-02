@@ -18,7 +18,9 @@ DESTDIR = $${OUT_PWD}
 QMAKE_CFLAGS += -std=c99 -pedantic -Wall -Werror -fpic -fno-strict-overflow \
     -Wno-error=unused-but-set-variable -Wno-error=unused-function \
     -Wno-error=unused-result -Wno-error=pointer-to-int-cast \
-    -Wno-error=unused-variable -Wno-error=int-conversion
+    -Wno-error=unused-variable -Wno-error=int-conversion \
+    -Wno-error=stringop-truncation -Wno-error=array-bounds \
+    -Wno-error=format-overflow -Wno-error=stringop-overread
 QMAKE_CFLAGS_DEBUG = -O0 -g
 QMAKE_CFLAGS_RELEASE = -O3
 QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO = -O3 -g
